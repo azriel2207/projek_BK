@@ -57,7 +57,7 @@ Aplikasi **BK (Bimbingan Konseling)** adalah platform digital berbasis web yang 
 Gunakan perintah berikut untuk clone hanya branch ini saja:
 
 ```bash
-git clone --branch aplikasi_bk --single-branch https://github.com/riskiputraalamzah/ukk2526.git aplikasi_bk
+git clone --branch aplikasi_bk --single-branch https://github.com/riskiputraalamzah/ukk_2526.git aplikasi_bk
 ```
 
 Lalu masuk ke folder project:
