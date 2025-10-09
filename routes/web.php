@@ -1,28 +1,44 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\CounselorController;
-use App\Http\Controllers\CounselingSessionController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
+// Route untuk halaman utama
 Route::get('/', function () {
     return view('welcome');
-})->name('home');
+});
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+// Routes Authentication
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Protected routes
+// Routes Dashboard (Protected by auth middleware)
 Route::middleware(['auth'])->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Dashboard berdasarkan role
+    Route::get('/koordinator/dashboard', function () {
+        return view('dashboard.koordinator');
+    })->name('koordinator.dashboard');
     
-    // Resource routes
-    Route::resource('students', StudentController::class);
-    Route::resource('counselors', CounselorController::class);
-    Route::resource('counseling-sessions', CounselingSessionController::class);
+    Route::get('/guru/dashboard', function () {
+        return view('dashboard.guru');
+    })->name('guru.dashboard');
+    
+    Route::get('/siswa/dashboard', function () {
+        return view('dashboard.siswa');
+    })->name('siswa.dashboard');
+    
+    // Default dashboard
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+        if ($user->role === 'koordinator_bk') {
+            return redirect()->route('koordinator.dashboard');
+        } elseif ($user->role === 'guru_bk') {
+            return redirect()->route('guru.dashboard');
+        } else {
+            return redirect()->route('siswa.dashboard');
+        }
+    })->name('dashboard');
 });

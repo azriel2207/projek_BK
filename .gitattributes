@@ -9,3 +9,9 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+*.php text=auto
+*.blade.php text=auto
+*.html text=auto
+*.css text=auto
+*.js text=auto

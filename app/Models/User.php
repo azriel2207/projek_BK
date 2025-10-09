@@ -11,8 +11,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'username',
-        'email',
+        'name',
+        'email', 
         'password',
         'role',
     ];
@@ -30,38 +30,18 @@ class User extends Authenticatable
         ];
     }
 
-    public function student()
+    public function isKoordinatorBK()
     {
-        return $this->hasOne(Student::class);
+        return $this->role === 'koordinator_bk';
     }
 
-    public function counselor()
+    public function isGuruBK()
     {
-        return $this->hasOne(Counselor::class);
+        return $this->role === 'guru_bk';
     }
 
-    public function sentMessages()
+    public function isSiswa()
     {
-        return $this->hasMany(Message::class, 'sender_id');
-    }
-
-    public function receivedMessages()
-    {
-        return $this->hasMany(Message::class, 'receiver_id');
-    }
-
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isCounselor()
-    {
-        return $this->role === 'counselor';
-    }
-
-    public function isStudent()
-    {
-        return $this->role === 'student';
+        return $this->role === 'siswa';
     }
 }

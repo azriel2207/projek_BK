@@ -7,13 +7,18 @@ use App\Models\Student;
 use App\Models\Counselor;
 use App\Models\CounselingSession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
+        if (!$user) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         switch($user->role) {
             case 'admin':
                 return $this->adminDashboard();
@@ -21,6 +26,9 @@ class DashboardController extends Controller
                 return $this->counselorDashboard();
             case 'student':
                 return $this->studentDashboard();
+            default:
+                Auth::logout();
+                return redirect('/')->with('error', 'Role tidak valid.');
         }
     }
 
@@ -38,7 +46,13 @@ class DashboardController extends Controller
 
     private function counselorDashboard()
     {
-        $counselor = auth()->user()->counselor;
+        $counselor = Auth::user()->counselor;
+        
+        if (!$counselor) {
+            Auth::logout();
+            return redirect('/')->with('error', 'Data konselor tidak ditemukan.');
+        }
+
         $stats = [
             'upcomingSessions' => CounselingSession::where('counselor_id', $counselor->id)
                 ->where('status', 'dijadwalkan')
@@ -51,7 +65,13 @@ class DashboardController extends Controller
 
     private function studentDashboard()
     {
-        $student = auth()->user()->student;
+        $student = Auth::user()->student;
+        
+        if (!$student) {
+            Auth::logout();
+            return redirect('/')->with('error', 'Data siswa tidak ditemukan.');
+        }
+
         $stats = [
             'upcomingSessions' => CounselingSession::where('student_id', $student->id)
                 ->where('status', 'dijadwalkan')
