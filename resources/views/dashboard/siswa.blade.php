@@ -37,19 +37,28 @@
         </div>
         
         <nav class="mt-8">
-            <a href="#" class="block py-3 px-6 bg-purple-700 border-l-4 border-yellow-400">
+            <!-- Dashboard Link -->
+            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 bg-purple-700 border-l-4 border-yellow-400">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="#" class="block py-3 px-6 hover:bg-purple-700 transition">
+            
+            <!-- Janji Konseling Link -->
+            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
             </a>
-            <a href="#" class="block py-3 px-6 hover:bg-purple-700 transition">
+            
+            <!-- Riwayat Konseling Link -->
+            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
             </a>
-            <a href="#" class="block py-3 px-6 hover:bg-purple-700 transition">
+            
+            <!-- Bimbingan Belajar Link -->
+            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
             </a>
-            <a href="#" class="block py-3 px-6 hover:bg-purple-700 transition">
+            
+            <!-- Bimbingan Karir Link -->
+            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
             </a>
         </nav>
@@ -147,31 +156,58 @@
                             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Terjadwal</span>
                         </div>
                     </div>
-                    <button class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition">
+                    <a href="{{ route('siswa.janji-konseling') }}" class="block w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition text-center">
                         <i class="fas fa-plus mr-2"></i>Buat Janji Baru
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Layanan BK</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <a href="#" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
+                        <a href="{{ route('siswa.janji-konseling') }}" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
                             <i class="fas fa-user-circle text-blue-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Bimbingan Pribadi</p>
                         </a>
-                        <a href="#" class="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition">
+                        <a href="{{ route('siswa.bimbingan-belajar') }}" class="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition">
                             <i class="fas fa-book text-green-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Bimbingan Belajar</p>
                         </a>
-                        <a href="#" class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition">
+                        <a href="{{ route('siswa.bimbingan-karir') }}" class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition">
                             <i class="fas fa-briefcase text-purple-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Bimbingan Karir</p>
                         </a>
-                        <a href="#" class="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg text-center transition">
+                        <a href="{{ route('siswa.janji-konseling') }}" class="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg text-center transition">
                             <i class="fas fa-users text-orange-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Bimbingan Sosial</p>
                         </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Aktivitas Terbaru</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="bg-green-100 p-2 rounded-lg">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium">Konseling Bimbingan Belajar selesai</p>
+                            <p class="text-sm text-gray-600">Dengan Ibu Siti - Kesulitan Matematika</p>
+                            <p class="text-xs text-gray-500">2 hari yang lalu</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="bg-blue-100 p-2 rounded-lg">
+                            <i class="fas fa-calendar-plus text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium">Janji konseling baru dibuat</p>
+                            <p class="text-sm text-gray-600">Bimbingan Karir dengan Bpk. Ahmad</p>
+                            <p class="text-xs text-gray-500">1 hari yang lalu</p>
+                        </div>
                     </div>
                 </div>
             </div>

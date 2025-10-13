@@ -11,39 +11,53 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Kosongkan tabel users
         DB::table('users')->delete();
 
-        $users = [
+        // Cek struktur tabel
+        $columns = Schema::getColumnListing('users');
+        
+        // Data user dasar
+        $baseUsers = [
             [
-                'name' => 'Koordinator BK',
                 'email' => 'bk@gmail.com',
                 'password' => Hash::make('123456'),
-                'role' => 'koordinator_bk',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Guru BK',
-                'email' => 'gurubk@gmail.com', 
+                'email' => 'gurubk@gmail.com',
                 'password' => Hash::make('123456'),
-                'role' => 'guru_bk',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Siswa Contoh',
                 'email' => 'siswa@gmail.com',
                 'password' => Hash::make('123456'),
-                'role' => 'siswa',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
         ];
 
-        DB::table('users')->insert($users);
+        // Tambahkan kolom name jika ada
+        if (in_array('name', $columns)) {
+            $baseUsers[0]['name'] = 'Koordinator BK';
+            $baseUsers[1]['name'] = 'Guru BK';
+            $baseUsers[2]['name'] = 'Siswa Contoh';
+        }
+        
+        // Tambahkan kolom role jika ada
+        if (in_array('role', $columns)) {
+            $baseUsers[0]['role'] = 'koordinator_bk';
+            $baseUsers[1]['role'] = 'guru_bk';
+            $baseUsers[2]['role'] = 'siswa';
+        }
+
+        // Insert data
+        DB::table('users')->insert($baseUsers);
 
         $this->command->info('✅ User data berhasil ditambahkan!');
         $this->command->info('📧 Email: bk@gmail.com | 🔑 Password: 123456 (Koordinator BK)');
