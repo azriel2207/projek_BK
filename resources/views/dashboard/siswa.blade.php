@@ -24,6 +24,12 @@
                 margin-left: 0;
             }
         }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -37,29 +43,23 @@
         </div>
         
         <nav class="mt-8">
-            <!-- Dashboard Link -->
             <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 bg-purple-700 border-l-4 border-yellow-400">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            
-            <!-- Janji Konseling Link -->
             <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
             </a>
-            
-            <!-- Riwayat Konseling Link -->
             <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
             </a>
-            
-            <!-- Bimbingan Belajar Link -->
             <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
             </a>
-            
-            <!-- Bimbingan Karir Link -->
             <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
                 <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
+            </a>
+            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+                <i class="fas fa-user-cog mr-3"></i>Profile Settings
             </a>
         </nav>
         
@@ -97,116 +97,145 @@
         <!-- Content -->
         <main class="p-6">
             <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-sm p-6 text-white mb-8">
-                <h1 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h1>
-                <p class="opacity-90">Sistem Bimbingan Konseling siap membantumu dalam perkembangan akademik dan pribadi</p>
+            <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-sm p-6 mb-6 text-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h1>
+                        <p class="text-purple-100">Apa yang ingin Anda lakukan hari ini?</p>
+                    </div>
+                    <div class="text-4xl">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
-                    <div class="flex justify-between items-center">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Janji Aktif -->
+                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                    <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-sm text-gray-600">Konseling Aktif</p>
+                            <p class="text-gray-500 text-sm">Janji Aktif</p>
                             <p class="text-2xl font-bold text-gray-800">2</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-lg">
-                            <i class="fas fa-comments text-blue-600 text-xl"></i>
+                            <i class="fas fa-calendar-check text-blue-600"></i>
                         </div>
                     </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-600">Selesai</p>
-                            <p class="text-2xl font-bold text-gray-800">5</p>
-                        </div>
-                        <div class="bg-green-100 p-3 rounded-lg">
-                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-600">Janji Mendatang</p>
-                            <p class="text-2xl font-bold text-gray-800">1</p>
-                        </div>
-                        <div class="bg-orange-100 p-3 rounded-lg">
-                            <i class="fas fa-calendar text-orange-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Content Sections -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Janji Mendatang -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Janji Konseling Mendatang</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                            <div>
-                                <p class="font-medium">Bimbingan Karir</p>
-                                <p class="text-sm text-gray-600">Bpk. Ahmad, Guru BK</p>
-                                <p class="text-xs text-gray-500">Besok, 10:00 - 11:00</p>
-                            </div>
-                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Terjadwal</span>
-                        </div>
-                    </div>
-                    <a href="{{ route('siswa.janji-konseling') }}" class="block w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition text-center">
-                        <i class="fas fa-plus mr-2"></i>Buat Janji Baru
+                    <a href="{{ route('siswa.janji-konseling') }}" class="text-blue-600 text-sm hover:text-blue-800 mt-4 block">
+                        Lihat Detail →
                     </a>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Layanan BK</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <a href="{{ route('siswa.janji-konseling') }}" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
-                            <i class="fas fa-user-circle text-blue-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium">Bimbingan Pribadi</p>
-                        </a>
-                        <a href="{{ route('siswa.bimbingan-belajar') }}" class="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition">
-                            <i class="fas fa-book text-green-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium">Bimbingan Belajar</p>
-                        </a>
-                        <a href="{{ route('siswa.bimbingan-karir') }}" class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition">
-                            <i class="fas fa-briefcase text-purple-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium">Bimbingan Karir</p>
-                        </a>
-                        <a href="{{ route('siswa.janji-konseling') }}" class="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg text-center transition">
-                            <i class="fas fa-users text-orange-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium">Bimbingan Sosial</p>
-                        </a>
+                <!-- Riwayat Konseling -->
+                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">Riwayat</p>
+                            <p class="text-2xl font-bold text-gray-800">5</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-lg">
+                            <i class="fas fa-history text-green-600"></i>
+                        </div>
                     </div>
+                    <a href="{{ route('siswa.riwayat-konseling') }}" class="text-green-600 text-sm hover:text-green-800 mt-4 block">
+                        Lihat Riwayat →
+                    </a>
+                </div>
+
+                <!-- Bimbingan Belajar -->
+                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">Materi Belajar</p>
+                            <p class="text-2xl font-bold text-gray-800">8</p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-lg">
+                            <i class="fas fa-book text-yellow-600"></i>
+                        </div>
+                    </div>
+                    <a href="{{ route('siswa.bimbingan-belajar') }}" class="text-yellow-600 text-sm hover:text-yellow-800 mt-4 block">
+                        Pelajari →
+                    </a>
+                </div>
+
+                <!-- Bimbingan Karir -->
+                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">Materi Karir</p>
+                            <p class="text-2xl font-bold text-gray-800">6</p>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-lg">
+                            <i class="fas fa-briefcase text-red-600"></i>
+                        </div>
+                    </div>
+                    <a href="{{ route('siswa.bimbingan-karir') }}" class="text-red-600 text-sm hover:text-red-800 mt-4 block">
+                        Explore Karir →
+                    </a>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Aktivitas Terbaru</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div class="bg-green-100 p-2 rounded-lg">
-                            <i class="fas fa-check text-green-600"></i>
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Janji Mendatang -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-clock mr-2 text-blue-600"></i>Janji Mendatang
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <div>
+                                <p class="font-medium text-gray-800">Bimbingan Pribadi</p>
+                                <p class="text-sm text-gray-600">Besok, 08:00 - 09:00</p>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Menunggu</span>
                         </div>
-                        <div>
-                            <p class="font-medium">Konseling Bimbingan Belajar selesai</p>
-                            <p class="text-sm text-gray-600">Dengan Ibu Siti - Kesulitan Matematika</p>
-                            <p class="text-xs text-gray-500">2 hari yang lalu</p>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <div>
+                                <p class="font-medium text-gray-800">Bimbingan Belajar</p>
+                                <p class="text-sm text-gray-600">Jumat, 10:00 - 11:00</p>
+                            </div>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Dikonfirmasi</span>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div class="bg-blue-100 p-2 rounded-lg">
-                            <i class="fas fa-calendar-plus text-blue-600"></i>
+                    <a href="{{ route('siswa.janji-konseling') }}" class="block text-center mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                        Buat Janji Baru
+                    </a>
+                </div>
+
+                <!-- Aktivitas Terbaru -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bell mr-2 text-purple-600"></i>Aktivitas Terbaru
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                            <div class="bg-purple-100 p-2 rounded">
+                                <i class="fas fa-check text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Konseling Selesai</p>
+                                <p class="text-sm text-gray-600">Bimbingan Karir - 2 hari lalu</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-medium">Janji konseling baru dibuat</p>
-                            <p class="text-sm text-gray-600">Bimbingan Karir dengan Bpk. Ahmad</p>
-                            <p class="text-xs text-gray-500">1 hari yang lalu</p>
+                        <div class="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
+                            <div class="bg-yellow-100 p-2 rounded">
+                                <i class="fas fa-book text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Materi Baru</p>
+                                <p class="text-sm text-gray-600">Teknik Belajar Efektif</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                            <div class="bg-green-100 p-2 rounded">
+                                <i class="fas fa-user-tie text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Janji Dikonfirmasi</p>
+                                <p class="text-sm text-gray-600">Oleh Bu Siti Rahayu</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,6 +244,7 @@
     </div>
 
     <script>
+        // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('active');
         });
