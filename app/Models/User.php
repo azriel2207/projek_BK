@@ -15,6 +15,8 @@ class User extends Authenticatable
         'email', 
         'password',
         'role',
+        'phone', // tambahkan ini
+        'class'  // tambahkan ini jika perlu
     ];
 
     protected $hidden = [
@@ -43,5 +45,16 @@ class User extends Authenticatable
     public function isSiswa()
     {
         return $this->role === 'siswa';
+    }
+
+    // Tambahkan relasi untuk konseling
+    public function counselingRequestsAsStudent()
+    {
+        return $this->hasMany(CounselingRequest::class, 'student_id');
+    }
+
+    public function counselingRequestsAsCounselor()
+    {
+        return $this->hasMany(CounselingRequest::class, 'counselor_id');
     }
 }
