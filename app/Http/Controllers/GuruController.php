@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JanjiKonseling;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -22,6 +23,7 @@ class GuruController extends Controller
             ->where('tanggal', '>=', now()->format('Y-m-d'))
             ->orderBy('tanggal', 'asc')
             ->orderBy('waktu', 'asc')
+            ->limit(5) // Batasi hanya 5 untuk dashboard
             ->get();
         
         // Ambil jadwal konseling hari ini yang sudah dikonfirmasi
@@ -44,7 +46,7 @@ class GuruController extends Controller
             'konseling_hari_ini' => JanjiKonseling::where('status', 'dikonfirmasi')
                 ->where('tanggal', now()->format('Y-m-d'))
                 ->count(),
-            'total_siswa' => JanjiKonseling::distinct('user_id')->count(),
+            'total_siswa' => User::where('role', 'siswa')->count(),
             'selesai_bulan_ini' => JanjiKonseling::where('status', 'selesai')
                 ->whereYear('tanggal', now()->year)
                 ->whereMonth('tanggal', now()->month)
@@ -65,15 +67,20 @@ class GuruController extends Controller
      */
     public function konfirmasiJanji(Request $request, $id)
     {
-        $janji = JanjiKonseling::findOrFail($id);
-        
-        $janji->update([
-            'status' => 'dikonfirmasi',
-            'guru_bk' => Auth::user()->name
-        ]);
-        
-        return redirect()->route('guru.dashboard')
-            ->with('success', 'Janji konseling berhasil dikonfirmasi');
+        try {
+            $janji = JanjiKonseling::findOrFail($id);
+            
+            $janji->update([
+                'status' => 'dikonfirmasi',
+                'guru_bk' => Auth::user()->name
+            ]);
+            
+            return redirect()->route('guru.dashboard')
+                ->with('success', 'Janji konseling berhasil dikonfirmasi');
+        } catch (\Exception $e) {
+            return redirect()->route('guru.dashboard')
+                ->with('error', 'Gagal mengkonfirmasi janji konseling: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -81,19 +88,31 @@ class GuruController extends Controller
      */
     public function tambahCatatan(Request $request, $id)
     {
-        $request->validate([
-            'catatan_konselor' => 'required|string|min:10'
-        ]);
-        
-        $janji = JanjiKonseling::findOrFail($id);
-        
-        $janji->update([
-            'catatan_konselor' => $request->catatan_konselor,
-            'status' => 'selesai'
-        ]);
-        
-        return redirect()->route('guru.dashboard')
-            ->with('success', 'Catatan konseling berhasil ditambahkan');
+        try {
+            $request->validate([
+                'catatan_konselor' => 'required|string|min:10'
+            ], [
+                'catatan_konselor.required' => 'Catatan konselor harus diisi',
+                'catatan_konselor.min' => 'Catatan konselor minimal 10 karakter'
+            ]);
+            
+            $janji = JanjiKonseling::findOrFail($id);
+            
+            $janji->update([
+                'catatan_konselor' => $request->catatan_konselor,
+                'status' => 'selesai'
+            ]);
+            
+            return redirect()->route('guru.dashboard')
+                ->with('success', 'Catatan konseling berhasil ditambahkan dan sesi ditandai selesai');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menambahkan catatan: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -104,6 +123,7 @@ class GuruController extends Controller
         $permintaan = JanjiKonseling::with('user')
             ->where('status', 'menunggu')
             ->orderBy('tanggal', 'asc')
+            ->orderBy('waktu', 'asc')
             ->paginate(10);
         
         return view('guru.permintaan', compact('permintaan'));
@@ -115,24 +135,27 @@ class GuruController extends Controller
     public function daftarSiswa()
     {
         // Ambil siswa yang pernah melakukan konseling
-        $siswa = JanjiKonseling::with('user')
-            ->select('user_id')
+        $siswaIds = JanjiKonseling::select('user_id')
             ->distinct()
+            ->pluck('user_id');
+        
+        $siswa = User::whereIn('id', $siswaIds)
+            ->where('role', 'siswa')
             ->get()
-            ->map(function($item) {
-                $user = $item->user;
+            ->map(function($user) {
                 $totalKonseling = JanjiKonseling::where('user_id', $user->id)->count();
                 $konselingSelesai = JanjiKonseling::where('user_id', $user->id)
                     ->where('status', 'selesai')
                     ->count();
+                $terakhirKonseling = JanjiKonseling::where('user_id', $user->id)
+                    ->orderBy('tanggal', 'desc')
+                    ->first();
                 
                 return [
                     'user' => $user,
                     'total_konseling' => $totalKonseling,
                     'konseling_selesai' => $konselingSelesai,
-                    'terakhir_konseling' => JanjiKonseling::where('user_id', $user->id)
-                        ->orderBy('tanggal', 'desc')
-                        ->first()
+                    'terakhir_konseling' => $terakhirKonseling
                 ];
             });
         
@@ -144,20 +167,32 @@ class GuruController extends Controller
      */
     public function detailSiswa($userId)
     {
-        $user = \App\Models\User::findOrFail($userId);
-        
-        $riwayatKonseling = JanjiKonseling::where('user_id', $userId)
-            ->orderBy('tanggal', 'desc')
-            ->get();
-        
-        $statistik = [
-            'total' => $riwayatKonseling->count(),
-            'selesai' => $riwayatKonseling->where('status', 'selesai')->count(),
-            'menunggu' => $riwayatKonseling->where('status', 'menunggu')->count(),
-            'dikonfirmasi' => $riwayatKonseling->where('status', 'dikonfirmasi')->count(),
-        ];
-        
-        return view('guru.detail-siswa', compact('user', 'riwayatKonseling', 'statistik'));
+        try {
+            $user = User::findOrFail($userId);
+            
+            // Pastikan user adalah siswa
+            if ($user->role !== 'siswa') {
+                return redirect()->route('guru.siswa')
+                    ->with('error', 'User bukan siswa');
+            }
+            
+            $riwayatKonseling = JanjiKonseling::where('user_id', $userId)
+                ->orderBy('tanggal', 'desc')
+                ->get();
+            
+            $statistik = [
+                'total' => $riwayatKonseling->count(),
+                'selesai' => $riwayatKonseling->where('status', 'selesai')->count(),
+                'menunggu' => $riwayatKonseling->where('status', 'menunggu')->count(),
+                'dikonfirmasi' => $riwayatKonseling->where('status', 'dikonfirmasi')->count(),
+                'dibatalkan' => $riwayatKonseling->where('status', 'dibatalkan')->count(),
+            ];
+            
+            return view('guru.detail-siswa', compact('user', 'riwayatKonseling', 'statistik'));
+        } catch (\Exception $e) {
+            return redirect()->route('guru.siswa')
+                ->with('error', 'Siswa tidak ditemukan');
+        }
     }
     
     /**
@@ -176,5 +211,62 @@ class GuruController extends Controller
             });
         
         return view('guru.jadwal-konseling', compact('jadwal'));
+    }
+    
+    /**
+     * Tolak permintaan konseling
+     */
+    public function tolakJanji(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'alasan' => 'required|string|min:10'
+            ], [
+                'alasan.required' => 'Alasan penolakan harus diisi',
+                'alasan.min' => 'Alasan penolakan minimal 10 karakter'
+            ]);
+            
+            $janji = JanjiKonseling::findOrFail($id);
+            
+            $janji->update([
+                'status' => 'dibatalkan',
+                'catatan_konselor' => 'Ditolak oleh Guru BK. Alasan: ' . $request->alasan
+            ]);
+            
+            return redirect()->route('guru.dashboard')
+                ->with('success', 'Permintaan konseling berhasil ditolak');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menolak permintaan: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Reschedule konseling
+     */
+    public function reschedule(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'tanggal_baru' => 'required|date|after_or_equal:today',
+                'waktu_baru' => 'required',
+                'catatan' => 'nullable|string'
+            ]);
+            
+            $janji = JanjiKonseling::findOrFail($id);
+            
+            $janji->update([
+                'tanggal' => $request->tanggal_baru,
+                'waktu' => $request->waktu_baru,
+                'status' => 'dikonfirmasi',
+                'catatan_konselor' => $request->catatan ? 'Reschedule: ' . $request->catatan : 'Jadwal dirubah oleh Guru BK'
+            ]);
+            
+            return redirect()->route('guru.dashboard')
+                ->with('success', 'Jadwal konseling berhasil diubah');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mengubah jadwal: ' . $e->getMessage());
+        }
     }
 }
