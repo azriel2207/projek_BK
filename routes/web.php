@@ -27,53 +27,52 @@ Route::middleware(['auth'])->group(function () {
 // Routes untuk KOORDINATOR BK
 Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(function () {
     Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
-    // Tambahkan routes koordinator lainnya di sini
 });
+
 
 // Routes untuk GURU BK
 Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [GuruController::class, 'dashboard'])->name('dashboard');
     
-    // Kelola Permintaan Konseling
-    Route::get('/permintaan', [GuruController::class, 'semuaPermintaan'])->name('permintaan');
-    Route::put('/permintaan/{id}/konfirmasi', [GuruController::class, 'konfirmasiJanji'])->name('permintaan.konfirmasi');
-    Route::put('/permintaan/{id}/tolak', [GuruController::class, 'tolakJanji'])->name('permintaan.tolak');
-    Route::put('/permintaan/{id}/reschedule', [GuruController::class, 'reschedule'])->name('permintaan.reschedule');
-    
     // Kelola Jadwal
     Route::get('/jadwal', [GuruController::class, 'jadwalKonseling'])->name('jadwal');
+    Route::get('/jadwal/tambah', [GuruController::class, 'tambahJadwal'])->name('jadwal.tambah');
+    Route::post('/jadwal/simpan', [GuruController::class, 'simpanJadwal'])->name('jadwal.simpan');
+    
+    // Kelola Permintaan Konseling
+    Route::get('/permintaan', [GuruController::class, 'semuaPermintaan'])->name('permintaan');
+    Route::post('/permintaan/{id}/konfirmasi', [GuruController::class, 'konfirmasiJanji'])->name('permintaan.konfirmasi');
+    Route::put('/permintaan/{id}/tolak', [GuruController::class, 'tolakJanji'])->name('permintaan.tolak');
+    Route::put('/permintaan/{id}/reschedule', [GuruController::class, 'reschedule'])->name('permintaan.reschedule');
     
     // Kelola Siswa
     Route::get('/siswa', [GuruController::class, 'daftarSiswa'])->name('siswa');
     Route::get('/siswa/{id}', [GuruController::class, 'detailSiswa'])->name('siswa.detail');
     
     // Catatan Konseling
+    Route::get('/catatan', [GuruController::class, 'daftarCatatan'])->name('catatan');
     Route::post('/catatan/{id}', [GuruController::class, 'tambahCatatan'])->name('catatan.store');
+    Route::get('/catatan/{id}/detail', [GuruController::class, 'detailCatatan'])->name('catatan.detail');
+    
+    // Laporan & Statistik
+    Route::get('/laporan', [GuruController::class, 'laporan'])->name('laporan');
+    Route::get('/statistik', [GuruController::class, 'statistik'])->name('statistik');
 });
 
 // Routes untuk SISWA
 Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () {
-    // Dashboard
     Route::get('/dashboard', [SiswaController::class, 'dashboard'])->name('dashboard');
-    
-    // Janji Konseling
     Route::get('/janji-konseling', [JanjiKonselingController::class, 'index'])->name('janji-konseling');
     Route::post('/janji-konseling', [JanjiKonselingController::class, 'store'])->name('janji-konseling.store');
     Route::put('/janji-konseling/{id}', [JanjiKonselingController::class, 'update'])->name('janji-konseling.update');
     Route::delete('/janji-konseling/{id}', [JanjiKonselingController::class, 'destroy'])->name('janji-konseling.destroy');
-    
-    // Riwayat Konseling
     Route::get('/riwayat-konseling', [SiswaController::class, 'riwayatKonseling'])->name('riwayat-konseling');
-    
-    // Bimbingan Belajar
     Route::get('/bimbingan-belajar', [SiswaController::class, 'bimbinganBelajar'])->name('bimbingan-belajar');
-    
-    // Bimbingan Karir
     Route::get('/bimbingan-karir', [SiswaController::class, 'bimbinganKarir'])->name('bimbingan-karir');
 });
 
-// Fallback route - Auto redirect berdasarkan role
+// Fallback route
 Route::middleware(['auth'])->get('/dashboard', function () {
     $user = auth()->user();
     
@@ -86,6 +85,6 @@ Route::middleware(['auth'])->get('/dashboard', function () {
             return redirect()->route('siswa.dashboard');
         default:
             auth()->logout();
-            return redirect('/')->with('error', 'Role tidak dikenali. Silakan hubungi administrator.');
+            return redirect('/')->with('error', 'Role tidak dikenali.');
     }
 })->name('dashboard');

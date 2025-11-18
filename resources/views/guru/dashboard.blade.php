@@ -30,49 +30,64 @@
         .stat-card:hover {
             transform: translateY(-5px);
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
-    <!-- Sidebar -->
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-green-800 text-white">
-        <div class="p-4">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-hands-helping text-2xl"></i>
-                <h1 class="text-xl font-bold">Sistem BK</h1>
-            </div>
-        </div>
-        
-        <nav class="mt-8">
-            <a href="{{ route('guru.dashboard') }}" class="block py-3 px-6 bg-green-700 border-l-4 border-yellow-400">
-                <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
-            </a>
-            <a href="#" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-calendar-alt mr-3"></i>Kelola Jadwal
-            </a>
-            <a href="#" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-user-friends mr-3"></i>Daftar Siswa
-            </a>
-            <a href="#" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-file-medical mr-3"></i>Catatan Konseling
-            </a>
-            <a href="#" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-chart-line mr-3"></i>Laporan & Statistik
-            </a>
-            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-user-cog mr-3"></i>Profile Settings
-            </a>
-        </nav>
-        
-        <div class="absolute bottom-0 w-full p-4 border-t border-green-700">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </form>
+   <!-- Sidebar -->
+<div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-green-800 text-white">
+    <div class="p-4">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-hands-helping text-2xl"></i>
+            <h1 class="text-xl font-bold">Sistem BK</h1>
         </div>
     </div>
+    
+    <nav class="mt-8">
+        <a href="{{ route('guru.dashboard') }}" class="block py-3 px-6 {{ Request::routeIs('guru.dashboard') ? 'bg-green-700 border-l-4 border-yellow-400' : 'hover:bg-green-700' }} transition">
+            <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
+        </a>
+        <a href="{{ route('guru.jadwal') }}" class="block py-3 px-6 {{ Request::routeIs('guru.jadwal*') ? 'bg-green-700 border-l-4 border-yellow-400' : 'hover:bg-green-700' }} transition">
+            <i class="fas fa-calendar-alt mr-3"></i>Kelola Jadwal
+        </a>
+        <a href="{{ route('guru.siswa') }}" class="block py-3 px-6 {{ Request::routeIs('guru.siswa*') ? 'bg-green-700 border-l-4 border-yellow-400' : 'hover:bg-green-700' }} transition">
+            <i class="fas fa-user-friends mr-3"></i>Daftar Siswa
+        </a>
+        <a href="{{ route('guru.catatan') }}" class="block py-3 px-6 {{ Request::routeIs('guru.catatan*') ? 'bg-green-700 border-l-4 border-yellow-400' : 'hover:bg-green-700' }} transition">
+            <i class="fas fa-file-medical mr-3"></i>Catatan Konseling
+        </a>
+        <a href="{{ route('guru.laporan') }}" class="block py-3 px-6 {{ Request::routeIs('guru.laporan') || Request::routeIs('guru.statistik') ? 'bg-green-700 border-l-4 border-yellow-400' : 'hover:bg-green-700' }} transition">
+            <i class="fas fa-chart-line mr-3"></i>Laporan & Statistik
+        </a>
+        <a href="{{ route('profile') }}" class="block py-3 px-6 {{ Request::routeIs('profile*') ? 'bg-green-700 border-l-4 border-yellow-400' : 'hover:bg-green-700' }} transition">
+            <i class="fas fa-user-cog mr-3"></i>Profile Settings
+        </a>
+    </nav>
+    
+    <div class="absolute bottom-0 w-full p-4 border-t border-green-700">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition w-full">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </form>
+    </div>
+</div>
 
     <!-- Main Content -->
     <div class="main-content min-h-screen">
@@ -211,10 +226,10 @@
                         </span>
                     </div>
                     
-                    <div class="space-y-3">
+                    <div class="space-y-3" id="permintaan-list">
                         @if(isset($permintaanBaru) && $permintaanBaru->count() > 0)
                             @foreach($permintaanBaru as $janji)
-                            <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition">
+                            <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition" data-id="{{ $janji->id }}">
                                 <div class="flex-1">
                                     <div class="flex items-center space-x-3 mb-2">
                                         <div class="bg-yellow-100 p-2 rounded-full">
@@ -238,15 +253,14 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col space-y-2 ml-4">
-                                    <form action="#" method="POST" class="inline">
+                                    <form action="{{ route('guru.permintaan.konfirmasi', $janji->id) }}" method="POST">
                                         @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="dikonfirmasi">
                                         <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition flex items-center whitespace-nowrap">
                                             <i class="fas fa-check mr-1"></i>Konfirmasi
                                         </button>
                                     </form>
-                                    <button onclick="showDetail({{ $janji->id }})" class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
+                                    <button onclick="showDetailModal({{ $janji->id }}, '{{ addslashes($janji->user->name) }}', '{{ $janji->jenis_bimbingan_text }}', '{{ addslashes($janji->keluhan) }}', '{{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}', '{{ $janji->waktu }}')" 
+                                            class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
                                         <i class="fas fa-eye mr-1"></i>Detail
                                     </button>
                                 </div>
@@ -254,7 +268,7 @@
                             @endforeach
                         @else
                             <!-- Data Contoh jika tidak ada data real -->
-                            <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition">
+                            <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition" data-id="1">
                                 <div class="flex-1">
                                     <div class="flex items-center space-x-3 mb-2">
                                         <div class="bg-yellow-100 p-2 rounded-full">
@@ -269,7 +283,7 @@
                                     <div class="flex flex-wrap gap-3 text-sm text-gray-600 ml-11 mt-2">
                                         <span class="flex items-center">
                                             <i class="fas fa-calendar mr-1"></i>
-                                            {{ \Carbon\Carbon::now()->addDays(1)->translatedFormat('d M Y') }}
+                                            19 Nov 2025
                                         </span>
                                         <span class="flex items-center">
                                             <i class="fas fa-clock mr-1"></i>
@@ -281,13 +295,14 @@
                                     <button onclick="konfirmasiJanji(1)" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition flex items-center whitespace-nowrap">
                                         <i class="fas fa-check mr-1"></i>Konfirmasi
                                     </button>
-                                    <button onclick="showDetail(1)" class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
+                                    <button onclick="showDetailModal(1, 'Ahmad Fauzi', 'Bimbingan Pribadi', 'Membutuhkan konseling terkait masalah keluarga yang mempengaruhi prestasi belajar. Nilai akademik menurun sejak 2 bulan terakhir.', '19 Nov 2025', '10:00 - 11:00')" 
+                                            class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
                                         <i class="fas fa-eye mr-1"></i>Detail
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="flex items-start justify-between p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 hover:bg-blue-100 transition">
+                            <div class="flex items-start justify-between p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 hover:bg-blue-100 transition" data-id="2">
                                 <div class="flex-1">
                                     <div class="flex items-center space-x-3 mb-2">
                                         <div class="bg-blue-100 p-2 rounded-full">
@@ -302,7 +317,7 @@
                                     <div class="flex flex-wrap gap-3 text-sm text-gray-600 ml-11 mt-2">
                                         <span class="flex items-center">
                                             <i class="fas fa-calendar mr-1"></i>
-                                            {{ \Carbon\Carbon::now()->addDays(2)->translatedFormat('d M Y') }}
+                                            20 Nov 2025
                                         </span>
                                         <span class="flex items-center">
                                             <i class="fas fa-clock mr-1"></i>
@@ -314,7 +329,8 @@
                                     <button onclick="konfirmasiJanji(2)" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition flex items-center whitespace-nowrap">
                                         <i class="fas fa-check mr-1"></i>Konfirmasi
                                     </button>
-                                    <button onclick="showDetail(2)" class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
+                                    <button onclick="showDetailModal(2, 'Siti Nurhaliza', 'Bimbingan Belajar', 'Kesulitan memahami materi Matematika, khususnya pada materi aljabar. Membutuhkan bantuan dalam menyelesaikan soal-soal latihan.', '20 Nov 2025', '13:00 - 14:00')" 
+                                            class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
                                         <i class="fas fa-eye mr-1"></i>Detail
                                     </button>
                                 </div>
@@ -473,7 +489,76 @@
         </main>
     </div>
 
+    <!-- Modal Detail -->
+    <div id="detailModal" class="modal">
+        <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white p-6 rounded-t-xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">
+                        <i class="fas fa-info-circle mr-2"></i>Detail Permintaan Konseling
+                    </h3>
+                    <button onclick="closeDetailModal()" class="text-white hover:text-gray-200 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg">
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-user text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-sm font-medium text-gray-500">Nama Siswa</label>
+                        <p id="modal-nama" class="text-lg font-semibold text-gray-800"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <label class="text-sm font-medium text-gray-500 flex items-center">
+                            <i class="fas fa-bookmark mr-2 text-green-600"></i>Jenis Bimbingan
+                        </label>
+                        <p id="modal-jenis" class="text-gray-800 font-medium mt-1"></p>
+                    </div>
+
+                    <div class="p-4 bg-yellow-50 rounded-lg">
+                        <label class="text-sm font-medium text-gray-500 flex items-center">
+                            <i class="fas fa-calendar mr-2 text-yellow-600"></i>Tanggal
+                        </label>
+                        <p id="modal-tanggal" class="text-gray-800 font-medium mt-1"></p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-purple-50 rounded-lg">
+                    <label class="text-sm font-medium text-gray-500 flex items-center">
+                        <i class="fas fa-clock mr-2 text-purple-600"></i>Waktu
+                    </label>
+                    <p id="modal-waktu" class="text-gray-800 font-medium mt-1"></p>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <label class="text-sm font-medium text-gray-500 flex items-center mb-2">
+                        <i class="fas fa-comment-dots mr-2 text-gray-600"></i>Keluhan / Permasalahan
+                    </label>
+                    <p id="modal-keluhan" class="text-gray-700 leading-relaxed"></p>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="konfirmasiDariModal()" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center">
+                        <i class="fas fa-check mr-2"></i>Konfirmasi Permintaan
+                    </button>
+                    <button onclick="closeDetailModal()" class="flex-1 bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">
+                        <i class="fas fa-times mr-2"></i>Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let currentModalId = null;
+
         // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('active');
@@ -481,17 +566,154 @@
 
         function konfirmasiJanji(id) {
             if(confirm('Konfirmasi janji konseling ini?')) {
-                alert('Janji konseling ID: ' + id + ' dikonfirmasi!\n\nFitur ini akan terhubung dengan backend.');
-                // Di production, akan ada form submit atau AJAX request
+                // Simulasi konfirmasi berhasil
+                const permintaanCard = document.querySelector(`[data-id="${id}"]`);
+                if(permintaanCard) {
+                    // Animasi fade out
+                    permintaanCard.style.transition = 'opacity 0.5s';
+                    permintaanCard.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        permintaanCard.remove();
+                        
+                        // Update counter
+                        const counter = document.querySelector('.bg-orange-100.text-orange-800');
+                        if(counter) {
+                            const current = parseInt(counter.textContent);
+                            if(current > 0) {
+                                counter.textContent = `${current - 1} Baru`;
+                            }
+                        }
+                        
+                        // Tampilkan notifikasi
+                        showNotification('Permintaan konseling berhasil dikonfirmasi!');
+                    }, 500);
+                }
             }
         }
 
-        function showDetail(id) {
-            alert('Menampilkan detail permintaan konseling ID: ' + id + '\n\nFitur detail sedang dikembangkan.');
+        function showDetailModal(id, nama, jenis, keluhan, tanggal, waktu) {
+            currentModalId = id;
+            document.getElementById('modal-nama').textContent = nama;
+            document.getElementById('modal-jenis').textContent = jenis;
+            document.getElementById('modal-keluhan').textContent = keluhan;
+            document.getElementById('modal-tanggal').textContent = tanggal;
+            document.getElementById('modal-waktu').textContent = waktu;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('active');
+            currentModalId = null;
+        }
+
+        function konfirmasiDariModal() {
+            closeDetailModal();
+            konfirmasiJanji(currentModalId);
+        }
+
+        function showTolakForm(id) {
+            closeDetailModal();
+            const modal = `
+                <div id="tolakModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-xl max-w-md w-full">
+                        <div class="bg-red-600 text-white p-6 rounded-t-xl">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold">Tolak Permintaan</h3>
+                                <button onclick="closeTolakModal()" class="text-white hover:text-gray-200">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <form action="{{ url('guru/permintaan') }}/${id}/tolak" method="POST" class="p-6">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="_method" value="PUT">
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Alasan Penolakan</label>
+                                <textarea name="alasan" rows="4" required 
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                          placeholder="Jelaskan alasan penolakan..."></textarea>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button type="button" onclick="closeTolakModal()" 
+                                        class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
+                                    Batal
+                                </button>
+                                <button type="submit" 
+                                        class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                    <i class="fas fa-times mr-2"></i>Tolak
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+
+        function closeTolakModal() {
+            const modal = document.getElementById('tolakModal');
+            if (modal) modal.remove();
         }
 
         function tambahCatatan(id) {
-            alert('Menambahkan catatan konseling untuk ID: ' + id + '\n\nFitur catatan sedang dikembangkan.');
+            const modal = `
+                <div id="catatanModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-xl max-w-md w-full">
+                        <div class="bg-purple-600 text-white p-6 rounded-t-xl">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold">Tambah Catatan Konseling</h3>
+                                <button onclick="closeCatatanModal()" class="text-white hover:text-gray-200">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <form action="{{ url('guru/catatan') }}/${id}" method="POST" class="p-6">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan Konselor</label>
+                                <textarea name="catatan_konselor" rows="5" required 
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                          placeholder="Tulis catatan hasil konseling..."></textarea>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button type="button" onclick="closeCatatanModal()" 
+                                        class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
+                                    Batal
+                                </button>
+                                <button type="submit" 
+                                        class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                                    <i class="fas fa-save mr-2"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+
+        function closeCatatanModal() {
+            const modal = document.getElementById('catatanModal');
+            if (modal) modal.remove();
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg shadow-lg z-50';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-3 text-xl"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transition = 'opacity 0.5s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
         }
 
         // Auto hide success message
