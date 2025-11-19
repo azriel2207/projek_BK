@@ -24,11 +24,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
 });
 
-// Routes untuk KOORDINATOR BK
+// Routes untuk KOORDINATOR BK (tambahkan setelah routes Guru BK)
 Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(function () {
+    // Dashboard
     Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
-});
-
+    
+   }); 
 
 // Routes untuk GURU BK
 Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {

@@ -2,82 +2,180 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\JanjiKonseling;
-use App\Models\BimbinganBelajar;
-use App\Models\BimbinganKarir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
-class SiswaController extends Controller
+class KoordinatorController extends Controller
 {
-    // Dashboard Siswa
+    /**
+     * Dashboard Koordinator BK
+     */
     public function dashboard()
     {
-        $user = Auth::user();
-        
-        $stats = [
-            'janji_aktif' => JanjiKonseling::where('user_id', $user->id)
-                ->whereIn('status', ['menunggu', 'dikonfirmasi'])
-                ->count(),
-            'total_riwayat' => JanjiKonseling::where('user_id', $user->id)
-                ->whereIn('status', ['selesai', 'dibatalkan'])
-                ->count(),
-            'materi_belajar' => 8, // Static for now
-            'materi_karir' => 6,   // Static for now
-        ];
-
-        return view('dashboard.siswa', compact('stats'));
+        return view('koordinator.dashboard');
     }
 
-    // Riwayat Konseling
-    public function riwayatKonseling()
+    /**
+     * Kelola Guru BK
+     */
+    public function guru()
     {
-        $user = Auth::user();
-        $riwayat = JanjiKonseling::where('user_id', $user->id)
-            ->whereIn('status', ['selesai', 'dibatalkan'])
+        $guruBK = DB::table('users')
+            ->where('role', 'guru_bk')
+            ->orderBy('name', 'asc')
+            ->paginate(20);
+
+        return view('koordinator.guru', compact('guruBK'));
+    }
+
+    public function tambahGuru()
+    {
+        return view('koordinator.guru-tambah');
+    }
+
+    public function simpanGuru(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'phone' => 'nullable|string|max:15',
+        ]);
+
+        DB::table('users')->insert([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'guru_bk',
+            'phone' => $request->phone,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('koordinator.guru')->with('success', 'Guru BK berhasil ditambahkan');
+    }
+
+    public function editGuru($id)
+    {
+        $guru = DB::table('users')->where('id', $id)->where('role', 'guru_bk')->first();
+        
+        if (!$guru) {
+            abort(404, 'Guru BK tidak ditemukan');
+        }
+
+        return view('koordinator.guru-edit', compact('guru'));
+    }
+
+    public function updateGuru(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'phone' => 'nullable|string|max:15',
+        ]);
+
+        $updateData = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'updated_at' => now(),
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        DB::table('users')->where('id', $id)->update($updateData);
+
+        return redirect()->route('koordinator.guru')->with('success', 'Data Guru BK berhasil diupdate');
+    }
+
+    public function hapusGuru($id)
+    {
+        DB::table('users')->where('id', $id)->where('role', 'guru_bk')->delete();
+
+        return redirect()->route('koordinator.guru')->with('success', 'Guru BK berhasil dihapus');
+    }
+
+    /**
+     * Data Siswa
+     */
+    public function siswa()
+    {
+        $siswa = DB::table('users')
+            ->where('role', 'siswa')
+            ->orderBy('name', 'asc')
+            ->paginate(20);
+
+        return view('koordinator.siswa', compact('siswa'));
+    }
+
+    public function detailSiswa($id)
+    {
+        $siswa = DB::table('users')->where('id', $id)->where('role', 'siswa')->first();
+        
+        if (!$siswa) {
+            abort(404, 'Siswa tidak ditemukan');
+        }
+
+        $riwayatKonseling = DB::table('janji_konselings')
+            ->where('user_id', $id)
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        return view('siswa.riwayat-konseling', compact('riwayat'));
+        return view('koordinator.siswa-detail', compact('siswa', 'riwayatKonseling'));
     }
 
-  // Bimbingan Belajar - Konsep Baru
-public function bimbinganBelajar()
-{
-    // Data untuk form konsultasi belajar
-    $guruBK = [
-        [
-            'nama' => 'Ibu Siti Rahayu, S.Pd',
-            'spesialisasi' => 'Spesialis Akademik & Belajar',
-            'status' => 'tersedia'
-        ],
-        [
-            'nama' => 'Bpk. Budi Santoso, M.Psi', 
-            'spesialisasi' => 'Spesialis Motivasi & Konsentrasi',
-            'status' => 'tersedia'
-        ]
-    ];
+    /**
+     * Laporan
+     */
+    public function laporan()
+    {
+        $stats = [
+            'total_siswa' => DB::table('users')->where('role', 'siswa')->count(),
+            'total_guru' => DB::table('users')->where('role', 'guru_bk')->count(),
+            'total_konseling' => DB::table('janji_konselings')->count(),
+            'konseling_selesai' => DB::table('janji_konselings')->where('status', 'selesai')->count(),
+            'konseling_pending' => DB::table('janji_konselings')->whereIn('status', ['menunggu', 'dikonfirmasi'])->count(),
+            'konseling_bulan_ini' => DB::table('janji_konselings')
+                ->whereMonth('tanggal', Carbon::now()->month)
+                ->count(),
+        ];
 
-    return view('siswa.bimbingan-belajar', compact('guruBK'));
-}
+        $perJenis = DB::table('janji_konselings')
+            ->select('jenis_bimbingan', DB::raw('count(*) as total'))
+            ->groupBy('jenis_bimbingan')
+            ->get();
 
-// Bimbingan Karir - Konsep Baru  
-public function bimbinganKarir()
-{
-    // Data untuk form konsultasi karir
-    $spesialisKarir = [
-        [
-            'nama' => 'Bpk. Ahmad, M.Pd',
-            'spesialisasi' => 'Spesialis Bimbingan Karir',
-            'pengalaman' => '15+ tahun pengalaman'
-        ],
-        [
-            'nama' => 'Ibu Diana, S.Psi',
-            'spesialisasi' => 'Spesialis Psikologi Karir', 
-            'pengalaman' => 'Expert assessment minat'
-        ]
-    ];
+        $perBulan = DB::table('janji_konselings')
+            ->select(
+                DB::raw('MONTH(tanggal) as bulan'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereYear('tanggal', Carbon::now()->year)
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
 
-    return view('siswa.bimbingan-karir', compact('spesialisKarir'));
-}
+        return view('koordinator.laporan', compact('stats', 'perJenis', 'perBulan'));
+    }
+
+    /**
+     * Pengaturan
+     */
+    public function pengaturan()
+    {
+        return view('koordinator.pengaturan');
+    }
+
+    public function updatePengaturan(Request $request)
+    {
+        // Simpan pengaturan sistem
+        // Implementasi sesuai kebutuhan
+
+        return redirect()->route('koordinator.pengaturan')->with('success', 'Pengaturan berhasil disimpan');
+    }
 }

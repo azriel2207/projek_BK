@@ -17,10 +17,6 @@
             <i class="fas fa-arrow-left"></i>
             <span>Kembali ke Dashboard</span>
         </a>
-        <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
-            <i class="fas fa-plus"></i>
-            <span>Tambah Catatan</span>
-        </button>
         <button class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
             <i class="fas fa-download"></i>
             <span>Export Catatan</span>
@@ -43,17 +39,14 @@
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900">{{ $item->nama_siswa }}</h3>
-                                <p class="text-sm text-gray-600">{{ $item->topic }}</p>
+                                <p class="text-sm text-gray-600">{{ ucfirst($item->jenis_bimbingan ?? 'Konseling') }}</p>
                             </div>
                             <div class="text-right">
-                                <span class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($item->session_date)->format('d M Y') }}</span>
+                                <span class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</span>
                                 <div class="flex space-x-1 mt-1">
-                                    <button class="text-blue-600 hover:text-blue-900 transition duration-150">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="text-green-600 hover:text-green-900 transition duration-150">
+                                    <a href="{{ route('guru.catatan.detail', $item->id) }}" class="text-green-600 hover:text-green-900 transition duration-150">
                                         <i class="fas fa-eye"></i>
-                                    </button>
+                                    </a>
                                     <button class="text-red-600 hover:text-red-900 transition duration-150">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -62,8 +55,15 @@
                         </div>
                         
                         <div class="prose max-w-none">
-                            <p class="text-gray-700">{{ Str::limit($item->notes, 200) }}</p>
+                            <p class="text-gray-700">{{ Str::limit($item->keluhan ?? 'Tidak ada keluhan', 200) }}</p>
                         </div>
+                        
+                        @if($item->catatan_konselor)
+                        <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                            <p class="text-sm font-medium text-gray-800 mb-1">Catatan Konselor:</p>
+                            <p class="text-sm text-gray-700">{{ Str::limit($item->catatan_konselor, 150) }}</p>
+                        </div>
+                        @endif
                         
                         <div class="flex justify-between items-center mt-4">
                             <div class="flex items-center space-x-4 text-sm text-gray-500">
@@ -71,15 +71,9 @@
                                     <i class="fas fa-calendar"></i>
                                     <span>{{ \Carbon\Carbon::parse($item->created_at)->format('d M Y H:i') }}</span>
                                 </span>
-                                @if($item->follow_up_required)
-                                <span class="flex items-center space-x-1 text-orange-600">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    <span>Perlu Tindak Lanjut</span>
-                                </span>
-                                @endif
                             </div>
-                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                                {{ $item->session_type ?? 'Konseling Reguler' }}
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                {{ ucfirst($item->status) }}
                             </span>
                         </div>
                     </div>
@@ -114,13 +108,16 @@
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Bulan Ini</span>
                         <span class="font-semibold">
-                            {{ DB::table('counseling_notes')->where('counselor_id', auth()->id())->whereMonth('created_at', now()->month)->count() }}
+                            {{ DB::table('janji_konselings')
+                                ->where('status', 'selesai')
+                                ->whereMonth('tanggal', now()->month)
+                                ->count() }}
                         </span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Perlu Tindak Lanjut</span>
-                        <span class="font-semibold text-orange-600">
-                            {{ DB::table('counseling_notes')->where('counselor_id', auth()->id())->where('follow_up_required', true)->count() }}
+                        <span class="text-gray-600">Total Konseling</span>
+                        <span class="font-semibold">
+                            {{ DB::table('janji_konselings')->where('status', 'selesai')->count() }}
                         </span>
                     </div>
                 </div>
@@ -147,24 +144,27 @@
 
             <!-- Recent Sessions -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Sesi Terbaru</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Konseling Terbaru</h3>
                 <div class="space-y-3">
                     @php
-                        $recentSessions = DB::table('counseling_sessions')
-                            ->join('users', 'counseling_sessions.student_id', '=', 'users.id')
-                            ->where('counselor_id', auth()->id())
-                            ->orderBy('session_date', 'desc')
+                        $recentSessions = DB::table('janji_konselings')
+                            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+                            ->select('users.name', 'janji_konselings.tanggal', 'janji_konselings.jenis_bimbingan')
+                            ->where('janji_konselings.status', 'selesai')
+                            ->orderBy('janji_konselings.tanggal', 'desc')
                             ->limit(3)
-                            ->get(['users.name', 'counseling_sessions.session_date', 'counseling_sessions.topic']);
+                            ->get();
                     @endphp
                     
-                    @foreach($recentSessions as $session)
+                    @forelse($recentSessions as $session)
                     <div class="border-l-4 border-blue-500 pl-4 py-2">
                         <p class="font-medium text-sm">{{ $session->name }}</p>
-                        <p class="text-xs text-gray-600">{{ $session->topic }}</p>
-                        <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($session->session_date)->format('d M H:i') }}</p>
+                        <p class="text-xs text-gray-600">{{ ucfirst($session->jenis_bimbingan ?? 'Konseling') }}</p>
+                        <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($session->tanggal)->format('d M Y') }}</p>
                     </div>
-                    @endforeach
+                    @empty
+                    <p class="text-sm text-gray-500 text-center py-4">Belum ada sesi terbaru</p>
+                    @endforelse
                 </div>
             </div>
         </div>

@@ -105,10 +105,10 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <button class="text-blue-600 hover:text-blue-900 transition duration-150 flex items-center space-x-1">
+                                <a href="{{ route('guru.siswa.detail', $item->id) }}" class="text-blue-600 hover:text-blue-900 transition duration-150 flex items-center space-x-1">
                                     <i class="fas fa-eye"></i>
                                     <span>Lihat</span>
-                                </button>
+                                </a>
                                 <button class="text-green-600 hover:text-green-900 transition duration-150 flex items-center space-x-1">
                                     <i class="fas fa-history"></i>
                                     <span>Riwayat</span>
@@ -162,11 +162,10 @@
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Aktif Bulan Ini</h3>
                     <p class="text-2xl font-bold text-gray-900">
-                        {{ DB::table('counseling_sessions')
-                            ->join('users', 'counseling_sessions.student_id', '=', 'users.id')
-                            ->whereMonth('counseling_sessions.session_date', now()->month)
-                            ->distinct('student_id')
-                            ->count('student_id') }}
+                        {{ DB::table('janji_konselings')
+                            ->whereMonth('tanggal', now()->month)
+                            ->distinct('user_id')
+                            ->count('user_id') }}
                     </p>
                 </div>
             </div>
@@ -180,7 +179,7 @@
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Rata-rata Konseling</h3>
                     <p class="text-2xl font-bold text-gray-900">
-                        {{ number_format(DB::table('counseling_sessions')->count() / max($siswa->total(), 1), 1) }}
+                        {{ number_format(DB::table('janji_konselings')->count() / max($siswa->total(), 1), 1) }}
                     </p>
                 </div>
             </div>
