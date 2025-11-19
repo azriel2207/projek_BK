@@ -216,55 +216,134 @@
             <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <!-- Permintaan Konseling Menunggu Konfirmasi -->
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="fas fa-inbox mr-2 text-orange-600"></i>Permintaan Konseling Baru
-                        </h3>
-                        <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
-                            {{ $permintaanBaru->count() ?? 5 }} Baru
+<div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+            <i class="fas fa-inbox mr-2 text-orange-600"></i>Permintaan Konseling Baru
+        </h3>
+        <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+            {{ isset($permintaanBaru) ? $permintaanBaru->count() : 0 }} Baru
+        </span>
+    </div>
+    
+    <div class="space-y-3" id="permintaan-list">
+        @if(isset($permintaanBaru) && $permintaanBaru->count() > 0)
+            @foreach($permintaanBaru as $janji)
+            <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition" data-id="{{ $janji->id }}">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <div class="bg-yellow-100 p-2 rounded-full">
+                            <i class="fas fa-user text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800">{{ $janji->name }}</p>
+                            <p class="text-sm text-gray-600">{{ $janji->jenis_bimbingan }}</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700 ml-11">{{ Str::limit($janji->keluhan, 80) }}</p>
+                    <div class="flex flex-wrap gap-3 text-sm text-gray-600 ml-11 mt-2">
+                        <span class="flex items-center">
+                            <i class="fas fa-calendar mr-1"></i>
+                            {{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            {{ $janji->waktu }}
                         </span>
                     </div>
-                    
-                    <div class="space-y-3" id="permintaan-list">
-                        @if(isset($permintaanBaru) && $permintaanBaru->count() > 0)
-                            @foreach($permintaanBaru as $janji)
-                            <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition" data-id="{{ $janji->id }}">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-3 mb-2">
-                                        <div class="bg-yellow-100 p-2 rounded-full">
-                                            <i class="fas fa-user text-yellow-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-semibold text-gray-800">{{ $janji->user->name }}</p>
-                                            <p class="text-sm text-gray-600">{{ $janji->jenis_bimbingan_text }}</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-gray-700 ml-11">{{ Str::limit($janji->keluhan, 80) }}</p>
-                                    <div class="flex flex-wrap gap-3 text-sm text-gray-600 ml-11 mt-2">
-                                        <span class="flex items-center">
-                                            <i class="fas fa-calendar mr-1"></i>
-                                            {{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}
-                                        </span>
-                                        <span class="flex items-center">
-                                            <i class="fas fa-clock mr-1"></i>
-                                            {{ $janji->waktu }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col space-y-2 ml-4">
-                                    <form action="{{ route('guru.permintaan.konfirmasi', $janji->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition flex items-center whitespace-nowrap">
-                                            <i class="fas fa-check mr-1"></i>Konfirmasi
-                                        </button>
-                                    </form>
-                                    <button onclick="showDetailModal({{ $janji->id }}, '{{ addslashes($janji->user->name) }}', '{{ $janji->jenis_bimbingan_text }}', '{{ addslashes($janji->keluhan) }}', '{{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}', '{{ $janji->waktu }}')" 
-                                            class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
-                                        <i class="fas fa-eye mr-1"></i>Detail
-                                    </button>
-                                </div>
-                            </div>
+                </div>
+                <div class="flex flex-col space-y-2 ml-4">
+                    <form action="{{ route('guru.permintaan.konfirmasi', $janji->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition flex items-center whitespace-nowrap">
+                            <i class="fas fa-check mr-1"></i>Konfirmasi
+                        </button>
+                    </form>
+                    <button onclick="showDetailModal({{ $janji->id }}, '{{ addslashes($janji->name) }}', '{{ addslashes($janji->jenis_bimbingan) }}', '{{ addslashes($janji->keluhan) }}', '{{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}', '{{ $janji->waktu }}')" 
+                            class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
+                        <i class="fas fa-eye mr-1"></i>Detail
+                    </button>
+                </div>
+            </div>
+            @endforeach
+        @else
+            <!-- Data Contoh jika tidak ada data real -->
+            <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition" data-id="1">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <div class="bg-yellow-100 p-2 rounded-full">
+                            <i class="fas fa-user text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800">Ahmad Fauzi</p>
+                            <p class="text-sm text-gray-600">Bimbingan Pribadi</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700 ml-11">Membutuhkan konseling terkait masalah keluarga yang mempengaruhi prestasi belajar...</p>
+                    <div class="flex flex-wrap gap-3 text-sm text-gray-600 ml-11 mt-2">
+                        <span class="flex items-center">
+                            <i class="fas fa-calendar mr-1"></i>
+                            19 Nov 2025
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            10:00 - 11:00
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-2 ml-4">
+                    <button onclick="konfirmasiJanji(1)" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition flex items-center whitespace-nowrap">
+                        <i class="fas fa-check mr-1"></i>Konfirmasi
+                    </button>
+                    <button onclick="showDetailModal(1, 'Ahmad Fauzi', 'Bimbingan Pribadi', 'Membutuhkan konseling terkait masalah keluarga yang mempengaruhi prestasi belajar. Nilai akademik menurun sejak 2 bulan terakhir.', '19 Nov 2025', '10:00 - 11:00')" 
+                            class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
+                        <i class="fas fa-eye mr-1"></i>Detail
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-start justify-between p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 hover:bg-blue-100 transition" data-id="2">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <div class="bg-blue-100 p-2 rounded-full">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800">Siti Nurhaliza</p>
+                            <p class="text-sm text-gray-600">Bimbingan Belajar</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700 ml-11">Kesulitan memahami materi Matematika, khususnya pada materi aljabar...</p>
+                    <div class="flex flex-wrap gap-3 text-sm text-gray-600 ml-11 mt-2">
+                        <span class="flex items-center">
+                            <i class="fas fa-calendar mr-1"></i>
+                            20 Nov 2025
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            13:00 - 14:00
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-2 ml-4">
+                    <button onclick="konfirmasiJanji(2)" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition flex items-center whitespace-nowrap">
+                        <i class="fas fa-check mr-1"></i>Konfirmasi
+                    </button>
+                    <button onclick="showDetailModal(2, 'Siti Nurhaliza', 'Bimbingan Belajar', 'Kesulitan memahami materi Matematika, khususnya pada materi aljabar. Membutuhkan bantuan dalam menyelesaikan soal-soal latihan.', '20 Nov 2025', '13:00 - 14:00')" 
+                            class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center whitespace-nowrap">
+                        <i class="fas fa-eye mr-1"></i>Detail
+                    </button>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <div class="mt-4 text-center">
+        <a href="{{ route('guru.permintaan') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Lihat Semua Permintaan <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+</div>
                             @endforeach
                         @else
                             <!-- Data Contoh jika tidak ada data real -->
@@ -345,150 +424,145 @@
                     </div>
                 </div>
 
-                <!-- Jadwal Konseling Hari Ini -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-calendar-day mr-2 text-blue-600"></i>Jadwal Hari Ini
-                    </h3>
-                    
-                    <div class="space-y-3">
-                        @if(isset($jadwalHariIni) && $jadwalHariIni->count() > 0)
-                            @foreach($jadwalHariIni as $jadwal)
-                            <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div>
-                                        <p class="font-semibold text-gray-800 text-sm">{{ $jadwal->user->name }}</p>
-                                        <p class="text-xs text-gray-600">{{ $jadwal->jenis_bimbingan_text }}</p>
-                                    </div>
-                                    <span class="bg-green-600 text-white px-2 py-1 rounded text-xs">{{ $jadwal->waktu }}</span>
-                                </div>
-                                <p class="text-xs text-gray-700">{{ Str::limit($jadwal->keluhan, 50) }}</p>
-                            </div>
-                            @endforeach
-                        @else
-                            <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div>
-                                        <p class="font-semibold text-gray-800 text-sm">Andi Pratama</p>
-                                        <p class="text-xs text-gray-600">Bimbingan Belajar</p>
-                                    </div>
-                                    <span class="bg-green-600 text-white px-2 py-1 rounded text-xs">10:00</span>
-                                </div>
-                                <p class="text-xs text-gray-700">Kesulitan fokus belajar</p>
-                            </div>
-
-                            <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div>
-                                        <p class="font-semibold text-gray-800 text-sm">Dewi Lestari</p>
-                                        <p class="text-xs text-gray-600">Bimbingan Karir</p>
-                                    </div>
-                                    <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs">14:00</span>
-                                </div>
-                                <p class="text-xs text-gray-700">Konsultasi pemilihan jurusan</p>
-                            </div>
-
-                            <div class="text-center py-4">
-                                <i class="fas fa-calendar-check text-gray-400 text-2xl mb-2"></i>
-                                <p class="text-gray-500 text-sm">3 jadwal konseling</p>
-                            </div>
-                        @endif
+               <!-- Jadwal Konseling Hari Ini -->
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-calendar-day mr-2 text-blue-600"></i>Jadwal Hari Ini
+    </h3>
+    
+    <div class="space-y-3">
+        @if(isset($jadwalHariIni) && $jadwalHariIni->count() > 0)
+            @foreach($jadwalHariIni as $jadwal)
+            <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">{{ $jadwal->name }}</p>
+                        <p class="text-xs text-gray-600">{{ $jadwal->jenis_bimbingan }}</p>
                     </div>
-
-                    <div class="mt-4">
-                        <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm">
-                            <i class="fas fa-calendar-plus mr-2"></i>Tambah Jadwal
-                        </button>
-                    </div>
+                    <span class="bg-green-600 text-white px-2 py-1 rounded text-xs">{{ $jadwal->waktu }}</span>
                 </div>
+                <p class="text-xs text-gray-700">{{ Str::limit($jadwal->keluhan, 50) }}</p>
+            </div>
+            @endforeach
+        @else
+            <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Andi Pratama</p>
+                        <p class="text-xs text-gray-600">Bimbingan Belajar</p>
+                    </div>
+                    <span class="bg-green-600 text-white px-2 py-1 rounded text-xs">10:00</span>
+                </div>
+                <p class="text-xs text-gray-700">Kesulitan fokus belajar</p>
             </div>
 
-            <!-- Riwayat Konseling Terbaru -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                        <i class="fas fa-history mr-2 text-purple-600"></i>Riwayat Konseling Terbaru
-                    </h3>
-                    <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                        Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
+            <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Dewi Lestari</p>
+                        <p class="text-xs text-gray-600">Bimbingan Karir</p>
+                    </div>
+                    <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs">14:00</span>
                 </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis Bimbingan</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @if(isset($riwayatKonseling) && $riwayatKonseling->count() > 0)
-                                @foreach($riwayatKonseling->take(5) as $riwayat)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 text-sm text-gray-800">{{ $riwayat->user->name }}</td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                            {{ $riwayat->jenis_bimbingan_text }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600">
-                                        {{ \Carbon\Carbon::parse($riwayat->tanggal)->translatedFormat('d M Y') }}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                            {{ ucfirst($riwayat->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <button onclick="tambahCatatan({{ $riwayat->id }})" class="text-blue-600 hover:text-blue-800">
-                                            <i class="fas fa-file-alt mr-1"></i>Catatan
-                                        </button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            @else
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 text-sm text-gray-800">Ahmad Fauzi</td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Pribadi</span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600">10 Nov 2024</td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Selesai</span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <button onclick="tambahCatatan(1)" class="text-blue-600 hover:text-blue-800">
-                                            <i class="fas fa-file-alt mr-1"></i>Catatan
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 text-sm text-gray-800">Siti Nurhaliza</td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Belajar</span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600">09 Nov 2024</td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Selesai</span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <button onclick="tambahCatatan(2)" class="text-blue-600 hover:text-blue-800">
-                                            <i class="fas fa-file-alt mr-1"></i>Catatan
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
+                <p class="text-xs text-gray-700">Konsultasi pemilihan jurusan</p>
             </div>
-        </main>
+
+            <div class="text-center py-4">
+                <i class="fas fa-calendar-check text-gray-400 text-2xl mb-2"></i>
+                <p class="text-gray-500 text-sm">Tidak ada jadwal hari ini</p>
+            </div>
+        @endif
     </div>
 
+    <div class="mt-4">
+        <a href="{{ route('guru.jadwal.tambah') }}" class="block w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm text-center">
+            <i class="fas fa-calendar-plus mr-2"></i>Tambah Jadwal
+        </a>
+    </div>
+</div>
+<!-- Riwayat Konseling Terbaru -->
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+            <i class="fas fa-history mr-2 text-purple-600"></i>Riwayat Konseling Terbaru
+        </h3>
+        <a href="{{ route('guru.catatan') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis Bimbingan</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @if(isset($riwayatKonseling) && $riwayatKonseling->count() > 0)
+                    @foreach($riwayatKonseling->take(5) as $riwayat)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm text-gray-800">{{ $riwayat->name }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                {{ $riwayat->jenis_bimbingan }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            {{ \Carbon\Carbon::parse($riwayat->tanggal)->translatedFormat('d M Y') }}
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                {{ ucfirst($riwayat->status) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <button onclick="tambahCatatan({{ $riwayat->id }})" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-file-alt mr-1"></i>Catatan
+                            </button>
+                        </td>
+                    </tr>
+                    @endforeach
+                @else
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm text-gray-800">Ahmad Fauzi</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Pribadi</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">10 Nov 2024</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Selesai</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <button onclick="tambahCatatan(1)" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-file-alt mr-1"></i>Catatan
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm text-gray-800">Siti Nurhaliza</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Belajar</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">09 Nov 2024</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Selesai</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <button onclick="tambahCatatan(2)" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-file-alt mr-1"></i>Catatan
+                            </button>
+                        </td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    </div>
+</div>
     <!-- Modal Detail -->
     <div id="detailModal" class="modal">
         <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -560,32 +634,38 @@
         let currentModalId = null;
 
         // Mobile menu toggle
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        });
+        const menuToggle = document.getElementById('menu-toggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) sidebar.classList.toggle('active');
+            });
+        }
 
         function konfirmasiJanji(id) {
+            if(!id) return;
             if(confirm('Konfirmasi janji konseling ini?')) {
-                // Simulasi konfirmasi berhasil
                 const permintaanCard = document.querySelector(`[data-id="${id}"]`);
                 if(permintaanCard) {
-                    // Animasi fade out
-                    permintaanCard.style.transition = 'opacity 0.5s';
+                    permintaanCard.style.transition = 'opacity 0.5s, transform 0.25s';
                     permintaanCard.style.opacity = '0';
+                    permintaanCard.style.transform = 'translateY(-8px)';
                     
                     setTimeout(() => {
                         permintaanCard.remove();
                         
-                        // Update counter
+                        // Update counter (ambil angka dari teks)
                         const counter = document.querySelector('.bg-orange-100.text-orange-800');
                         if(counter) {
-                            const current = parseInt(counter.textContent);
-                            if(current > 0) {
-                                counter.textContent = `${current - 1} Baru`;
+                            const match = counter.textContent.match(/\d+/);
+                            if(match) {
+                                const current = parseInt(match[0], 10);
+                                if(!isNaN(current) && current > 0) {
+                                    counter.textContent = `${current - 1} Baru`;
+                                }
                             }
                         }
                         
-                        // Tampilkan notifikasi
                         showNotification('Permintaan konseling berhasil dikonfirmasi!');
                     }, 500);
                 }
@@ -594,38 +674,41 @@
 
         function showDetailModal(id, nama, jenis, keluhan, tanggal, waktu) {
             currentModalId = id;
-            document.getElementById('modal-nama').textContent = nama;
-            document.getElementById('modal-jenis').textContent = jenis;
-            document.getElementById('modal-keluhan').textContent = keluhan;
-            document.getElementById('modal-tanggal').textContent = tanggal;
-            document.getElementById('modal-waktu').textContent = waktu;
+            document.getElementById('modal-nama').textContent = nama || '';
+            document.getElementById('modal-jenis').textContent = jenis || '';
+            document.getElementById('modal-keluhan').textContent = keluhan || '';
+            document.getElementById('modal-tanggal').textContent = tanggal || '';
+            document.getElementById('modal-waktu').textContent = waktu || '';
             document.getElementById('detailModal').classList.add('active');
         }
 
         function closeDetailModal() {
-            document.getElementById('detailModal').classList.remove('active');
+            const dm = document.getElementById('detailModal');
+            if(dm) dm.classList.remove('active');
             currentModalId = null;
         }
 
         function konfirmasiDariModal() {
-            closeDetailModal();
-            konfirmasiJanji(currentModalId);
+            if(currentModalId) {
+                closeDetailModal();
+                konfirmasiJanji(currentModalId);
+            }
         }
 
         function showTolakForm(id) {
             closeDetailModal();
-            const modal = `
+            const modalHtml = `
                 <div id="tolakModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div class="bg-white rounded-xl max-w-md w-full">
                         <div class="bg-red-600 text-white p-6 rounded-t-xl">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-xl font-bold">Tolak Permintaan</h3>
-                                <button onclick="closeTolakModal()" class="text-white hover:text-gray-200">
+                                <button id="closeTolakBtn" class="text-white hover:text-gray-200">
                                     <i class="fas fa-times text-xl"></i>
                                 </button>
                             </div>
                         </div>
-                        <form action="{{ url('guru/permintaan') }}/${id}/tolak" method="POST" class="p-6">
+                        <form id="tolakForm" method="POST" class="p-6">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="_method" value="PUT">
                             <div class="mb-4">
@@ -635,7 +718,7 @@
                                           placeholder="Jelaskan alasan penolakan..."></textarea>
                             </div>
                             <div class="flex space-x-3">
-                                <button type="button" onclick="closeTolakModal()" 
+                                <button type="button" id="tolakBatal" 
                                         class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
                                     Batal
                                 </button>
@@ -648,7 +731,19 @@
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modal);
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Set action safely using Blade-provided base URL
+            const form = document.getElementById('tolakForm');
+            if(form) {
+                form.action = '{{ url("guru/permintaan") }}' + '/' + id + '/tolak';
+            }
+
+            // Attach close handlers
+            const closeBtn = document.getElementById('closeTolakBtn');
+            const batalBtn = document.getElementById('tolakBatal');
+            if(closeBtn) closeBtn.addEventListener('click', closeTolakModal);
+            if(batalBtn) batalBtn.addEventListener('click', closeTolakModal);
         }
 
         function closeTolakModal() {
@@ -657,18 +752,18 @@
         }
 
         function tambahCatatan(id) {
-            const modal = `
+            const modalHtml = `
                 <div id="catatanModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div class="bg-white rounded-xl max-w-md w-full">
                         <div class="bg-purple-600 text-white p-6 rounded-t-xl">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-xl font-bold">Tambah Catatan Konseling</h3>
-                                <button onclick="closeCatatanModal()" class="text-white hover:text-gray-200">
+                                <button id="closeCatatanBtn" class="text-white hover:text-gray-200">
                                     <i class="fas fa-times text-xl"></i>
                                 </button>
                             </div>
                         </div>
-                        <form action="{{ url('guru/catatan') }}/${id}" method="POST" class="p-6">
+                        <form id="catatanForm" method="POST" class="p-6">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                             <div class="mb-4">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan Konselor</label>
@@ -677,7 +772,7 @@
                                           placeholder="Tulis catatan hasil konseling..."></textarea>
                             </div>
                             <div class="flex space-x-3">
-                                <button type="button" onclick="closeCatatanModal()" 
+                                <button type="button" id="catatanBatal" 
                                         class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
                                     Batal
                                 </button>
@@ -690,7 +785,19 @@
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modal);
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Set action safely using Blade-provided base URL
+            const form = document.getElementById('catatanForm');
+            if(form) {
+                form.action = '{{ url("guru/catatan") }}' + '/' + id;
+            }
+
+            // Attach close handlers
+            const closeBtn = document.getElementById('closeCatatanBtn');
+            const batalBtn = document.getElementById('catatanBatal');
+            if(closeBtn) closeBtn.addEventListener('click', closeCatatanModal);
+            if(batalBtn) batalBtn.addEventListener('click', closeCatatanModal);
         }
 
         function closeCatatanModal() {
