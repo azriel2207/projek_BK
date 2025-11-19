@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Guru BK - Sistem BK</title>
+    <title>Data Siswa - Sistem BK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -30,10 +30,10 @@
             <a href="{{ route('koordinator.dashboard') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('koordinator.guru') }}" class="block py-3 px-6 bg-blue-700 border-l-4 border-yellow-400">
+            <a href="{{ route('koordinator.guru') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-user-tie mr-3"></i>Kelola Guru BK
             </a>
-            <a href="{{ route('koordinator.siswa') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
+            <a href="{{ route('koordinator.siswa') }}" class="block py-3 px-6 bg-blue-700 border-l-4 border-yellow-400">
                 <i class="fas fa-users mr-3"></i>Data Siswa
             </a>
             <a href="{{ route('koordinator.laporan') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
@@ -67,7 +67,7 @@
                     <button id="menu-toggle" class="md:hidden text-gray-600">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <h2 class="text-xl font-semibold text-gray-800 ml-4">Kelola Guru BK</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 ml-4">Data Siswa</h2>
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-700">{{ Auth::user()->name }}</span>
@@ -83,25 +83,31 @@
             <!-- Header Section -->
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Manajemen Guru BK</h1>
-                    <p class="text-gray-600">Kelola data guru bimbingan dan konseling</p>
+                    <h1 class="text-2xl font-bold text-gray-800">Data Siswa</h1>
+                    <p class="text-gray-600">Kelola data siswa dan riwayat konseling</p>
                 </div>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
-                    <i class="fas fa-plus"></i>
-                    <span>Tambah Guru BK</span>
-                </button>
+                <div class="flex space-x-3">
+                    <div class="relative">
+                        <input type="text" placeholder="Cari siswa..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-gray-500 text-sm">Total Guru BK</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ DB::table('users')->where('role', 'guru_bk')->count() }}</p>
+                            <p class="text-gray-500 text-sm">Total Siswa</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ DB::table('users')->where('role', 'siswa')->count() }}</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-lg">
-                            <i class="fas fa-user-tie text-blue-600 text-xl"></i>
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -109,8 +115,8 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-gray-500 text-sm">Konseling Bulan Ini</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ DB::table('janji_konselings')->whereMonth('tanggal', now()->month)->count() }}</p>
+                            <p class="text-gray-500 text-sm">Aktif Konseling</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ DB::table('janji_konselings')->where('status', 'dikonfirmasi')->distinct('user_id')->count('user_id') }}</p>
                         </div>
                         <div class="bg-green-100 p-3 rounded-lg">
                             <i class="fas fa-comments text-green-600 text-xl"></i>
@@ -121,91 +127,110 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-gray-500 text-sm">Rata-rata per Guru</p>
-                            @php
-                                $totalGuru = DB::table('users')->where('role', 'guru_bk')->count();
-                                $totalKonseling = DB::table('janji_konselings')->count();
-                                $rataRata = $totalGuru > 0 ? round($totalKonseling / $totalGuru) : 0;
-                            @endphp
-                            <p class="text-2xl font-bold text-gray-800">{{ $rataRata }}</p>
+                            <p class="text-gray-500 text-sm">Selesai Konseling</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ DB::table('janji_konselings')->where('status', 'selesai')->distinct('user_id')->count('user_id') }}</p>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                            <i class="fas fa-check-circle text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500 text-sm">Butuh Perhatian</p>
+                            <p class="text-2xl font-bold text-gray-800">12</p>
+                        </div>
+                        <div class="bg-orange-100 p-3 rounded-lg">
+                            <i class="fas fa-exclamation-triangle text-orange-600 text-xl"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Guru BK Table -->
+            <!-- Students Table -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800">Daftar Guru BK</h3>
+                    <h3 class="text-lg font-semibold text-gray-800">Daftar Siswa</h3>
                 </div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Guru</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Konseling</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siswa Dibimbing</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Konseling</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Terakhir</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @php
-                                $guruList = DB::table('users')->where('role', 'guru_bk')->get();
+                                $siswaList = DB::table('users')->where('role', 'siswa')->get();
                             @endphp
                             
-                            @foreach($guruList as $guru)
+                            @foreach($siswaList as $siswa)
                             @php
-                                $jumlahKonseling = DB::table('janji_konselings')->where('guru_bk', $guru->id)->count();
-                                $siswaDibimbing = DB::table('janji_konselings')->where('guru_bk', $guru->id)->distinct('user_id')->count('user_id');
+                                $konselingCount = DB::table('janji_konselings')->where('user_id', $siswa->id)->count();
+                                $lastKonseling = DB::table('janji_konselings')->where('user_id', $siswa->id)->orderBy('created_at', 'desc')->first();
                             @endphp
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                            <i class="fas fa-user-tie text-blue-600 text-sm"></i>
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user-graduate text-green-600 text-sm"></i>
                                         </div>
                                         <div>
-                                            <div class="text-sm font-medium text-gray-900">{{ $guru->name }}</div>
-                                            <div class="text-sm text-gray-500">Guru BK</div>
+                                            <div class="text-sm font-medium text-gray-900">{{ $siswa->name }}</div>
+                                            <div class="text-sm text-gray-500">{{ $siswa->email }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $guru->email }}</div>
+                                    <div class="text-sm text-gray-900">XII IPA 1</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $jumlahKonseling }}</div>
+                                    <div class="text-sm text-gray-900">{{ $konselingCount }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $siswaDibimbing }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Aktif
-                                    </span>
+                                    @if($lastKonseling)
+                                        @if($lastKonseling->status == 'selesai')
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Selesai
+                                        </span>
+                                        @elseif($lastKonseling->status == 'dikonfirmasi')
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            Berjalan
+                                        </span>
+                                        @else
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            Menunggu
+                                        </span>
+                                        @endif
+                                    @else
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            Belum
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <button class="text-blue-600 hover:text-blue-900 mr-3">
-                                        <i class="fas fa-edit"></i> Edit
+                                        <i class="fas fa-eye"></i> Lihat
                                     </button>
-                                    <button class="text-red-600 hover:text-red-900">
-                                        <i class="fas fa-trash"></i> Hapus
+                                    <button class="text-green-600 hover:text-green-900">
+                                        <i class="fas fa-history"></i> Riwayat
                                     </button>
                                 </td>
                             </tr>
                             @endforeach
                             
-                            @if($guruList->isEmpty())
+                            @if($siswaList->isEmpty())
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                    <i class="fas fa-user-tie text-4xl mb-2 text-gray-300"></i>
-                                    <p>Belum ada data guru BK</p>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                    <i class="fas fa-users text-4xl mb-2 text-gray-300"></i>
+                                    <p>Belum ada data siswa</p>
                                 </td>
                             </tr>
                             @endif
@@ -216,7 +241,7 @@
                 <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                     <div class="flex justify-between items-center">
                         <div class="text-sm text-gray-700">
-                            Menampilkan <span class="font-medium">{{ $guruList->count() }}</span> guru BK
+                            Menampilkan <span class="font-medium">{{ $siswaList->count() }}</span> siswa
                         </div>
                         <div class="flex space-x-2">
                             <button class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50">

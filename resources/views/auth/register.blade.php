@@ -3,106 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi - Sistem BK</title>
+    <title>Registrasi Akun - Sistem BK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div class="bg-blue-600 py-6 px-8">
-            <h2 class="text-2xl font-bold text-white text-center">
-                <i class="fas fa-user-plus mr-2"></i>Registrasi Akun Baru
-            </h2>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+                <i class="fas fa-hands-helping text-3xl text-blue-600"></i>
+                <h1 class="text-3xl font-bold text-gray-800">Sistem Bimbingan Konseling</h1>
+            </div>
+            <p class="text-gray-600">Daftarkan akun untuk mengakses layanan bimbingan dan konseling</p>
         </div>
-        
-        <div class="p-8">
-            <!-- Tampilkan error jika ada -->
-            @if($errors->any())
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <ul class="list-disc list-inside">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
 
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Form Registrasi -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Buat Akun Baru</h2>
+                <p class="text-gray-600 mb-6">Isi form berikut untuk mendaftar</p>
 
-            <!-- FORM REGISTRASI -->
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
-                
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
-                        <i class="fas fa-user mr-2 text-blue-600"></i>Nama Lengkap
-                    </label>
-                    <input type="text" name="name" id="name" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                           placeholder="Masukkan nama lengkap"
-                           value="{{ old('name') }}">
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-                        <i class="fas fa-envelope mr-2 text-blue-600"></i>Email
-                    </label>
-                    <input type="email" name="email" id="email" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                           placeholder="Masukkan email"
-                           value="{{ old('email') }}">
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                        <i class="fas fa-key mr-2 text-blue-600"></i>Password
-                    </label>
-                    <input type="password" name="password" id="password" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                           placeholder="Masukkan password (minimal 6 karakter)">
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password_confirmation">
-                        <i class="fas fa-key mr-2 text-blue-600"></i>Konfirmasi Password
-                    </label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                           placeholder="Masukkan ulang password">
-                </div>
-                
-                <button type="submit" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 mb-4">
-                    <i class="fas fa-user-plus mr-2"></i>Daftar Akun
-                </button>
-            </form>
+                <form method="POST" action="{{ route('register') }}">
+                    @csrf
 
-            <div class="text-center mt-4">
-                <p class="text-gray-600 text-sm">
-                    Sudah punya akun? 
-                    <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
-                        Login di sini
-                    </a>
-                </p>
+                    <!-- Nama Lengkap -->
+                    <div class="mb-6">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user mr-2 text-blue-500"></i>Nama Lengkap
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            value="{{ old('name') }}"
+                            required 
+                            autofocus
+                            placeholder="Masukkan nama lengkap Anda"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('name') border-red-500 @enderror"
+                        >
+                        @error('name')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-6">
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-envelope mr-2 text-blue-500"></i>Alamat Email
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            value="{{ old('email') }}"
+                            required
+                            placeholder="contoh@email.com"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('email') border-red-500 @enderror"
+                        >
+                        @error('email')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-lock mr-2 text-blue-500"></i>Password
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                required
+                                placeholder="Buat password yang kuat"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('password') border-red-500 @enderror"
+                            >
+                            <button type="button" onclick="togglePassword('password')" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        @error('password')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Konfirmasi Password -->
+                    <div class="mb-6">
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-lock mr-2 text-blue-500"></i>Konfirmasi Password
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password_confirmation" 
+                                name="password_confirmation" 
+                                required
+                                placeholder="Masukkan ulang password"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                            >
+                            <button type="button" onclick="togglePassword('password_confirmation')" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition duration-200 transform hover:scale-105 focus:ring-4 focus:ring-blue-200"
+                    >
+                        <i class="fas fa-user-plus mr-2"></i>Daftar Akun
+                    </button>
+                </form>
+
+                <!-- Login Link - DIUBAH: Kembali ke Landing Page -->
+                <div class="text-center mt-6">
+                    <p class="text-gray-600">
+                        Sudah punya akun? 
+                        <a href="{{ url('/') }}" class="text-blue-600 hover:text-blue-800 font-semibold transition duration-200">
+                            <i class="fas fa-sign-in-alt mr-1"></i>Kembali ke Halaman Utama
+                        </a>
+                    </p>
+                </div>
             </div>
 
-            <!-- Info -->
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-yellow-800 mb-2">
-                        <i class="fas fa-info-circle mr-2"></i>Informasi
-                    </h4>
-                    <p class="text-yellow-700 text-sm">
-                        Akun yang didaftarkan akan secara otomatis memiliki role <strong>Siswa</strong>. 
-                        Untuk akses sebagai Guru BK atau Koordinator BK, hubungi administrator.
-                    </p>
+            <!-- Informasi Panel -->
+            <div class="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-lg p-8 text-white">
+                <div class="flex items-center space-x-3 mb-6">
+                    <i class="fas fa-info-circle text-2xl"></i>
+                    <h3 class="text-xl font-bold">Informasi Registrasi</h3>
+                </div>
+
+                <!-- Role Information -->
+                <div class="mb-6">
+                    <h4 class="font-semibold mb-3">Tipe Akun yang Tersedia:</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3 p-3 bg-blue-500/20 rounded-lg">
+                            <i class="fas fa-user-graduate text-lg"></i>
+                            <div>
+                                <p class="font-semibold">Siswa</p>
+                                <p class="text-blue-100 text-sm">Akses default untuk konseling</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-purple-500/20 rounded-lg">
+                            <i class="fas fa-user-tie text-lg"></i>
+                            <div>
+                                <p class="font-semibold">Guru BK</p>
+                                <p class="text-purple-100 text-sm">Kelola sesi konseling siswa</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-indigo-500/20 rounded-lg">
+                            <i class="fas fa-user-shield text-lg"></i>
+                            <div>
+                                <p class="font-semibold">Koordinator BK</p>
+                                <p class="text-indigo-100 text-sm">Monitor seluruh sistem BK</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Important Notice -->
+                <div class="bg-white/10 rounded-lg p-4 border-l-4 border-yellow-400">
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-triangle text-yellow-300 mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-yellow-300 mb-1">Perhatian</h4>
+                            <p class="text-blue-100 text-sm">
+                                Akun yang didaftarkan akan secara otomatis memiliki role <strong>Siswa</strong>. 
+                                Untuk akses sebagai <strong>Guru BK</strong> atau <strong>Koordinator BK</strong>, 
+                                harap hubungi administrator sistem.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features List -->
+                <div class="mt-6">
+                    <h4 class="font-semibold mb-3">Fitur yang Didapat:</h4>
+                    <ul class="space-y-2 text-blue-100">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-green-300"></i>
+                            <span>Janji konseling online</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-green-300"></i>
+                            <span>Riwayat bimbingan</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-green-300"></i>
+                            <span>Konsultasi pribadi</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-green-300"></i>
+                            <span>Bimbingan belajar & karir</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

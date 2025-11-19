@@ -8,16 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!auth()->check()) {
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // PERBAIKAN: Operator perbandingan yang benar
         if (auth()->user()->role !== $role) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }

@@ -109,7 +109,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Total Siswa</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ DB::table('users')->where('role', 'siswa')->count() }}
+                                {{ $stats['total_siswa'] }}
                             </p>
                             <p class="text-blue-600 text-sm mt-2">
                                 <i class="fas fa-users"></i> Terdaftar
@@ -127,7 +127,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Guru BK</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ DB::table('users')->where('role', 'guru_bk')->count() }}
+                                {{ $stats['total_guru'] }}
                             </p>
                             <p class="text-green-600 text-sm mt-2">
                                 <i class="fas fa-user-tie"></i> Aktif
@@ -145,7 +145,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Konseling Bulan Ini</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ DB::table('janji_konselings')->whereMonth('tanggal', now()->month)->count() }}
+                                {{ $stats['konseling_bulan_ini'] }}
                             </p>
                             <p class="text-purple-600 text-sm mt-2">
                                 <i class="fas fa-comments"></i> Sesi
@@ -163,7 +163,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Menunggu Konfirmasi</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ DB::table('janji_konselings')->where('status', 'menunggu')->count() }}
+                                {{ $stats['menunggu_konfirmasi'] }}
                             </p>
                             <p class="text-orange-600 text-sm mt-2">
                                 <i class="fas fa-exclamation-triangle"></i> Perlu tindakan
@@ -182,32 +182,14 @@
                 <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Statistik Konseling Per Jenis</h3>
                     <div class="space-y-4">
-                        @php
-                            $jenisKonseling = DB::table('janji_konselings')
-                                ->select('jenis_bimbingan', DB::raw('count(*) as total'))
-                                ->groupBy('jenis_bimbingan')
-                                ->get();
-                            $totalAll = $jenisKonseling->sum('total');
-                        @endphp
-                        
-                        @foreach($jenisKonseling as $jenis)
-                        @php
-                            $percentage = $totalAll > 0 ? ($jenis->total / $totalAll) * 100 : 0;
-                            $colors = [
-                                'pribadi' => ['bg' => 'blue', 'label' => 'Pribadi'],
-                                'belajar' => ['bg' => 'green', 'label' => 'Belajar'],
-                                'karir' => ['bg' => 'purple', 'label' => 'Karir'],
-                                'sosial' => ['bg' => 'orange', 'label' => 'Sosial']
-                            ];
-                            $color = $colors[$jenis->jenis_bimbingan] ?? ['bg' => 'gray', 'label' => ucfirst($jenis->jenis_bimbingan)];
-                        @endphp
+                        @foreach($jenisKonselingData as $jenis)
                         <div>
                             <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-medium">{{ $color['label'] }}</span>
-                                <span class="text-sm font-bold">{{ $jenis->total }} ({{ number_format($percentage, 1) }}%)</span>
+                                <span class="text-sm font-medium">{{ $jenis['color']['label'] }}</span>
+                                <span class="text-sm font-bold">{{ $jenis['total'] }} ({{ number_format($jenis['percentage'], 1) }}%)</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-3">
-                                <div class="bg-{{ $color['bg'] }}-600 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
+                                <div class="bg-{{ $jenis['color']['bg'] }}-600 h-3 rounded-full transition-all duration-500" style="width: {{ $jenis['percentage'] }}%"></div>
                             </div>
                         </div>
                         @endforeach
@@ -244,15 +226,6 @@
                 </div>
                 
                 <div class="space-y-4">
-                    @php
-                        $recentActivities = DB::table('janji_konselings')
-                            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
-                            ->select('janji_konselings.*', 'users.name')
-                            ->orderBy('janji_konselings.created_at', 'desc')
-                            ->limit(5)
-                            ->get();
-                    @endphp
-                    
                     @forelse($recentActivities as $activity)
                     <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                         <div class="bg-{{ $activity->status == 'selesai' ? 'green' : ($activity->status == 'menunggu' ? 'yellow' : 'blue') }}-100 p-2 rounded-full">
