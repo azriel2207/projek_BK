@@ -13,7 +13,7 @@ class SiswaController extends Controller
      */
     public function dashboard()
     {
-        return view('siswa.dashboard');
+        return view('dashboard.siswa'); // UBAH BARIS INI
     }
 
     /**

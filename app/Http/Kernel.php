@@ -1,23 +1,52 @@
 <?php
+// ...existing code...
 
-namespace App\Http\Middleware;
+namespace App\Http;
 
-use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
-class CheckRole
+class Kernel extends HttpKernel
 {
-    public function handle(Request $request, Closure $next, string $role): Response
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
+    /**
+     * Global HTTP middleware stack.
+     */
+    protected $middleware = [
+        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        \App\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\TrustProxies::class,
+    ];
 
-        if (auth()->user()->role !== $role) {
-            abort(403);
-        }
+    /**
+     * The application's route middleware groups.
+     */
+    protected $middlewareGroups = [
+        'web' => [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
 
-        return $next($request);
-    }
+        'api' => [
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+    ];
+
+    /**
+     * The application's route middleware.
+     */
+    protected $routeMiddleware = [
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        // pastikan alias 'role' mengarah ke middleware CheckRole
+        'role' => \App\Http\Middleware\CheckRole::class,
+    ];
 }
+?>
+// ...existing code...

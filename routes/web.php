@@ -22,18 +22,20 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
 });
 
-// Routes untuk KOORDINATOR BK
-Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
-    
-    // Tambahkan route yang baru
-    Route::get('/guru', [KoordinatorController::class, 'kelolaGuru'])->name('guru');
-    Route::get('/siswa', [KoordinatorController::class, 'dataSiswa'])->name('siswa');
-    Route::get('/laporan', [KoordinatorController::class, 'laporan'])->name('laporan');
-    Route::get('/pengaturan', [KoordinatorController::class, 'pengaturan'])->name('pengaturan');
-});
+ // Routes untuk Koordinator
+    Route::middleware('role:koordinator')->prefix('koordinator')->name('koordinator.')->group(function () {
+        Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
 
+        // Guru BK Management
+        Route::get('/guru', [KoordinatorController::class, 'indexGuru'])->name('guru.index');
+        Route::get('/guru/create', [KoordinatorController::class, 'createGuru'])->name('guru.create');
+        Route::post('/guru', [KoordinatorController::class, 'storeGuru'])->name('guru.store');
+        Route::get('/guru/{id}', [KoordinatorController::class, 'showGuru'])->name('guru.show');
+        Route::get('/guru/{id}/edit', [KoordinatorController::class, 'editGuru'])->name('guru.edit');
+        Route::put('/guru/{id}', [KoordinatorController::class, 'updateGuru'])->name('guru.update');
+        Route::delete('/guru/{id}', [KoordinatorController::class, 'destroyGuru'])->name('guru.destroy');
+    });
+    
 // GURU BK
 Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'dashboard'])->name('dashboard');

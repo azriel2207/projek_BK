@@ -2,78 +2,141 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Counselor;
+use App\Models\Student;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class KoordinatorController extends Controller
 {
-    /**
-     * Display dashboard for Koordinator BK
-     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:koordinator');
+    }
+
+    // Dashboard Koordinator
     public function dashboard()
     {
-        // Semua query dipindahkan dari view ke controller
-        $stats = [
-            'total_siswa' => DB::table('users')->where('role', 'siswa')->count(),
-            'total_guru' => DB::table('users')->where('role', 'guru_bk')->count(),
-            'konseling_bulan_ini' => DB::table('janji_konselings')->whereMonth('tanggal', now()->month)->count(),
-            'menunggu_konfirmasi' => DB::table('janji_konselings')->where('status', 'menunggu')->count(),
+        $totalGuru = Counselor::count();
+        $totalSiswa = Student::count();
+        $totalUser = User::count();
+
+        return view('koordinator.dashboard', compact('totalGuru', 'totalSiswa', 'totalUser'));
+    }
+
+    // List semua guru BK
+    public function indexGuru()
+    {
+        $gurus = Counselor::with('user')->paginate(10);
+        return view('koordinator.guru.index', compact('gurus'));
+    }
+
+    // Form tambah guru BK
+    public function createGuru()
+    {
+        return view('koordinator.guru.create');
+    }
+
+    // Simpan guru BK baru
+    public function storeGuru(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'phone' => 'required|string|unique:users',
+            'nip' => 'required|string|unique:counselors',
+            'password' => 'required|min:8|confirmed',
+            'specialization' => 'nullable|string',
+            'office_hours' => 'nullable|string',
+        ]);
+
+        // Buat user
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'guru',
+        ]);
+
+        // Buat counselor
+        Counselor::create([
+            'user_id' => $user->id,
+            'nip' => $validated['nip'],
+            'specialization' => $validated['specialization'],
+            'office_hours' => $validated['office_hours'],
+        ]);
+
+        return redirect()->route('koordinator.guru.index')
+            ->with('success', 'Guru BK berhasil ditambahkan');
+    }
+
+    // Form edit guru BK
+    public function editGuru($id)
+    {
+        $guru = Counselor::findOrFail($id);
+        return view('koordinator.guru.edit', compact('guru'));
+    }
+
+    // Update guru BK
+    public function updateGuru(Request $request, $id)
+    {
+        $guru = Counselor::findOrFail($id);
+        $user = $guru->user;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'required|string|unique:users,phone,' . $user->id,
+            'nip' => 'required|string|unique:counselors,nip,' . $guru->id,
+            'specialization' => 'nullable|string',
+            'office_hours' => 'nullable|string',
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        // Update user
+        $updateData = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
         ];
 
-        $jenisKonseling = DB::table('janji_konselings')
-            ->select('jenis_bimbingan', DB::raw('count(*) as total'))
-            ->groupBy('jenis_bimbingan')
-            ->get();
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
 
-        $totalAll = $jenisKonseling->sum('total');
+        $user->update($updateData);
 
-        // Process data untuk chart
-        $jenisKonselingData = $jenisKonseling->map(function($item) use ($totalAll) {
-            $percentage = $totalAll > 0 ? ($item->total / $totalAll) * 100 : 0;
-            $colors = [
-                'pribadi' => ['bg' => 'blue', 'label' => 'Pribadi'],
-                'belajar' => ['bg' => 'green', 'label' => 'Belajar'],
-                'karir' => ['bg' => 'purple', 'label' => 'Karir'],
-                'sosial' => ['bg' => 'orange', 'label' => 'Sosial']
-            ];
-            
-            return [
-                'jenis_bimbingan' => $item->jenis_bimbingan,
-                'total' => $item->total,
-                'percentage' => $percentage,
-                'color' => $colors[$item->jenis_bimbingan] ?? ['bg' => 'gray', 'label' => ucfirst($item->jenis_bimbingan)]
-            ];
-        });
+        // Update counselor
+        $guru->update([
+            'nip' => $validated['nip'],
+            'specialization' => $validated['specialization'],
+            'office_hours' => $validated['office_hours'],
+        ]);
 
-        $recentActivities = DB::table('janji_konselings')
-            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
-            ->select('janji_konselings.*', 'users.name')
-            ->orderBy('janji_konselings.created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        return view('koordinator.dashboard', compact('stats', 'jenisKonselingData', 'recentActivities'));
+        return redirect()->route('koordinator.guru.index')
+            ->with('success', 'Guru BK berhasil diupdate');
     }
 
-    // Tambahkan method untuk route yang belum ada
-    public function kelolaGuru()
+    // Hapus guru BK
+    public function destroyGuru($id)
     {
-        return view('koordinator.guru');
+        $guru = Counselor::findOrFail($id);
+        $user = $guru->user;
+
+        $guru->delete();
+        $user->delete();
+
+        return redirect()->route('koordinator.guru.index')
+            ->with('success', 'Guru BK berhasil dihapus');
     }
 
-    public function dataSiswa()
+    // Lihat detail guru BK
+    public function showGuru($id)
     {
-        return view('koordinator.siswa');
-    }
-
-    public function laporan()
-    {
-        return view('koordinator.laporan');
-    }
-
-    public function pengaturan()
-    {
-        return view('koordinator.pengaturan');
+        $guru = Counselor::with('user', 'counselingSessions')->findOrFail($id);
+        return view('koordinator.guru.show', compact('guru'));
     }
 }
