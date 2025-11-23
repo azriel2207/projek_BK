@@ -17,44 +17,39 @@ class DatabaseSeeder extends Seeder
         // Cek struktur tabel
         $columns = Schema::getColumnListing('users');
         
-        // Data user dasar
+        // PERBAIKAN: Gunakan role yang konsisten
+        // Role di database harus sesuai dengan yang di migration: 
+        // 'koordinator_bk', 'guru_bk', 'siswa'
+        
         $baseUsers = [
             [
+                'name' => 'Koordinator BK',
                 'email' => 'bk@gmail.com',
                 'password' => Hash::make('123456'),
+                'role' => 'koordinator_bk', // PERBAIKAN: gunakan koordinator_bk bukan koordinator
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
+                'name' => 'Guru BK',
                 'email' => 'gurubk@gmail.com',
                 'password' => Hash::make('123456'),
+                'role' => 'guru_bk', // PERBAIKAN: gunakan guru_bk bukan guru
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
+                'name' => 'Siswa Contoh',
                 'email' => 'siswa@gmail.com',
                 'password' => Hash::make('123456'),
+                'role' => 'siswa',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
         ];
-
-        // Tambahkan kolom name jika ada
-        if (in_array('name', $columns)) {
-            $baseUsers[0]['name'] = 'Koordinator BK';
-            $baseUsers[1]['name'] = 'Guru BK';
-            $baseUsers[2]['name'] = 'Siswa Contoh';
-        }
-        
-        // Tambahkan kolom role jika ada
-        if (in_array('role', $columns)) {
-            $baseUsers[0]['role'] = 'koordinator_bk';
-            $baseUsers[1]['role'] = 'guru_bk';
-            $baseUsers[2]['role'] = 'siswa';
-        }
 
         // Insert data
         DB::table('users')->insert($baseUsers);

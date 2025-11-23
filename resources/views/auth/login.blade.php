@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login Sistem BK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -75,15 +76,39 @@
                 <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">Login Sistem BK</h2>
                 <p class="text-gray-600 text-center mb-6">Masuk ke akun Anda</p>
 
-                <form method="POST" action="{{ url('/login') }}">
+                <!-- Error Messages -->
+                @if($errors->any())
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        <ul class="list-disc list-inside text-sm">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                        <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
+                        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}" id="loginForm">
                     @csrf
-                    <!-- Tambahkan hidden token manual untuk backup -->
-                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    
+                    <!-- CSRF Token Backup (untuk debugging) -->
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}" id="csrfToken">
 
                     <!-- Email -->
                     <div class="mb-4">
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                            Email
+                            <i class="fas fa-envelope mr-2 text-blue-600"></i>Email
                         </label>
                         <input 
                             type="email" 
@@ -92,78 +117,72 @@
                             value="{{ old('email') }}"
                             required 
                             autofocus
+                            autocomplete="email"
                             placeholder="masukkan email anda"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('email') border-red-500 @enderror"
                         >
                         @error('email')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-sm mt-1">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
                         @enderror
                     </div>
 
                     <!-- Password -->
                     <div class="mb-6">
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Password
+                            <i class="fas fa-lock mr-2 text-blue-600"></i>Password
                         </label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            required
-                            placeholder="masukkan password"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('password') border-red-500 @enderror"
-                        >
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                required
+                                autocomplete="current-password"
+                                placeholder="masukkan password"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('password') border-red-500 @enderror"
+                            >
+                            <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
                         @error('password')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Role Selection (TAMBAHKAN INI) -->
-                    <div class="mb-6">
-                        <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
-                            Login Sebagai
-                        </label>
-                        <select 
-                            id="role" 
-                            name="role" 
-                            required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                        >
-                            <option value="">Pilih Role</option>
-                            <option value="siswa" {{ old('role') == 'siswa' ? 'selected' : '' }}>Siswa</option>
-                            <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru BK</option>
-                            <option value="koordinator" {{ old('role') == 'koordinator' ? 'selected' : '' }}>Koordinator BK</option>
-                        </select>
-                        @error('role')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-sm mt-1">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
                         @enderror
                     </div>
 
                     <!-- Remember Me -->
-                    <div class="flex items-center mb-6">
-                        <input 
-                            type="checkbox" 
-                            name="remember" 
-                            id="remember"
-                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        >
-                        <label for="remember" class="ml-2 text-sm text-gray-600">
-                            Ingat saya
-                        </label>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <input 
+                                type="checkbox" 
+                                name="remember" 
+                                id="remember"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            >
+                            <label for="remember" class="ml-2 text-sm text-gray-600">
+                                Ingat saya
+                            </label>
+                        </div>
                     </div>
 
                     <!-- Submit Button -->
                     <button 
                         type="submit" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition duration-200 focus:ring-4 focus:ring-blue-200"
+                        id="submitBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition duration-200 focus:ring-4 focus:ring-blue-200 flex items-center justify-center"
                     >
-                        Masuk ke Sistem
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        <span id="btnText">Masuk ke Sistem</span>
                     </button>
                 </form>
 
                 <!-- Register Link -->
                 <div class="text-center mt-6">
-                    <p class="text-gray-600">
+                    <p class="text-gray-600 text-sm">
                         Belum punya akun? 
                         <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
                             Daftar di sini
@@ -172,16 +191,102 @@
                 </div>
 
                 <!-- Demo Accounts -->
-                <div class="mt-6 p-4 bg-gray-100 rounded-lg">
-                    <p class="text-sm text-gray-600 text-center mb-2">Akun Demo:</p>
-                    <div class="text-xs text-gray-500 space-y-1">
-                        <div>Koordinator BK: bk@gmail.com / 123456</div>
-                        <div>Guru BK: gurubk@gmail.com / 123456</div>
-                        <div>Siswa: siswa@gmail.com / 123456</div>
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p class="text-sm text-blue-800 font-semibold text-center mb-2">
+                        <i class="fas fa-info-circle mr-1"></i>Akun Demo
+                    </p>
+                    <div class="text-xs text-blue-700 space-y-1">
+                        <div class="flex items-center justify-between p-2 bg-white rounded">
+                            <span>Koordinator BK:</span>
+                            <span class="font-mono">bk@gmail.com / 123456</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded">
+                            <span>Guru BK:</span>
+                            <span class="font-mono">gurubk@gmail.com / 123456</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded">
+                            <span>Siswa:</span>
+                            <span class="font-mono">siswa@gmail.com / 123456</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            
+            form.addEventListener('submit', function(e) {
+                // Validate CSRF token
+                const csrfInput = form.querySelector('input[name="_token"]');
+                
+                if (!csrfInput || !csrfInput.value) {
+                    e.preventDefault();
+                    alert('Session expired. Halaman akan dimuat ulang.');
+                    location.reload();
+                    return false;
+                }
+
+                // Disable button and show loading
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+            });
+
+            // Auto-hide flash messages after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.bg-red-100, .bg-green-100');
+                alerts.forEach(function(alert) {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000);
+        });
+
+        // Refresh CSRF token setiap 30 menit
+        setInterval(function() {
+            fetch('/login', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newToken = doc.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                if (newToken) {
+                    document.querySelector('meta[name="csrf-token"]').setAttribute('content', newToken);
+                    document.getElementById('csrfToken').value = newToken;
+                    console.log('CSRF token refreshed');
+                }
+            }).catch(error => {
+                console.error('Failed to refresh CSRF token:', error);
+            });
+        }, 30 * 60 * 1000); // 30 minutes
+    </script>
 </body>
 </html>

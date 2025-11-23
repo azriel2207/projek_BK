@@ -7,6 +7,7 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\JanjiKonselingController;
 use Illuminate\Support\Facades\Route;
 
+// Landing page
 Route::get('/', function () {
     return view('welcome');
 });
@@ -18,7 +19,7 @@ Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Public profile routes (jika ada)
+// Profile routes (untuk semua role yang login)
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
@@ -27,7 +28,7 @@ Route::middleware(['auth'])->group(function () {
 // Routes untuk Koordinator BK
 Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(function () {
     Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
-
+    
     // Guru BK Management
     Route::get('/guru', [KoordinatorController::class, 'indexGuru'])->name('guru.index');
     Route::get('/guru/create', [KoordinatorController::class, 'createGuru'])->name('guru.create');
@@ -36,6 +37,11 @@ Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(
     Route::get('/guru/{id}/edit', [KoordinatorController::class, 'editGuru'])->name('guru.edit');
     Route::put('/guru/{id}', [KoordinatorController::class, 'updateGuru'])->name('guru.update');
     Route::delete('/guru/{id}', [KoordinatorController::class, 'destroyGuru'])->name('guru.destroy');
+    
+    // Pages lainnya
+    Route::get('/siswa', function() { return view('koordinator.siswa'); })->name('siswa');
+    Route::get('/laporan', function() { return view('koordinator.laporan'); })->name('laporan');
+    Route::get('/pengaturan', function() { return view('koordinator.pengaturan'); })->name('pengaturan');
 });
 
 // Routes untuk Guru BK
@@ -69,22 +75,24 @@ Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () 
     Route::get('/bimbingan-karir', [SiswaController::class, 'bimbinganKarir'])->name('bimbingan-karir');
 });
 
-// Redirect berdasarkan role
+// Fallback dashboard redirect
 Route::middleware(['auth'])->get('/dashboard', function () {
     $user = auth()->user();
     
-    // Debug: lihat role user
-    // dd($user->role);
-    
     switch($user->role) {
+        case 'koordinator_bk':
         case 'koordinator':
             return redirect()->route('koordinator.dashboard');
+            
+        case 'guru_bk':
         case 'guru':
             return redirect()->route('guru.dashboard');
+            
         case 'siswa':
             return redirect()->route('siswa.dashboard');
+            
         default:
             auth()->logout();
-            return redirect('/login')->with('error', 'Role tidak dikenali: ' . $user->role);
+            return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
     }
 })->name('dashboard');
