@@ -75,8 +75,10 @@
                 <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">Login Sistem BK</h2>
                 <p class="text-gray-600 text-center mb-6">Masuk ke akun Anda</p>
 
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ url('/login') }}">
                     @csrf
+                    <!-- Tambahkan hidden token manual untuk backup -->
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
                     <!-- Email -->
                     <div class="mb-4">
@@ -116,6 +118,27 @@
                         @enderror
                     </div>
 
+                    <!-- Role Selection (TAMBAHKAN INI) -->
+                    <div class="mb-6">
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                            Login Sebagai
+                        </label>
+                        <select 
+                            id="role" 
+                            name="role" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                        >
+                            <option value="">Pilih Role</option>
+                            <option value="siswa" {{ old('role') == 'siswa' ? 'selected' : '' }}>Siswa</option>
+                            <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru BK</option>
+                            <option value="koordinator" {{ old('role') == 'koordinator' ? 'selected' : '' }}>Koordinator BK</option>
+                        </select>
+                        @error('role')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Remember Me -->
                     <div class="flex items-center mb-6">
                         <input 
@@ -148,7 +171,7 @@
                     </p>
                 </div>
 
-                <!-- Demo Accounts (Optional) -->
+                <!-- Demo Accounts -->
                 <div class="mt-6 p-4 bg-gray-100 rounded-lg">
                     <p class="text-sm text-gray-600 text-center mb-2">Akun Demo:</p>
                     <div class="text-xs text-gray-500 space-y-1">

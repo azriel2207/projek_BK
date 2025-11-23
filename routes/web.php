@@ -11,32 +11,34 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Auth Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Public profile routes (jika ada)
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
 });
 
- // Routes untuk Koordinator
-    Route::middleware('role:koordinator')->prefix('koordinator')->name('koordinator.')->group(function () {
-        Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
+// Routes untuk Koordinator BK
+Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(function () {
+    Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
 
-        // Guru BK Management
-        Route::get('/guru', [KoordinatorController::class, 'indexGuru'])->name('guru.index');
-        Route::get('/guru/create', [KoordinatorController::class, 'createGuru'])->name('guru.create');
-        Route::post('/guru', [KoordinatorController::class, 'storeGuru'])->name('guru.store');
-        Route::get('/guru/{id}', [KoordinatorController::class, 'showGuru'])->name('guru.show');
-        Route::get('/guru/{id}/edit', [KoordinatorController::class, 'editGuru'])->name('guru.edit');
-        Route::put('/guru/{id}', [KoordinatorController::class, 'updateGuru'])->name('guru.update');
-        Route::delete('/guru/{id}', [KoordinatorController::class, 'destroyGuru'])->name('guru.destroy');
-    });
-    
-// GURU BK
+    // Guru BK Management
+    Route::get('/guru', [KoordinatorController::class, 'indexGuru'])->name('guru.index');
+    Route::get('/guru/create', [KoordinatorController::class, 'createGuru'])->name('guru.create');
+    Route::post('/guru', [KoordinatorController::class, 'storeGuru'])->name('guru.store');
+    Route::get('/guru/{id}', [KoordinatorController::class, 'showGuru'])->name('guru.show');
+    Route::get('/guru/{id}/edit', [KoordinatorController::class, 'editGuru'])->name('guru.edit');
+    Route::put('/guru/{id}', [KoordinatorController::class, 'updateGuru'])->name('guru.update');
+    Route::delete('/guru/{id}', [KoordinatorController::class, 'destroyGuru'])->name('guru.destroy');
+});
+
+// Routes untuk Guru BK
 Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'dashboard'])->name('dashboard');
     Route::get('/jadwal', [GuruController::class, 'jadwalKonseling'])->name('jadwal');
@@ -55,7 +57,7 @@ Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/statistik', [GuruController::class, 'statistik'])->name('statistik');
 });
 
-// SISWA
+// Routes untuk Siswa
 Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () {
     Route::get('/dashboard', [SiswaController::class, 'dashboard'])->name('dashboard');
     Route::get('/janji-konseling', [JanjiKonselingController::class, 'index'])->name('janji-konseling');
@@ -67,17 +69,22 @@ Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () 
     Route::get('/bimbingan-karir', [SiswaController::class, 'bimbinganKarir'])->name('bimbingan-karir');
 });
 
+// Redirect berdasarkan role
 Route::middleware(['auth'])->get('/dashboard', function () {
     $user = auth()->user();
+    
+    // Debug: lihat role user
+    // dd($user->role);
+    
     switch($user->role) {
-        case 'koordinator_bk':
+        case 'koordinator':
             return redirect()->route('koordinator.dashboard');
-        case 'guru_bk':
+        case 'guru':
             return redirect()->route('guru.dashboard');
         case 'siswa':
             return redirect()->route('siswa.dashboard');
         default:
             auth()->logout();
-            return redirect('/')->with('error', 'Role tidak dikenali.');
+            return redirect('/login')->with('error', 'Role tidak dikenali: ' . $user->role);
     }
 })->name('dashboard');
