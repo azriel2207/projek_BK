@@ -14,6 +14,8 @@ class Counselor extends Model
         'nama_lengkap',
         'nip',
         'no_hp',
+        'specialization',    // TAMBAH INI
+        'office_hours',      // TAMBAH INI
     ];
 
     public function user()
@@ -44,5 +46,16 @@ class Counselor extends Model
     public function feedbacks()
     {
         return $this->hasMany(CounselorFeedback::class);
+    }
+
+    // ACCESSOR UNTUK KOMPATIBILITAS
+    public function getSpecializationAttribute($value)
+    {
+        return $value ?? 'Umum';
+    }
+
+    public function getOfficeHoursAttribute($value)
+    {
+        return $value ?? '08:00 - 16:00';
     }
 }

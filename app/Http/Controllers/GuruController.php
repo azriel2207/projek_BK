@@ -9,6 +9,8 @@ use Carbon\Carbon;
 
 class GuruController extends Controller
 {
+
+    
     // Alias untuk dashboard
     public function index()
     {

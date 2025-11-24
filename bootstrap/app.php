@@ -11,9 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Tambahkan ini untuk handle CSRF
+        // Validate CSRF tokens dengan exception yang lebih jelas
         $middleware->validateCsrfTokens(except: [
-            // Jika ada route tertentu yang perlu di-exclude
+            // Tambahkan route yang perlu di-exclude jika ada
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

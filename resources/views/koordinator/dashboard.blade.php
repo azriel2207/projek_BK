@@ -32,10 +32,10 @@
             <a href="{{ route('koordinator.dashboard') }}" class="block py-3 px-6 bg-blue-700 border-l-4 border-yellow-400">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('koordinator.guru') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
+            <a href="{{ route('koordinator.guru.index') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-user-tie mr-3"></i>Kelola Guru BK
             </a>
-            <a href="{{ route('koordinator.siswa') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
+            <a href="{{ route('koordinator.siswa.index') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-users mr-3"></i>Data Siswa
             </a>
             <a href="{{ route('koordinator.laporan') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
@@ -200,7 +200,7 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
                     <div class="space-y-3">
-                        <a href="{{ route('koordinator.guru') }}" class="block bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
+                        <a href="{{ route('koordinator.guru.index') }}" class="block bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
                             <i class="fas fa-user-plus text-blue-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Tambah Guru BK</p>
                         </a>

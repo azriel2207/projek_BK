@@ -12,7 +12,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Auth Routes
+// Auth Routes - TANPA MIDDLEWARE
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
@@ -29,7 +29,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(function () {
     Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
     
-    // Guru BK Management
+    // Guru routes
     Route::get('/guru', [KoordinatorController::class, 'indexGuru'])->name('guru.index');
     Route::get('/guru/create', [KoordinatorController::class, 'createGuru'])->name('guru.create');
     Route::post('/guru', [KoordinatorController::class, 'storeGuru'])->name('guru.store');
@@ -38,13 +38,25 @@ Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(
     Route::put('/guru/{id}', [KoordinatorController::class, 'updateGuru'])->name('guru.update');
     Route::delete('/guru/{id}', [KoordinatorController::class, 'destroyGuru'])->name('guru.destroy');
     
-    // Pages lainnya
-    Route::get('/siswa', function() { return view('koordinator.siswa'); })->name('siswa');
-    Route::get('/laporan', function() { return view('koordinator.laporan'); })->name('laporan');
-    Route::get('/pengaturan', function() { return view('koordinator.pengaturan'); })->name('pengaturan');
+    // Siswa routes
+    Route::get('/siswa', [KoordinatorController::class, 'indexSiswa'])->name('siswa.index');
+    Route::get('/siswa/create', [KoordinatorController::class, 'createSiswa'])->name('siswa.create');
+    Route::post('/siswa', [KoordinatorController::class, 'storeSiswa'])->name('siswa.store');
+    Route::get('/siswa/{id}', [KoordinatorController::class, 'showSiswa'])->name('siswa.show');
+    Route::get('/siswa/{id}/edit', [KoordinatorController::class, 'editSiswa'])->name('siswa.edit');
+    Route::put('/siswa/{id}', [KoordinatorController::class, 'updateSiswa'])->name('siswa.update');
+    Route::delete('/siswa/{id}', [KoordinatorController::class, 'destroySiswa'])->name('siswa.destroy');
+    
+    // Upgrade siswa ke guru BK
+    Route::get('/siswa/{id}/upgrade', [KoordinatorController::class, 'showUpgradeForm'])->name('siswa.upgrade-form');
+    Route::post('/siswa/{id}/upgrade', [KoordinatorController::class, 'upgradeToGuru'])->name('siswa.upgrade');
+    
+    // Lainnya
+    Route::get('/laporan', [KoordinatorController::class, 'laporan'])->name('laporan');
+    Route::get('/pengaturan', [KoordinatorController::class, 'pengaturan'])->name('pengaturan');
 });
 
-// Routes untuk Guru BK
+// Routes untuk Guru BK - HANYA AUTH
 Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'dashboard'])->name('dashboard');
     Route::get('/jadwal', [GuruController::class, 'jadwalKonseling'])->name('jadwal');
@@ -63,7 +75,7 @@ Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/statistik', [GuruController::class, 'statistik'])->name('statistik');
 });
 
-// Routes untuk Siswa
+// Routes untuk Siswa - HANYA AUTH
 Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () {
     Route::get('/dashboard', [SiswaController::class, 'dashboard'])->name('dashboard');
     Route::get('/janji-konseling', [JanjiKonselingController::class, 'index'])->name('janji-konseling');

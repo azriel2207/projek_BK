@@ -30,10 +30,10 @@
             <a href="{{ route('koordinator.dashboard') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('koordinator.guru') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
+            <a href="{{ route('koordinator.guru.index') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-user-tie mr-3"></i>Kelola Guru BK
             </a>
-            <a href="{{ route('koordinator.siswa') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
+            <a href="{{ route('koordinator.siswa.index') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-users mr-3"></i>Data Siswa
             </a>
             <a href="{{ route('koordinator.laporan') }}" class="block py-3 px-6 hover:bg-blue-700 transition">

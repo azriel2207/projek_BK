@@ -17,61 +17,54 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Validasi input
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6'
+       $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|min:6'
+    ]);
+
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::attempt($credentials, $request->filled('remember'))) {
+        $request->session()->regenerate();
+        
+        $user = Auth::user();
+        
+        // Log untuk debug
+        Log::info('Login success', [
+            'email' => $user->email,
+            'role' => $user->role,
+            'user_id' => $user->id
         ]);
-
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            
-            $user = Auth::user();
-            
-            // Log untuk debug - PERBAIKI: gunakan Log:: bukan \Log::
-            Log::info('Login success', [
-                'email' => $user->email,
-                'role' => $user->role,
-                'user_id' => $user->id
-            ]);
-            
-            // Redirect berdasarkan role dengan route()->name untuk konsistensi
-            switch($user->role) {
-                case 'koordinator_bk':
-                case 'koordinator':
-                    return redirect()->route('koordinator.dashboard');
-                    
-                case 'guru_bk':
-                case 'guru':
-                    return redirect()->route('guru.dashboard');
-                    
-                case 'siswa':
-                    return redirect()->route('siswa.dashboard');
-                    
-                default:
-                    // Jika role tidak valid, logout dan beri pesan error
-                    Auth::logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-                    
-                    Log::warning('Invalid role detected', [
-                        'email' => $user->email,
-                        'role' => $user->role
-                    ]);
-                    
-                    return back()->withErrors([
-                        'email' => 'Role tidak valid: ' . $user->role
-                    ])->withInput($request->only('email'));
-            }
+        
+        // Redirect berdasarkan role
+        switch($user->role) {
+            case 'koordinator_bk':
+            case 'koordinator':
+                return redirect()->route('koordinator.dashboard');
+                
+            case 'guru_bk':
+            case 'guru':
+                return redirect()->route('guru.dashboard');
+                
+            case 'siswa':
+                return redirect()->route('siswa.dashboard');
+                
+            default:
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                
+                return back()->withErrors([
+                    'email' => 'Role tidak valid: ' . $user->role
+                ])->withInput($request->only('email'));
         }
-
-        // Login gagal
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->withInput($request->only('email'));
     }
+
+    // Login gagal
+    return back()->withErrors([
+        'email' => 'Email atau password salah.',
+    ])->withInput($request->only('email'));
+}
 
     public function showRegistrationForm()
     {
