@@ -5,6 +5,7 @@ use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KoordinatorController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\JanjiKonselingController;
+use App\Http\Controllers\Koordinator\LaporanController; // Tambahkan ini
 use Illuminate\Support\Facades\Route;
 
 // Landing page
@@ -51,9 +52,21 @@ Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(
     Route::get('/siswa/{id}/upgrade', [KoordinatorController::class, 'showUpgradeForm'])->name('siswa.upgrade-form');
     Route::post('/siswa/{id}/upgrade', [KoordinatorController::class, 'upgradeToGuru'])->name('siswa.upgrade');
     
+    // Laporan routes - DIPINDAH ke sini dan menggunakan LaporanController
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
+    Route::post('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.export');
+    Route::get('/laporan/statistik-trend', [LaporanController::class, 'statistikTrend'])->name('laporan.trend');
+    Route::get('/laporan/performa-guru', [LaporanController::class, 'performaGuru'])->name('laporan.performa');
+    Route::get('/laporan/kasus-prioritas', [LaporanController::class, 'kasusPrioritas'])->name('laporan.prioritas');
+    Route::post('/laporan/update-periode', [LaporanController::class, 'updatePeriode'])->name('laporan.update-periode');
+    
     // Lainnya
-    Route::get('/laporan', [KoordinatorController::class, 'laporan'])->name('laporan');
     Route::get('/pengaturan', [KoordinatorController::class, 'pengaturan'])->name('pengaturan');
+    //laporan generate
+    Route::post('/laporan/generate-bulanan', [LaporanController::class, 'generateLaporanBulanan'])->name('laporan.generate-bulanan');
+    Route::get('/laporan/generate-trend', [LaporanController::class, 'generateStatistikTrend'])->name('laporan.generate-trend');
+    Route::get('/laporan/generate-performa', [LaporanController::class, 'generatePerformaGuru'])->name('laporan.generate-performa');
+    Route::get('/laporan/generate-prioritas', [LaporanController::class, 'generateKasusPrioritas'])->name('laporan.generate-prioritas');
 });
 
 // Routes untuk Guru BK - HANYA AUTH

@@ -26,6 +26,34 @@ class JanjiKonseling extends Model
         'tanggal' => 'date',
     ];
 
+    // Scope untuk statistik
+    public function scopeBulanIni($query)
+    {
+        return $query->whereMonth('tanggal', now()->month)
+                    ->whereYear('tanggal', now()->year);
+    }
+
+    public function scopeBulanLalu($query)
+    {
+        return $query->whereMonth('tanggal', now()->subMonth()->month)
+                    ->whereYear('tanggal', now()->subMonth()->year);
+    }
+
+    public function scopePeriode($query, $periode)
+    {
+        switch ($periode) {
+            case '3_bulan':
+                return $query->where('tanggal', '>=', now()->subMonths(3));
+            case '6_bulan':
+                return $query->where('tanggal', '>=', now()->subMonths(6));
+            case 'tahun_ini':
+                return $query->whereYear('tanggal', now()->year);
+            default: // bulan_ini
+                return $query->whereMonth('tanggal', now()->month)
+                            ->whereYear('tanggal', now()->year);
+        }
+    }
+
     // Accessor untuk status_color
     public function getStatusColorAttribute()
     {
