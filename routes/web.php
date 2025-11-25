@@ -5,7 +5,8 @@ use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KoordinatorController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\JanjiKonselingController;
-use App\Http\Controllers\Koordinator\LaporanController; // Tambahkan ini
+use App\Http\Controllers\Koordinator\LaporanController;
+use App\Http\Controllers\Koordinator\PengaturanController;
 use Illuminate\Support\Facades\Route;
 
 // Landing page
@@ -52,7 +53,7 @@ Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(
     Route::get('/siswa/{id}/upgrade', [KoordinatorController::class, 'showUpgradeForm'])->name('siswa.upgrade-form');
     Route::post('/siswa/{id}/upgrade', [KoordinatorController::class, 'upgradeToGuru'])->name('siswa.upgrade');
     
-    // Laporan routes - DIPINDAH ke sini dan menggunakan LaporanController
+    // Laporan routes
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
     Route::post('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.export');
     Route::get('/laporan/statistik-trend', [LaporanController::class, 'statistikTrend'])->name('laporan.trend');
@@ -60,13 +61,44 @@ Route::middleware(['auth'])->prefix('koordinator')->name('koordinator.')->group(
     Route::get('/laporan/kasus-prioritas', [LaporanController::class, 'kasusPrioritas'])->name('laporan.prioritas');
     Route::post('/laporan/update-periode', [LaporanController::class, 'updatePeriode'])->name('laporan.update-periode');
     
-    // Lainnya
-    Route::get('/pengaturan', [KoordinatorController::class, 'pengaturan'])->name('pengaturan');
-    //laporan generate
+    // Laporan generate
     Route::post('/laporan/generate-bulanan', [LaporanController::class, 'generateLaporanBulanan'])->name('laporan.generate-bulanan');
     Route::get('/laporan/generate-trend', [LaporanController::class, 'generateStatistikTrend'])->name('laporan.generate-trend');
     Route::get('/laporan/generate-performa', [LaporanController::class, 'generatePerformaGuru'])->name('laporan.generate-performa');
     Route::get('/laporan/generate-prioritas', [LaporanController::class, 'generateKasusPrioritas'])->name('laporan.generate-prioritas');
+    
+    // =================================================================
+    // ✅ ROUTES PENGATURAN SISTEM - SATU GRUP SAJA
+    // =================================================================
+    Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        Route::get('/', [PengaturanController::class, 'index'])->name('index');
+        
+        // Umum
+        Route::get('/umum', [PengaturanController::class, 'general'])->name('general');
+        Route::post('/umum', [PengaturanController::class, 'updateGeneral'])->name('general.update');
+        Route::post('/reset', [PengaturanController::class, 'resetSettings'])->name('reset');
+        
+        // Notifikasi
+        Route::get('/notifikasi', [PengaturanController::class, 'notification'])->name('notification');
+        Route::post('/notifikasi', [PengaturanController::class, 'updateNotification'])->name('notification.update');
+        
+        // Keamanan
+        Route::get('/keamanan', [PengaturanController::class, 'security'])->name('security');
+        Route::post('/keamanan', [PengaturanController::class, 'updateSecurity'])->name('security.update');
+        
+        // Hak Akses
+        Route::get('/hak-akses', [PengaturanController::class, 'permissions'])->name('permissions');
+        Route::post('/hak-akses', [PengaturanController::class, 'updatePermissions'])->name('permissions.update');
+        
+        // Backup
+        Route::get('/backup', [PengaturanController::class, 'backup'])->name('backup');
+        Route::post('/backup', [PengaturanController::class, 'updateBackup'])->name('backup.update');
+        Route::post('/backup/create', [PengaturanController::class, 'createBackup'])->name('backup.create');
+        Route::get('/backup/download/{filename}', [PengaturanController::class, 'downloadBackup'])->name('backup.download');
+    });
+    
+    // Legacy route (jika diperlukan untuk kompatibilitas)
+    Route::get('/pengaturan', [KoordinatorController::class, 'pengaturan'])->name('pengaturan');
 });
 
 // Routes untuk Guru BK - HANYA AUTH
