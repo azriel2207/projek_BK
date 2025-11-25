@@ -7,6 +7,7 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\JanjiKonselingController;
 use App\Http\Controllers\Koordinator\LaporanController;
 use App\Http\Controllers\Koordinator\PengaturanController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Landing page
@@ -134,7 +135,7 @@ Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () 
 
 // Fallback dashboard redirect
 Route::middleware(['auth'])->get('/dashboard', function () {
-    $user = auth()->user();
+    $user = Auth::user();
     
     switch($user->role) {
         case 'koordinator_bk':
@@ -147,9 +148,9 @@ Route::middleware(['auth'])->get('/dashboard', function () {
             
         case 'siswa':
             return redirect()->route('siswa.dashboard');
-            
         default:
-            auth()->logout();
+            Auth::logout();
+            return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
             return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
     }
 })->name('dashboard');
