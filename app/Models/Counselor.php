@@ -7,15 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Counselor extends Model
 {
-    use HasFactory;
+   use HasFactory;
 
     protected $fillable = [
         'user_id',
         'nama_lengkap',
         'nip',
         'no_hp',
-        'specialization',    // TAMBAH INI
-        'office_hours',      // TAMBAH INI
+        'email',
+        'specialization',
+        'office_hours',
     ];
 
     public function user()
@@ -23,35 +24,38 @@ class Counselor extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function counselingSessions()
+    // ...existing relations...
+
+    // Compatibility accessors / mutators (alias)
+    public function getNamaAttribute()
     {
-        return $this->hasMany(CounselingSession::class);
+        return $this->nama_lengkap;
     }
 
-    public function followUps()
+    public function setNamaAttribute($value)
     {
-        return $this->hasMany(FollowUp::class);
+        $this->attributes['nama_lengkap'] = $value;
     }
 
-    public function activities()
+    public function getTeleponAttribute()
     {
-        return $this->hasMany(Activity::class);
+        return $this->no_hp;
     }
 
-    public function developments()
+    public function setTeleponAttribute($value)
     {
-        return $this->hasMany(StudentDevelopment::class);
+        $this->attributes['no_hp'] = $value;
     }
 
-    public function feedbacks()
+    public function getSpesialisasiAttribute()
     {
-        return $this->hasMany(CounselorFeedback::class);
+        // gunakan kolom specialization di DB
+        return $this->attributes['specialization'] ?? 'Umum';
     }
 
-    // ACCESSOR UNTUK KOMPATIBILITAS
-    public function getSpecializationAttribute($value)
+    public function setSpesialisasiAttribute($value)
     {
-        return $value ?? 'Umum';
+        $this->attributes['specialization'] = $value;
     }
 
     public function getOfficeHoursAttribute($value)

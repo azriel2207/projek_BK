@@ -96,7 +96,19 @@ Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
         Route::get('/dashboard', [GuruController::class, 'dashboard'])->name('dashboard');
         Route::get('/jadwal', [GuruController::class, 'jadwalKonseling'])->name('jadwal');
         Route::get('/jadwal/tambah', [GuruController::class, 'tambahJadwal'])->name('jadwal.tambah');
+        
+        // PERBAIKAN: Route POST untuk menyimpan jadwal - HARUS DI DALAM PREFIX 'guru'
         Route::post('/jadwal/simpan', [GuruController::class, 'simpanJadwal'])->name('jadwal.simpan');
+        
+        // ROUTE BARU UNTUK AKSI JADWAL
+        Route::get('/jadwal/{id}/detail', [GuruController::class, 'detailJadwal'])->name('jadwal.detail');
+        Route::get('/jadwal/{id}/edit', [GuruController::class, 'editJadwal'])->name('jadwal.edit');
+        Route::put('/jadwal/{id}/update', [GuruController::class, 'updateJadwal'])->name('jadwal.update');
+        Route::delete('/jadwal/{id}/hapus', [GuruController::class, 'hapusJadwal'])->name('jadwal.hapus');
+        
+        // ROUTE CATATAN TAMBAHAN
+        Route::get('/catatan/{id}/tambah', [GuruController::class, 'tambahCatatanForm'])->name('catatan.tambah');
+        
         Route::get('/permintaan', [GuruController::class, 'semuaPermintaan'])->name('permintaan');
         Route::post('/permintaan/{id}/konfirmasi', [GuruController::class, 'konfirmasiJanji'])->name('permintaan.konfirmasi');
         Route::put('/permintaan/{id}/tolak', [GuruController::class, 'tolakJanji'])->name('permintaan.tolak');

@@ -9,8 +9,6 @@ use Carbon\Carbon;
 
 class GuruController extends Controller
 {
-
-    
     // Alias untuk dashboard
     public function index()
     {
@@ -85,7 +83,12 @@ class GuruController extends Controller
 
     public function tambahJadwal()
     {
-        return view('guru.jadwal-tambah');
+        $siswa = DB::table('users')
+            ->where('role', 'siswa')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('guru.jadwal-tambah', compact('siswa'));
     }
 
     public function simpanJadwal(Request $request)
@@ -93,14 +96,22 @@ class GuruController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'tanggal' => 'required|date',
-            'waktu' => 'required',
+            'mulai' => 'required',
+            'selesai' => 'nullable',
             'jenis_bimbingan' => 'required',
+            'keluhan' => 'nullable|string',
         ]);
+
+        // Format waktu: "mulai - selesai"
+        $waktu = $request->mulai;
+        if ($request->selesai) {
+            $waktu .= ' - ' . $request->selesai;
+        }
 
         DB::table('janji_konselings')->insert([
             'user_id' => $request->user_id,
             'tanggal' => $request->tanggal,
-            'waktu' => $request->waktu,
+            'waktu' => $waktu,
             'jenis_bimbingan' => $request->jenis_bimbingan,
             'keluhan' => $request->keluhan ?? '',
             'guru_bk' => Auth::user()->name,
@@ -110,6 +121,99 @@ class GuruController extends Controller
         ]);
 
         return redirect()->route('guru.jadwal')->with('success', 'Jadwal berhasil ditambahkan');
+    }
+
+    // DETAIL JADWAL
+    public function detailJadwal($id)
+    {
+        $jadwal = DB::table('janji_konselings')
+            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+            ->select('janji_konselings.*', 'users.name as nama_siswa', 'users.email as email_siswa')
+            ->where('janji_konselings.id', $id)
+            ->first();
+
+        if (!$jadwal) {
+            abort(404, 'Jadwal tidak ditemukan');
+        }
+
+        return view('guru.jadwal-detail', compact('jadwal'));
+    }
+
+    // EDIT JADWAL
+    public function editJadwal($id)
+    {
+        $jadwal = DB::table('janji_konselings')->where('id', $id)->first();
+        $siswa = DB::table('users')->where('role', 'siswa')->get();
+
+        if (!$jadwal) {
+            abort(404, 'Jadwal tidak ditemukan');
+        }
+
+        return view('guru.jadwal-edit', compact('jadwal', 'siswa'));
+    }
+
+    // UPDATE JADWAL
+    public function updateJadwal(Request $request, $id)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'tanggal' => 'required|date',
+            'mulai' => 'required',
+            'selesai' => 'nullable',
+            'jenis_bimbingan' => 'required',
+            'keluhan' => 'nullable|string',
+            'status' => 'required|in:menunggu,dikonfirmasi,selesai,dibatalkan',
+        ]);
+
+        // Format waktu
+        $waktu = $request->mulai;
+        if ($request->selesai) {
+            $waktu .= ' - ' . $request->selesai;
+        }
+
+        DB::table('janji_konselings')
+            ->where('id', $id)
+            ->update([
+                'user_id' => $request->user_id,
+                'tanggal' => $request->tanggal,
+                'waktu' => $waktu,
+                'jenis_bimbingan' => $request->jenis_bimbingan,
+                'keluhan' => $request->keluhan ?? '',
+                'status' => $request->status,
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->route('guru.jadwal')->with('success', 'Jadwal berhasil diperbarui');
+    }
+
+    // HAPUS JADWAL
+    public function hapusJadwal($id)
+    {
+        $jadwal = DB::table('janji_konselings')->where('id', $id)->first();
+
+        if (!$jadwal) {
+            abort(404, 'Jadwal tidak ditemukan');
+        }
+
+        DB::table('janji_konselings')->where('id', $id)->delete();
+
+        return redirect()->route('guru.jadwal')->with('success', 'Jadwal berhasil dihapus');
+    }
+
+    // FORM TAMBAH CATATAN
+    public function tambahCatatanForm($id)
+    {
+        $jadwal = DB::table('janji_konselings')
+            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+            ->select('janji_konselings.*', 'users.name as nama_siswa')
+            ->where('janji_konselings.id', $id)
+            ->first();
+
+        if (!$jadwal) {
+            abort(404, 'Jadwal tidak ditemukan');
+        }
+
+        return view('guru.catatan-tambah', compact('jadwal'));
     }
 
     // Kelola Permintaan

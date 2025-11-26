@@ -15,6 +15,7 @@ class JanjiKonseling extends Model
         'user_id',
         'tanggal', 
         'waktu',
+        'lokasi',
         'status',
         'keluhan',
         'jenis_bimbingan',

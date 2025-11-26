@@ -150,18 +150,52 @@
                             </span>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex gap-2">
-                                <button class="text-blue-600 hover:text-blue-900 transition" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="text-green-600 hover:text-green-900 transition" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-900 transition" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
+    <div class="flex gap-2">
+        <!-- View Detail -->
+        <a href="{{ route('guru.jadwal.detail', $item->id) }}" 
+           class="text-blue-600 hover:text-blue-900 transition" 
+           title="Lihat Detail">
+            <i class="fas fa-eye"></i>
+        </a>
+        
+        <!-- Edit -->
+        <a href="{{ route('guru.jadwal.edit', $item->id) }}" 
+           class="text-green-600 hover:text-green-900 transition" 
+           title="Edit">
+            <i class="fas fa-edit"></i>
+        </a>
+        
+        <!-- Hapus -->
+        <form action="{{ route('guru.jadwal.hapus', $item->id) }}" 
+              method="POST" 
+              class="inline"
+              onsubmit="return confirm('Apakah Anda yakin ingin menghapus jadwal ini?')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" 
+                    class="text-red-600 hover:text-red-900 transition" 
+                    title="Hapus">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+        
+        <!-- Catatan (jika status selesai) -->
+        @if($item->status == 'selesai')
+        <a href="{{ route('guru.catatan.detail', $item->id) }}" 
+           class="text-purple-600 hover:text-purple-900 transition" 
+           title="Lihat Catatan">
+            <i class="fas fa-file-alt"></i>
+        </a>
+        @else
+        <!-- Tambah Catatan -->
+        <a href="{{ route('guru.catatan.tambah', $item->id) }}" 
+           class="text-orange-600 hover:text-orange-900 transition" 
+           title="Tambah Catatan">
+            <i class="fas fa-notes-medical"></i>
+        </a>
+        @endif
+    </div>
+</td>
                     </tr>
                     @empty
                     <tr>

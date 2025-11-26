@@ -6,24 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('janji_konselings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('jenis_bimbingan')->default('pribadi');
-            $table->string('guru_bk')->nullable();
-            $table->date('tanggal');
-            $table->string('waktu');
-            $table->text('keluhan');
-            $table->string('status')->default('menunggu');
-            $table->text('catatan_konselor')->nullable();
-            $table->timestamps();
+        Schema::table('janji_konselings', function (Blueprint $table) {
+            if (! Schema::hasColumn('janji_konselings', 'lokasi')) {
+                $table->string('lokasi')->nullable()->after('waktu');
+            }
+            if (! Schema::hasColumn('janji_konselings', 'keterangan')) {
+                $table->text('keterangan')->nullable()->after('lokasi');
+            }
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('janji_konselings');
+        Schema::table('janji_konselings', function (Blueprint $table) {
+            if (Schema::hasColumn('janji_konselings', 'keterangan')) {
+                $table->dropColumn('keterangan');
+            }
+            if (Schema::hasColumn('janji_konselings', 'lokasi')) {
+                $table->dropColumn('lokasi');
+            }
+        });
     }
 };

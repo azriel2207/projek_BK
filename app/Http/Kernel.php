@@ -54,4 +54,11 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\CheckRole::class,
     ];
+
+    /**
+     * The application's commands.
+     */
+    protected $commands = [
+        \App\Console\Commands\SyncProfiles::class,
+    ];
 }
