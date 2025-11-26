@@ -4,16 +4,17 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, ...$roles): RedirectResponse|Response|\Illuminate\Http\JsonResponse
     {
         // Cek jika user tidak login
         if (!Auth::check()) {

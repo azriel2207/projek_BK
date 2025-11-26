@@ -22,10 +22,7 @@
             <i class="fas fa-plus"></i>
             <span>Tambah Jadwal</span>
         </a>
-        <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Kalender View</span>
-        </button>
+        {{-- Kalender View button removed --}}
     </div>
 
     <!-- Stats Cards -->

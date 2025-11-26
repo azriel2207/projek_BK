@@ -40,7 +40,7 @@
             <a href="{{ route('guru.siswa') }}" class="block py-3 px-6 hover:bg-green-700 transition">
                 <i class="fas fa-user-friends mr-3"></i>Daftar Siswa
             </a>
-            <a href="{{ route('guru.catatan') }}" class="block py-3 px-6 hover:bg-green-700 transition">
+            <a href="{{ route('guru.catatan.index') }}" class="block py-3 px-6 hover:bg-green-700 transition">
                 <i class="fas fa-file-medical mr-3"></i>Catatan Konseling
             </a>
             <a href="{{ route('guru.laporan') }}" class="block py-3 px-6 hover:bg-green-700 transition">
@@ -284,7 +284,7 @@
                     <h3 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-history mr-2 text-purple-600"></i>Riwayat Konseling Terbaru
                     </h3>
-                    <a href="{{ route('guru.catatan') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <a href="{{ route('guru.catatan.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                         Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>

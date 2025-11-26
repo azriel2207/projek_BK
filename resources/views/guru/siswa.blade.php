@@ -11,37 +11,40 @@
     </div>
 
     <!-- Actions -->
-    <div class="mb-6 flex flex-wrap gap-4">
+    <div class="mb-6 flex flex-wrap gap-3">
         <a href="{{ route('guru.dashboard') }}" 
-           class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali ke Dashboard</span>
         </a>
-        <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
-            <i class="fas fa-download"></i>
-            <span>Export Data</span>
-        </button>
-        <button class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
-            <i class="fas fa-filter"></i>
-            <span>Filter</span>
-        </button>
+
+        {{-- Filter button removed (header) --}}
     </div>
 
     <!-- Search Box -->
     <div class="mb-6">
-        <div class="bg-white rounded-lg shadow-md p-4">
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
-                    <input type="text" 
-                           placeholder="Cari siswa berdasarkan nama atau email..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
-                    <i class="fas fa-search"></i>
-                    <span>Cari</span>
+        <form method="GET" action="{{ route('guru.siswa') }}" class="mb-6">
+            <div class="flex gap-3 items-center">
+                <input type="text" name="q" value="{{ request('q') }}"
+                       class="w-full rounded-lg border px-4 py-3"
+                       placeholder="Cari siswa berdasarkan nama atau email..." />
+
+                <select name="kelas" class="rounded-lg border px-3 py-3">
+                    <option value="">Semua Kelas</option>
+                    @foreach($kelasList as $k)
+                        <option value="{{ $k }}" {{ request('kelas') == $k ? 'selected' : '' }}>
+                            {{ $k }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg inline-flex items-center gap-2">
+                    <i class="fas fa-search"></i> Cari
                 </button>
+
+                {{-- Side filter button removed --}}
             </div>
-        </div>
+        </form>
     </div>
 
     <!-- Siswa Table -->

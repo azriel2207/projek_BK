@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Models\Catatan;
 
 class GuruController extends Controller
 {
@@ -31,7 +33,7 @@ class GuruController extends Controller
             'total_siswa' => DB::table('users')->where('role', 'siswa')->count(),
             'permintaan_menunggu' => $permintaanBaru->count(),
             'konseling_hari_ini' => DB::table('janji_konselings')
-                ->whereDate('tanggal', Carbon::today())
+                ->whereDate('tanggal', \Carbon\Carbon::today())
                 ->where('status', 'dikonfirmasi')
                 ->count(),
             'kasus_aktif' => DB::table('janji_konselings')
@@ -40,7 +42,7 @@ class GuruController extends Controller
             'tindak_lanjut' => 0,
             'selesai_bulan_ini' => DB::table('janji_konselings')
                 ->where('status', 'selesai')
-                ->whereMonth('tanggal', Carbon::now()->month)
+                ->whereMonth('tanggal', \Carbon\Carbon::now()->month)
                 ->count(),
         ];
 
@@ -48,7 +50,7 @@ class GuruController extends Controller
         $jadwalHariIni = DB::table('janji_konselings')
             ->join('users', 'janji_konselings.user_id', '=', 'users.id')
             ->select('janji_konselings.*', 'users.name')
-            ->whereDate('janji_konselings.tanggal', Carbon::today())
+            ->whereDate('janji_konselings.tanggal', \Carbon\Carbon::today())
             ->where('janji_konselings.status', 'dikonfirmasi')
             ->orderBy('janji_konselings.waktu')
             ->get();
@@ -81,14 +83,19 @@ class GuruController extends Controller
         return view('guru.jadwal', compact('jadwal'));
     }
 
+    // view tambah jadwal (umum) — kirim daftar siswa untuk dropdown
     public function tambahJadwal()
     {
-        $siswa = DB::table('users')
-            ->where('role', 'siswa')
-            ->orderBy('name', 'asc')
-            ->get();
+        $siswaList = User::where('role', 'siswa')->orderBy('name')->get();
+        return view('guru.jadwal-tambah', compact('siswaList'));
+    }
 
-        return view('guru.jadwal-tambah', compact('siswa'));
+    // view tambah jadwal khusus untuk satu siswa — kirim selectedSiswa
+    public function tambahJadwalForSiswa($id)
+    {
+        $selectedSiswa = User::where('id', $id)->where('role', 'siswa')->first();
+        if (! $selectedSiswa) abort(404);
+        return view('guru.jadwal-tambah', compact('selectedSiswa'));
     }
 
     public function simpanJadwal(Request $request)
@@ -139,19 +146,19 @@ class GuruController extends Controller
         return view('guru.jadwal-detail', compact('jadwal'));
     }
 
-    // EDIT JADWAL
-    public function editJadwal($id)
-    {
-        $jadwal = DB::table('janji_konselings')->where('id', $id)->first();
-        $siswa = DB::table('users')->where('role', 'siswa')->get();
-
-        if (!$jadwal) {
-            abort(404, 'Jadwal tidak ditemukan');
-        }
-
-        return view('guru.jadwal-edit', compact('jadwal', 'siswa'));
+   // EDIT JADWAL
+public function editJadwal($id)
+{
+    $jadwal = DB::table('janji_konselings')->where('id', $id)->first();
+    if (!$jadwal) {
+        abort(404);
     }
 
+    $siswaList = User::where('role', 'siswa')->orderBy('name')->get();
+    $selectedSiswa = $jadwal->user_id ? User::find($jadwal->user_id) : null;
+
+    return view('guru.jadwal-edit', compact('jadwal', 'siswaList', 'selectedSiswa'));
+}
     // UPDATE JADWAL
     public function updateJadwal(Request $request, $id)
     {
@@ -278,14 +285,32 @@ class GuruController extends Controller
     }
 
     // Kelola Siswa
-    public function daftarSiswa()
+    public function daftarSiswa(\Illuminate\Http\Request $request)
     {
-        $siswa = DB::table('users')
+        $query = DB::table('users')
             ->where('role', 'siswa')
-            ->orderBy('name', 'asc')
-            ->paginate(20);
+            ->leftJoin('students', 'students.user_id', '=', 'users.id')
+            ->select('users.*', 'students.kelas as kelas');
 
-        return view('guru.siswa', compact('siswa'));
+        // pencarian nama / email
+        if ($search = $request->query('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('users.name', 'like', '%'.$search.'%')
+                  ->orWhere('users.email', 'like', '%'.$search.'%');
+            });
+        }
+
+        // filter kelas (exact match)
+        if ($kelas = $request->query('kelas')) {
+            $query->where('students.kelas', $kelas);
+        }
+
+        $siswa = $query->orderBy('users.name', 'asc')->paginate(20)->withQueryString();
+
+        // untuk dropdown kelas — ambil daftar distinct kelas dari tabel students
+        $kelasList = DB::table('students')->select('kelas')->whereNotNull('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
+
+        return view('guru.siswa', compact('siswa', 'kelasList'));
     }
 
     public function detailSiswa($id)
@@ -307,46 +332,31 @@ class GuruController extends Controller
     // Catatan Konseling
     public function daftarCatatan()
     {
-        $catatan = DB::table('janji_konselings')
-            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
-            ->select('janji_konselings.*', 'users.name as nama_siswa')
-            ->where('janji_konselings.status', 'selesai')
-            ->orderBy('janji_konselings.tanggal', 'desc')
-            ->paginate(15);
-
-        return view('guru.catatan', compact('catatan'));
-    }
-
-    public function tambahCatatan(Request $request, $id)
-    {
-        $request->validate([
-            'catatan_konselor' => 'required|string|min:10'
+        // Data contoh
+        $catatan = collect([
+            (object)[
+                'id' => 1,
+                'nama_siswa' => 'Ahmad Rizki',
+                'kelas' => 'XII RPL',
+                'jenis_konseling' => 'akademik',
+                'tanggal' => now()->subDays(2),
+                'keluhan' => 'Kesulitan memahami materi matematika',
+                'catatan_konselor' => 'Memberikan tips belajar efektif',
+                'status' => 'selesai',
+            ]
         ]);
 
-        DB::table('janji_konselings')
-            ->where('id', $id)
-            ->update([
-                'catatan_konselor' => $request->catatan_konselor,
-                'status' => 'selesai',
-                'updated_at' => now()
-            ]);
-
-        return redirect()->back()->with('success', 'Catatan berhasil disimpan');
+        return view('guru.catatan.index', compact('catatan'));
     }
 
-    public function detailCatatan($id)
+    // public function buatCatatan()
+    // {
+    //     return view('guru.catatan.buat');
+    // }
+
+    public function templateCatatan()
     {
-        $catatan = DB::table('janji_konselings')
-            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
-            ->select('janji_konselings.*', 'users.name as nama_siswa', 'users.email')
-            ->where('janji_konselings.id', $id)
-            ->first();
-
-        if (!$catatan) {
-            abort(404, 'Catatan tidak ditemukan');
-        }
-
-        return view('guru.catatan-detail', compact('catatan'));
+        return view('guru.catatan.template');
     }
 
     // Laporan & Statistik
@@ -357,7 +367,7 @@ class GuruController extends Controller
             'konseling_selesai' => DB::table('janji_konselings')->where('status', 'selesai')->count(),
             'konseling_pending' => DB::table('janji_konselings')->whereIn('status', ['menunggu', 'dikonfirmasi'])->count(),
             'konseling_bulan_ini' => DB::table('janji_konselings')
-                ->whereMonth('tanggal', Carbon::now()->month)
+                ->whereMonth('tanggal', \Carbon\Carbon::now()->month)
                 ->count(),
         ];
 
@@ -377,7 +387,7 @@ class GuruController extends Controller
                 DB::raw('MONTH(tanggal) as bulan'),
                 DB::raw('COUNT(*) as total')
             )
-            ->whereYear('tanggal', Carbon::now()->year)
+            ->whereYear('tanggal', \Carbon\Carbon::now()->year)
             ->groupBy('bulan')
             ->orderBy('bulan')
             ->get();
@@ -389,5 +399,93 @@ class GuruController extends Controller
             ->get();
 
         return view('guru.statistik', compact('perBulan', 'perStatus'));
+    }
+
+      // EDIT KELAS SISWA - FORM
+    public function editKelas($id)
+{
+    $siswa = User::where('id', $id)->where('role', 'siswa')->first();
+    
+    if (!$siswa) {
+        abort(404, 'Siswa tidak ditemukan');
+    }
+
+    // Daftar kelas yang tersedia (diperbaiki)
+    $kelasList = [
+        'X RPL', 'X TKR', 'X TITL', 'X TPM',
+        'XI RPL', 'XI TKR', 'XI TITL', 'XI TPM',
+        'XII RPL', 'XII TKR', 'XII TITL', 'XII TPM'
+    ];
+
+    return view('guru.siswa-edit-kelas', compact('siswa', 'kelasList'));
+}
+
+    // UPDATE KELAS SISWA
+    public function updateKelas(Request $request, $id)
+    {
+        $request->validate([
+            'class' => 'required|string|max:50'
+        ]);
+
+        $siswa = User::where('id', $id)->where('role', 'siswa')->first();
+        
+        if (!$siswa) {
+            abort(404, 'Siswa tidak ditemukan');
+        }
+
+        // Update kelas siswa
+        DB::table('users')
+            ->where('id', $id)
+            ->update([
+                'class' => $request->class,
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('guru.siswa.detail', $id)
+            ->with('success', 'Kelas siswa berhasil diperbarui.');
+    }
+
+    // RIWAYAT SISWA LENGKAP
+    public function riwayatSiswa($id)
+    {
+        $siswa = User::where('id', $id)->where('role', 'siswa')->first();
+        
+        if (!$siswa) {
+            abort(404, 'Siswa tidak ditemukan');
+        }
+
+        $riwayatKonseling = DB::table('janji_konselings')
+            ->where('user_id', $id)
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('waktu', 'desc')
+            ->paginate(20);
+
+        return view('guru.siswa-riwayat', compact('siswa', 'riwayatKonseling'));
+    }
+
+    public function buatCatatan()
+    {
+        $siswaList = User::where('role','siswa')->orderBy('name')->get();
+        return view('guru.catatan-create', compact('siswaList'));
+    }
+
+    public function simpanCatatan(Request $r)
+    {
+        $r->validate([
+            'user_id' => 'nullable|exists:users,id',
+            'tanggal' => 'required|date',
+            'isi' => 'required|string',
+        ]);
+
+        DB::table('catatan')->insert([
+            'user_id' => $r->user_id,
+            'tanggal' => $r->tanggal,
+            'isi' => $r->isi,
+            'guru_bk' => Auth::user()->name,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('guru.catatan.index')->with('success', 'Catatan berhasil disimpan.');
     }
 }

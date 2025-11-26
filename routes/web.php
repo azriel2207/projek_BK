@@ -7,6 +7,7 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\JanjiKonselingController;
 use App\Http\Controllers\Koordinator\LaporanController;
 use App\Http\Controllers\Koordinator\PengaturanController;
+use App\Http\Controllers\CatatanController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -87,37 +88,54 @@ Route::middleware(['auth', CheckRole::class.':koordinator,koordinator_bk'])
     });
 
 // =================================================================
-// ROUTES UNTUK GURU BK - MENGGUNAKAN FULL CLASS PATH
+// ROUTES UNTUK GURU BK - VERSI SEDERHANA
 // =================================================================
 Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
     ->prefix('guru')
     ->name('guru.')
     ->group(function () {
+        
+        // DASHBOARD
         Route::get('/dashboard', [GuruController::class, 'dashboard'])->name('dashboard');
+        
+        // JADWAL KONSELING
         Route::get('/jadwal', [GuruController::class, 'jadwalKonseling'])->name('jadwal');
         Route::get('/jadwal/tambah', [GuruController::class, 'tambahJadwal'])->name('jadwal.tambah');
-        
-        // PERBAIKAN: Route POST untuk menyimpan jadwal - HARUS DI DALAM PREFIX 'guru'
         Route::post('/jadwal/simpan', [GuruController::class, 'simpanJadwal'])->name('jadwal.simpan');
-        
-        // ROUTE BARU UNTUK AKSI JADWAL
         Route::get('/jadwal/{id}/detail', [GuruController::class, 'detailJadwal'])->name('jadwal.detail');
         Route::get('/jadwal/{id}/edit', [GuruController::class, 'editJadwal'])->name('jadwal.edit');
         Route::put('/jadwal/{id}/update', [GuruController::class, 'updateJadwal'])->name('jadwal.update');
         Route::delete('/jadwal/{id}/hapus', [GuruController::class, 'hapusJadwal'])->name('jadwal.hapus');
         
-        // ROUTE CATATAN TAMBAHAN
-        Route::get('/catatan/{id}/tambah', [GuruController::class, 'tambahCatatanForm'])->name('catatan.tambah');
-        
+        // PERMINTAAN KONSELING
         Route::get('/permintaan', [GuruController::class, 'semuaPermintaan'])->name('permintaan');
         Route::post('/permintaan/{id}/konfirmasi', [GuruController::class, 'konfirmasiJanji'])->name('permintaan.konfirmasi');
         Route::put('/permintaan/{id}/tolak', [GuruController::class, 'tolakJanji'])->name('permintaan.tolak');
         Route::put('/permintaan/{id}/reschedule', [GuruController::class, 'reschedule'])->name('permintaan.reschedule');
+        
+        // MANAJEMEN SISWA
         Route::get('/siswa', [GuruController::class, 'daftarSiswa'])->name('siswa');
         Route::get('/siswa/{id}', [GuruController::class, 'detailSiswa'])->name('siswa.detail');
-        Route::get('/catatan', [GuruController::class, 'daftarCatatan'])->name('catatan');
-        Route::post('/catatan/{id}', [GuruController::class, 'tambahCatatan'])->name('catatan.store');
-        Route::get('/catatan/{id}/detail', [GuruController::class, 'detailCatatan'])->name('catatan.detail');
+        Route::get('/siswa/{id}/riwayat', [GuruController::class, 'riwayatSiswa'])->name('siswa.riwayat');
+        Route::get('/siswa/{id}/konseling', [GuruController::class, 'tambahJadwalForSiswa'])->name('siswa.konseling.create');
+        Route::post('/siswa/{id}/konseling', [GuruController::class, 'simpanJadwalForSiswa'])->name('siswa.konseling.store');
+        Route::get('/siswa/{id}/kelas', [GuruController::class, 'editKelas'])->name('siswa.kelas.edit');
+        Route::put('/siswa/{id}/kelas', [GuruController::class, 'updateKelas'])->name('siswa.kelas.update');
+        
+        // ========== ROUTES UNTUK CATATAN KONSELING ==========
+        Route::prefix('catatan')->name('catatan.')->group(function () {
+            // Daftar & Pencarian
+            Route::get('/', [GuruController::class, 'daftarCatatan'])->name('index');
+            Route::get('/buat', [GuruController::class, 'buatCatatan'])->name('buat');
+            Route::get('/template', [GuruController::class, 'templateCatatan'])->name('template');
+            Route::get('/{id}', [GuruController::class, 'detailCatatan'])->name('detail');
+            Route::get('/{id}/edit', [GuruController::class, 'editCatatan'])->name('edit');
+            Route::post('/', [GuruController::class, 'simpanCatatan'])->name('simpan');
+            Route::put('/{id}', [GuruController::class, 'updateCatatan'])->name('update');
+            Route::delete('/{id}', [GuruController::class, 'hapusCatatan'])->name('hapus');
+        });
+        
+        // LAPORAN & STATISTIK
         Route::get('/laporan', [GuruController::class, 'laporan'])->name('laporan');
         Route::get('/statistik', [GuruController::class, 'statistik'])->name('statistik');
     });
@@ -162,3 +180,4 @@ Route::middleware(['auth'])->get('/dashboard', function () {
             return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
     }
 })->name('dashboard');
+
