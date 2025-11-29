@@ -331,23 +331,20 @@ public function editJadwal($id)
 
     // Catatan Konseling
     public function daftarCatatan()
-    {
-        // Data contoh
-        $catatan = collect([
-            (object)[
-                'id' => 1,
-                'nama_siswa' => 'Ahmad Rizki',
-                'kelas' => 'XII RPL',
-                'jenis_konseling' => 'akademik',
-                'tanggal' => now()->subDays(2),
-                'keluhan' => 'Kesulitan memahami materi matematika',
-                'catatan_konselor' => 'Memberikan tips belajar efektif',
-                'status' => 'selesai',
-            ]
-        ]);
+{
+    // Ganti dengan query database yang sebenarnya
+    $catatan = DB::table('catatan')
+        ->join('users', 'catatan.user_id', '=', 'users.id')
+        ->select(
+            'catatan.*',
+            'users.name as nama_siswa'
+        )
+        ->orderBy('catatan.tanggal', 'desc')
+        ->orderBy('catatan.created_at', 'desc')
+        ->paginate(20);
 
-        return view('guru.catatan.index', compact('catatan'));
-    }
+    return view('guru.catatan.index', compact('catatan'));
+}
 
     // public function buatCatatan()
     // {
@@ -463,11 +460,15 @@ public function editJadwal($id)
         return view('guru.siswa-riwayat', compact('siswa', 'riwayatKonseling'));
     }
 
-    public function buatCatatan()
-    {
-        $siswaList = User::where('role','siswa')->orderBy('name')->get();
-        return view('guru.catatan-create', compact('siswaList'));
-    }
+   public function buatCatatan()
+{
+    $siswas = User::where('role', 'siswa')
+                 ->orderBy('name')
+                 ->get();
+
+    return view('guru.catatan-create', compact('siswas'));
+}
+
 
     public function simpanCatatan(Request $r)
     {
