@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Catatan;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class GuruController extends Controller
 {
@@ -396,6 +397,83 @@ public function editJadwal($id)
             ->get();
 
         return view('guru.statistik', compact('perBulan', 'perStatus'));
+    }
+
+    // Export laporan ke PDF
+    public function export_pdf(Request $request)
+    {
+        try {
+            $periode = $request->input('periode', 'bulan');
+            $from = $request->input('from');
+            $to = $request->input('to');
+
+            // Inisialisasi query
+            $query = DB::table('janji_konselings');
+
+            // Tentukan rentang tanggal berdasarkan periode
+            $now = \Carbon\Carbon::now();
+            
+            if ($periode === 'custom' && $from && $to) {
+                $query->whereBetween('tanggal', [$from, $to]);
+                $periode_label = "Dari " . date('d M Y', strtotime($from)) . " hingga " . date('d M Y', strtotime($to));
+            } elseif ($periode === 'minggu') {
+                $query->whereBetween('tanggal', [
+                    $now->copy()->startOfWeek(),
+                    $now->copy()->endOfWeek()
+                ]);
+                $periode_label = "Minggu " . date('d M Y', strtotime($now->startOfWeek())) . " - " . date('d M Y', strtotime($now->endOfWeek()));
+            } elseif ($periode === 'bulan') {
+                $query->whereMonth('tanggal', $now->month)
+                    ->whereYear('tanggal', $now->year);
+                $periode_label = $this->getNamaBulan($now->month) . " " . $now->year;
+            } elseif ($periode === 'tahun') {
+                $query->whereYear('tanggal', $now->year);
+                $periode_label = "Tahun " . $now->year;
+            } else {
+                $periode_label = "Laporan Konseling";
+            }
+
+            // Data untuk laporan
+            $data = [
+                'periode' => $periode_label,
+                'tanggal_generate' => date('d F Y H:i:s'),
+                'guru_bk' => Auth::user()->name,
+                
+                'total_konseling' => (clone $query)->count(),
+                'konseling_selesai' => (clone $query)->where('status', 'selesai')->count(),
+                'konseling_pending' => (clone $query)->whereIn('status', ['menunggu', 'dikonfirmasi'])->count(),
+                
+                'data_per_jenis' => (clone $query)
+                    ->select('jenis_bimbingan', DB::raw('COUNT(*) as total'))
+                    ->groupBy('jenis_bimbingan')
+                    ->get(),
+                    
+                'detail_konseling' => (clone $query)
+                    ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+                    ->select('janji_konselings.*', 'users.name as siswa_name')
+                    ->orderBy('janji_konselings.tanggal', 'desc')
+                    ->limit(50)
+                    ->get(),
+            ];
+
+            // Generate PDF
+            $pdf = Pdf::loadView('guru.laporan-pdf', $data);
+
+            return $pdf->download('Laporan-Konseling-' . date('Y-m-d') . '.pdf');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    // Helper function untuk nama bulan
+    private function getNamaBulan($bulan)
+    {
+        $bulanIndonesia = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        return $bulanIndonesia[$bulan] ?? '';
     }
 
       // EDIT KELAS SISWA - FORM

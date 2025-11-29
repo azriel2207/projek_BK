@@ -137,6 +137,7 @@ Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
         
         // LAPORAN & STATISTIK
         Route::get('/laporan', [GuruController::class, 'laporan'])->name('laporan');
+        Route::get('/laporan/export-pdf', [GuruController::class, 'export_pdf'])->name('laporan.export_pdf');
         Route::get('/statistik', [GuruController::class, 'statistik'])->name('statistik');
     });
 

@@ -1,22 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengaturan - Sistem BK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .sidebar { transition: all 0.3s ease; }
-        .main-content { margin-left: 16rem; }
-        @media (max-width: 768px) {
-            .sidebar { margin-left: -16rem; }
-            .sidebar.active { margin-left: 0; }
-            .main-content { margin-left: 0; }
-        }
-    </style>
-</head>
-<body class="bg-gray-100">
+@extends('layouts.app')
+
+@section('title', 'Pengaturan - Sistem BK')
+
+@section('content')
     <!-- Sidebar -->
     <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-blue-800 text-white">
         <div class="p-4">
@@ -39,7 +25,7 @@
             <a href="{{ route('koordinator.laporan') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-chart-bar mr-3"></i>Laporan
             </a>
-            <a href="{{ route('koordinator.pengaturan') }}" class="block py-3 px-6 bg-blue-700 border-l-4 border-yellow-400">
+            <a href="{{ route('koordinator.pengaturan.index') }}" class="block py-3 px-6 bg-blue-700 border-l-4 border-yellow-400">
                 <i class="fas fa-cog mr-3"></i>Pengaturan
             </a>
             <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
@@ -120,89 +106,125 @@
 
                 <!-- Right Side - Content -->
                 <div class="lg:col-span-2">
-                    <!-- General Settings -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Pengaturan Umum</h3>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sekolah</label>
-                                <input type="text" value="SMAN 1 Contoh Kota" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
+                    <!-- Display Messages -->
+                    @if ($errors->any())
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                            <h3 class="text-red-800 font-semibold mb-2">Ada kesalahan:</h3>
+                            <ul class="list-disc list-inside text-red-700">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (session('success'))
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                            <p class="text-green-800"><i class="fas fa-check-circle mr-2"></i>{{ session('success') }}</p>
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                            <p class="text-red-800"><i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}</p>
+                        </div>
+                    @endif
+
+                    <!-- General Settings Form -->
+                    <form action="{{ route('koordinator.pengaturan.general.update') }}" method="POST">
+                        @csrf
+
+                        <!-- General Settings -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Pengaturan Umum</h3>
                             
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Sekolah</label>
-                                <textarea class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3">Jl. Contoh No. 123, Kota Contoh</textarea>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Ajaran</label>
-                                    <input type="text" value="2023/2024" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sekolah</label>
+                                    <input type="text" name="school_name" value="{{ old('school_name', $schoolName ?? '') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
-                                    <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option>Ganjil</option>
-                                        <option>Genap</option>
-                                    </select>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Sekolah</label>
+                                    <textarea name="school_address" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3" required>{{ old('school_address', $schoolAddress ?? '') }}</textarea>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Ajaran</label>
+                                        <input type="text" name="academic_year" value="{{ old('academic_year', $academicYear ?? '') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="2023/2024" required>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Frekuensi Backup</label>
+                                        <select name="backup_frequency" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                            <option value="daily" {{ old('backup_frequency', $backupFrequency ?? '') == 'daily' ? 'selected' : '' }}>Harian</option>
+                                            <option value="weekly" {{ old('backup_frequency', $backupFrequency ?? '') == 'weekly' ? 'selected' : '' }}>Mingguan</option>
+                                            <option value="monthly" {{ old('backup_frequency', $backupFrequency ?? '') == 'monthly' ? 'selected' : '' }}>Bulanan</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- System Configuration -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Konfigurasi Sistem</h3>
-                        
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="font-medium text-gray-800">Notifikasi Email</p>
-                                    <p class="text-sm text-gray-600">Kirim notifikasi via email</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" checked>
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
-                            </div>
+                        <!-- System Configuration -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Konfigurasi Sistem</h3>
                             
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="font-medium text-gray-800">Auto Backup</p>
-                                    <p class="text-sm text-gray-600">Backup otomatis setiap minggu</p>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Notifikasi Email</p>
+                                        <p class="text-sm text-gray-600">Kirim notifikasi via email</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="hidden" name="email_notification" value="0">
+                                        <input type="checkbox" name="email_notification" value="1" class="sr-only peer" {{ ($emailNotification ?? false) ? 'checked' : '' }}>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
-                            </div>
-                            
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="font-medium text-gray-800">Maintenance Mode</p>
-                                    <p class="text-sm text-gray-600">Nonaktifkan akses sementara</p>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Auto Backup</p>
+                                        <p class="text-sm text-gray-600">Backup otomatis sesuai jadwal</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="hidden" name="auto_backup" value="0">
+                                        <input type="checkbox" name="auto_backup" value="1" class="sr-only peer" {{ ($autoBackup ?? false) ? 'checked' : '' }}>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Maintenance Mode</p>
+                                        <p class="text-sm text-gray-600">Nonaktifkan akses sementara</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="hidden" name="maintenance_mode" value="0">
+                                        <input type="checkbox" name="maintenance_mode" value="1" class="sr-only peer" {{ ($maintenanceMode ?? false) ? 'checked' : '' }}>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Action Buttons -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex justify-end space-x-3">
-                            <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
-                                Reset
-                            </button>
-                            <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                Simpan Perubahan
-                            </button>
+                        <!-- Action Buttons -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <div class="flex justify-end space-x-3">
+                                <button type="reset" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                                    Reset Form
+                                </button>
+                                <a href="{{ route('koordinator.pengaturan.reset') }}" class="px-6 py-2 border border-orange-300 text-orange-700 rounded-lg hover:bg-orange-50 transition" onclick="return confirm('Apakah Anda yakin ingin mereset ke pengaturan default?')">
+                                    Reset Default
+                                </a>
+                                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    Simpan Perubahan
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </main>
