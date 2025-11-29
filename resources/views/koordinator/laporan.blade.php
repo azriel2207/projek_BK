@@ -93,10 +93,7 @@
                         <option value="6_bulan" {{ $periode == '6_bulan' ? 'selected' : '' }}>6 Bulan Terakhir</option>
                         <option value="tahun_ini" {{ $periode == 'tahun_ini' ? 'selected' : '' }}>Tahun Ini</option>
                     </select>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2">
-                        <i class="fas fa-download"></i>
-                        <span>Export PDF</span>
-                    </button>
+                   
                 </div>
             </div>
 
@@ -233,7 +230,7 @@
 
             <!-- Report Actions -->
             <div class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Generate Laporan</h3>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4"></h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <button onclick="generateLaporanBulanan()" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition border-2 border-dashed border-blue-200 cursor-pointer">
                         <i class="fas fa-file-pdf text-blue-600 text-2xl mb-2"></i>
@@ -241,23 +238,6 @@
                         <p class="text-xs text-blue-600 mt-1">PDF Report</p>
                     </button>
                     
-                    <button onclick="generateStatistikTrend()" class="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition border-2 border-dashed border-green-200 cursor-pointer">
-                        <i class="fas fa-chart-line text-green-600 text-2xl mb-2"></i>
-                        <p class="text-sm font-medium text-green-800">Statistik Trend</p>
-                        <p class="text-xs text-green-600 mt-1">Analytics</p>
-                    </button>
-                    
-                    <button onclick="generatePerformaGuru()" class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition border-2 border-dashed border-purple-200 cursor-pointer">
-                        <i class="fas fa-user-tie text-purple-600 text-2xl mb-2"></i>
-                        <p class="text-sm font-medium text-purple-800">Performa Guru</p>
-                        <p class="text-xs text-purple-600 mt-1">Performance</p>
-                    </button>
-                    
-                    <button onclick="generateKasusPrioritas()" class="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg text-center transition border-2 border-dashed border-orange-200 cursor-pointer">
-                        <i class="fas fa-exclamation-triangle text-orange-600 text-2xl mb-2"></i>
-                        <p class="text-sm font-medium text-orange-800">Kasus Prioritas</p>
-                        <p class="text-xs text-orange-600 mt-1">Priority</p>
-                    </button>
                 </div>
             </div>
         </main>
@@ -491,127 +471,11 @@
             document.getElementById('modalBulanan').classList.remove('hidden');
         }
 
-        function generateStatistikTrend() {
-            showLoading('Memuat statistik trend...');
-            
-            fetch('{{ route("koordinator.laporan.generate-trend") }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showTrendAnalysis(data);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error memuat statistik trend');
-                });
-        }
-
-        function generatePerformaGuru() {
-            showLoading('Memuat performa guru...');
-            
-            fetch('{{ route("koordinator.laporan.generate-performa") }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showPerformaGuru(data);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error memuat performa guru');
-                });
-        }
-
-        function generateKasusPrioritas() {
-            showLoading('Memuat kasus prioritas...');
-            
-            fetch('{{ route("koordinator.laporan.generate-prioritas") }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showKasusPrioritas(data);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error memuat kasus prioritas');
-                });
-        }
-
-        // Fungsi untuk menampilkan hasil
-        function showTrendAnalysis(data) {
-            const content = `
-                <div class="space-y-6">
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-blue-800 mb-2">Statistik Trend Konseling</h4>
-                        <p>Menampilkan data trend untuk ${data.data.length} bulan terakhir</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        ${data.data.map(item => `
-                            <div class="bg-white border rounded-lg p-4">
-                                <div class="text-sm text-gray-600">${item.bulan}/${item.tahun}</div>
-                                <div class="text-xl font-bold text-blue-600">${item.total_konseling}</div>
-                                <div class="text-sm text-green-600">${item.selesai} selesai</div>
-                                <div class="text-sm text-yellow-600">${item.menunggu} menunggu</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <h5 class="font-semibold mb-2">Chart Data (JSON):</h5>
-                        <pre class="text-xs bg-white p-2 rounded border overflow-auto">${JSON.stringify(data.chart_data, null, 2)}</pre>
-                    </div>
-                </div>
-            `;
-            
-            showModal('Statistik Trend', content);
-        }
-
-        function showPerformaGuru(data) {
-            const content = `
-                <div class="space-y-4">
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-purple-800 mb-2">Performa Guru BK</h4>
-                        <p>Menampilkan performa ${data.data.length} guru</p>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse border border-gray-300">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="border border-gray-300 px-4 py-2 text-left">Guru BK</th>
-                                    <th class="border border-gray-300 px-4 py-2 text-center">Total Konseling</th>
-                                    <th class="border border-gray-300 px-4 py-2 text-center">Selesai</th>
-                                    <th class="border border-gray-300 px-4 py-2 text-center">Tingkat Kesuksesan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.data.map(guru => `
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="border border-gray-300 px-4 py-2">${guru.guru_bk || 'Tidak ada data'}</td>
-                                        <td class="border border-gray-300 px-4 py-2 text-center">${guru.total_konseling}</td>
-                                        <td class="border border-gray-300 px-4 py-2 text-center">${guru.konseling_selesai}</td>
-                                        <td class="border border-gray-300 px-4 py-2 text-center">
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                guru.tingkat_kesuksesan >= 80 ? 'bg-green-100 text-green-800' :
-                                                guru.tingkat_kesuksesan >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
-                                            }">
-                                                ${guru.tingkat_kesuksesan}%
-                                            </span>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
+       
+        
             
             showModal('Performa Guru', content);
-        }
+
 
         function showKasusPrioritas(data) {
             const content = `

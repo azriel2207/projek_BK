@@ -147,59 +147,7 @@
         @endif
     </div>
 
-    <div class="section">
-        <h2>PERFORMA GURU BK</h2>
-        @if($performa_guru->count() > 0)
-        <table>
-            <thead>
-                <tr>
-                    <th>Nama Guru</th>
-                    <th>Jumlah Konseling</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($performa_guru as $guru => $jumlah)
-                <tr>
-                    <td>{{ $guru }}</td>
-                    <td>{{ $jumlah }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @else
-        <div class="no-data">Tidak ada data performa guru</div>
-        @endif
-    </div>
-
-    <div class="section">
-        <h2>DATA KONSELING ({{ $konseling->count() }} data)</h2>
-        @if($konseling->count() > 0)
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Tanggal</th>
-                    <th>Jenis</th>
-                    <th>Status</th>
-                    <th>Guru BK</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($konseling as $index => $item)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $item->tanggal->format('d/m/Y') }}</td>
-                    <td>{{ ucfirst($item->jenis_bimbingan) }}</td>
-                    <td>{{ ucfirst($item->status) }}</td>
-                    <td>{{ $item->guru_bk ?? '-' }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @else
-        <div class="no-data">Tidak ada data konseling untuk periode ini</div>
-        @endif
-    </div>
+    
 
     <div class="footer">
         <p>Laporan ini dibuat secara otomatis oleh Sistem Bimbingan Konseling</p>

@@ -17,14 +17,11 @@
             <i class="fas fa-arrow-left"></i>
             <span>Kembali ke Dashboard</span>
         </a>
-        <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
+        <button  type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
             <i class="fas fa-download"></i>
             <span>Export Laporan</span>
         </button>
-        <button class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
-            <i class="fas fa-print"></i>
-            <span>Print</span>
-        </button>
+       
         <select class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <option>Pilih Periode</option>
             <option>Minggu Ini</option>
