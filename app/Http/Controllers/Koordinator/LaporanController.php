@@ -15,27 +15,57 @@ class LaporanController extends Controller
     {
         $periode = $request->get('periode', 'bulan_ini');
         
-        // Data statistik
-        $totalKonseling = JanjiKonseling::count();
-        $kasusSelesai = JanjiKonseling::where('status', 'selesai')->count();
+        // Tentukan range tanggal berdasarkan periode
+        $dateRange = $this->getDateRange($periode);
         
+        // Data statistik berdasarkan periode (REAL DATA)
+        $totalKonseling = JanjiKonseling::whereBetween('tanggal', $dateRange)
+            ->count();
+        
+        $kasusSelesai = JanjiKonseling::whereBetween('tanggal', $dateRange)
+            ->where('status', 'selesai')
+            ->count();
+        
+        $kasusBerlangsung = JanjiKonseling::whereBetween('tanggal', $dateRange)
+            ->whereIn('status', ['menunggu', 'dikonfirmasi'])
+            ->count();
+        
+        // Persentase perubahan dari periode sebelumnya
+        $prevDateRange = $this->getPrevDateRange($periode);
+        $prevTotal = JanjiKonseling::whereBetween('tanggal', $prevDateRange)->count();
+        $persentaseTotal = $prevTotal > 0 
+            ? (($totalKonseling - $prevTotal) / $prevTotal) * 100 
+            : 0;
+        
+        $prevSelesai = JanjiKonseling::whereBetween('tanggal', $prevDateRange)
+            ->where('status', 'selesai')
+            ->count();
+        $persentaseSelesai = $prevSelesai > 0 
+            ? (($kasusSelesai - $prevSelesai) / $prevSelesai) * 100 
+            : 0;
+        
+        // Jenis bimbingan
         $jenisKonseling = JanjiKonseling::select('jenis_bimbingan', DB::raw('count(*) as total'))
+            ->whereBetween('tanggal', $dateRange)
             ->groupBy('jenis_bimbingan')
             ->get();
             
+        // Status bimbingan
         $statusKonseling = JanjiKonseling::select('status', DB::raw('count(*) as total'))
+            ->whereBetween('tanggal', $dateRange)
             ->groupBy('status')
             ->get();
 
-        // Statistik untuk testing
+        // Statistik untuk tampilan (REAL DATA dari database)
         $statistik = [
             'total_konseling' => $totalKonseling,
-            'persentase_total' => 12.5,
+            'persentase_total' => round($persentaseTotal, 1),
             'kasus_selesai' => $kasusSelesai,
-            'persentase_selesai' => 8.2,
-            'rata_rata_waktu' => 45,
+            'persentase_selesai' => round($persentaseSelesai, 1),
+            'kasus_berlangsung' => $kasusBerlangsung,
+            'rata_rata_waktu' => 45, // Default value (bisa ditambahkan di future jika ada kolom jam_mulai/jam_selesai)
             'perubahan_waktu' => 5,
-            'tingkat_kepuasan' => 89,
+            'tingkat_kepuasan' => 85, // Default value (bisa ditambahkan jika ada kolom rating)
             'perubahan_kepuasan' => 3
         ];
 
@@ -141,6 +171,71 @@ class LaporanController extends Controller
     }
 
     /**
+     * Update periode untuk AJAX (digunakan web UI)
+     */
+    public function updatePeriode(Request $request)
+    {
+        try {
+            $periode = $request->input('periode', 'bulan_ini');
+            
+            // Tentukan range tanggal berdasarkan periode
+            $dateRange = $this->getDateRange($periode);
+            
+            // Data statistik berdasarkan periode
+            $totalKonseling = JanjiKonseling::whereBetween('tanggal', $dateRange)->count();
+            $kasusSelesai = JanjiKonseling::whereBetween('tanggal', $dateRange)
+                ->where('status', 'selesai')
+                ->count();
+            
+            // Persentase perubahan
+            $prevDateRange = $this->getPrevDateRange($periode);
+            $prevTotal = JanjiKonseling::whereBetween('tanggal', $prevDateRange)->count();
+            $persentaseTotal = $prevTotal > 0 
+                ? (($totalKonseling - $prevTotal) / $prevTotal) * 100 
+                : 0;
+            
+            $prevSelesai = JanjiKonseling::whereBetween('tanggal', $prevDateRange)
+                ->where('status', 'selesai')
+                ->count();
+            $persentaseSelesai = $prevSelesai > 0 
+                ? (($kasusSelesai - $prevSelesai) / $prevSelesai) * 100 
+                : 0;
+            
+            // Jenis bimbingan
+            $jenisKonseling = JanjiKonseling::select('jenis_bimbingan', DB::raw('count(*) as total'))
+                ->whereBetween('tanggal', $dateRange)
+                ->groupBy('jenis_bimbingan')
+                ->get();
+            
+            // Status konseling
+            $statusKonseling = JanjiKonseling::select('status', DB::raw('count(*) as total'))
+                ->whereBetween('tanggal', $dateRange)
+                ->groupBy('status')
+                ->get();
+            
+            $statistik = [
+                'total_konseling' => $totalKonseling,
+                'persentase_total' => round($persentaseTotal, 1),
+                'kasus_selesai' => $kasusSelesai,
+                'persentase_selesai' => round($persentaseSelesai, 1)
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'statistik' => $statistik,
+                'jenisKonseling' => $jenisKonseling,
+                'statusKonseling' => $statusKonseling
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Statistik Trend - IMPLEMENTASI LENGKAP
      */
     public function statistikTrend(Request $request)
@@ -228,82 +323,6 @@ class LaporanController extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Update Periode - IMPLEMENTASI LENGKAP
-     */
-    public function updatePeriode(Request $request)
-    {
-        try {
-            $periode = $request->get('periode', 'bulan_ini');
-            
-            // Parse periode jika format YYYY-MM
-            if (strlen($periode) === 7) {
-                $tahun = substr($periode, 0, 4);
-                $bulan = substr($periode, 5, 2);
-                
-                $totalKonseling = JanjiKonseling::whereYear('tanggal', $tahun)
-                    ->whereMonth('tanggal', $bulan)
-                    ->count();
-                $kasusSelesai = JanjiKonseling::whereYear('tanggal', $tahun)
-                    ->whereMonth('tanggal', $bulan)
-                    ->where('status', 'selesai')
-                    ->count();
-                    
-                $jenisKonseling = JanjiKonseling::select('jenis_bimbingan', DB::raw('count(*) as total'))
-                    ->whereYear('tanggal', $tahun)
-                    ->whereMonth('tanggal', $bulan)
-                    ->groupBy('jenis_bimbingan')
-                    ->get();
-                    
-                $statusKonseling = JanjiKonseling::select('status', DB::raw('count(*) as total'))
-                    ->whereYear('tanggal', $tahun)
-                    ->whereMonth('tanggal', $bulan)
-                    ->groupBy('status')
-                    ->get();
-            } else {
-                // Default: bulan ini
-                $totalKonseling = JanjiKonseling::whereMonth('tanggal', date('m'))
-                    ->whereYear('tanggal', date('Y'))
-                    ->count();
-                $kasusSelesai = JanjiKonseling::whereMonth('tanggal', date('m'))
-                    ->whereYear('tanggal', date('Y'))
-                    ->where('status', 'selesai')
-                    ->count();
-                    
-                $jenisKonseling = JanjiKonseling::select('jenis_bimbingan', DB::raw('count(*) as total'))
-                    ->groupBy('jenis_bimbingan')
-                    ->get();
-                    
-                $statusKonseling = JanjiKonseling::select('status', DB::raw('count(*) as total'))
-                    ->groupBy('status')
-                    ->get();
-            }
-
-            return response()->json([
-                'success' => true,
-                'statistik' => [
-                    'total_konseling' => $totalKonseling,
-                    'persentase_total' => $totalKonseling > 0 ? round(($totalKonseling / JanjiKonseling::count()) * 100, 1) : 0,
-                    'kasus_selesai' => $kasusSelesai,
-                    'persentase_selesai' => $totalKonseling > 0 ? round(($kasusSelesai / $totalKonseling) * 100, 1) : 0,
-                    'rata_rata_waktu' => 45,
-                    'perubahan_waktu' => 5,
-                    'tingkat_kepuasan' => 89,
-                    'perubahan_kepuasan' => 3
-                ],
-                'jenisKonseling' => $jenisKonseling,
-                'statusKonseling' => $statusKonseling
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ]);
-        }
-    }
-
     /**
      * Generate Laporan Bulanan PDF
      */
@@ -511,5 +530,77 @@ class LaporanController extends Controller
         if ($hariMenunggu > 7) return 'Tinggi';
         if ($hariMenunggu > 3) return 'Sedang';
         return 'Rendah';
+    }
+
+    /**
+     * Helper method untuk mendapatkan range tanggal berdasarkan periode
+     */
+    private function getDateRange($periode)
+    {
+        $now = now();
+        
+        switch ($periode) {
+            case 'bulan_ini':
+                return [
+                    $now->copy()->startOfMonth(),
+                    $now->copy()->endOfMonth()
+                ];
+            case '3_bulan':
+                return [
+                    $now->copy()->subMonths(3)->startOfMonth(),
+                    $now->copy()->endOfMonth()
+                ];
+            case '6_bulan':
+                return [
+                    $now->copy()->subMonths(6)->startOfMonth(),
+                    $now->copy()->endOfMonth()
+                ];
+            case 'tahun_ini':
+                return [
+                    $now->copy()->startOfYear(),
+                    $now->copy()->endOfYear()
+                ];
+            default:
+                return [
+                    $now->copy()->startOfMonth(),
+                    $now->copy()->endOfMonth()
+                ];
+        }
+    }
+
+    /**
+     * Helper method untuk mendapatkan range tanggal periode sebelumnya
+     */
+    private function getPrevDateRange($periode)
+    {
+        $now = now();
+        
+        switch ($periode) {
+            case 'bulan_ini':
+                return [
+                    $now->copy()->subMonth()->startOfMonth(),
+                    $now->copy()->subMonth()->endOfMonth()
+                ];
+            case '3_bulan':
+                return [
+                    $now->copy()->subMonths(6)->startOfMonth(),
+                    $now->copy()->subMonths(3)->endOfMonth()
+                ];
+            case '6_bulan':
+                return [
+                    $now->copy()->subMonths(12)->startOfMonth(),
+                    $now->copy()->subMonths(6)->endOfMonth()
+                ];
+            case 'tahun_ini':
+                return [
+                    $now->copy()->subYear()->startOfYear(),
+                    $now->copy()->subYear()->endOfYear()
+                ];
+            default:
+                return [
+                    $now->copy()->subMonth()->startOfMonth(),
+                    $now->copy()->subMonth()->endOfMonth()
+                ];
+        }
     }
 }

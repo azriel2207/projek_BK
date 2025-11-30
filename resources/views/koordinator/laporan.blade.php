@@ -166,27 +166,35 @@
                             $totalAll = $jenisKonseling->sum('total');
                         @endphp
                         
-                        @foreach($jenisKonseling as $jenis)
-                        @php
-                            $percentage = $totalAll > 0 ? ($jenis->total / $totalAll) * 100 : 0;
-                            $colors = [
-                                'pribadi' => ['bg' => 'blue', 'label' => 'Pribadi'],
-                                'belajar' => ['bg' => 'green', 'label' => 'Belajar'],
-                                'karir' => ['bg' => 'purple', 'label' => 'Karir'],
-                                'sosial' => ['bg' => 'orange', 'label' => 'Sosial']
-                            ];
-                            $color = $colors[$jenis->jenis_bimbingan] ?? ['bg' => 'gray', 'label' => ucfirst($jenis->jenis_bimbingan)];
-                        @endphp
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-medium">{{ $color['label'] }}</span>
-                                <span class="text-sm font-bold">{{ $jenis->total }} ({{ number_format($percentage, 1) }}%)</span>
+                        @if($totalAll > 0)
+                            @foreach($jenisKonseling as $jenis)
+                            @php
+                                $percentage = $totalAll > 0 ? ($jenis->total / $totalAll) * 100 : 0;
+                                // Normalize jenis_bimbingan values
+                                $jenisLower = strtolower($jenis->jenis_bimbingan);
+                                $colors = [
+                                    'pribadi' => ['bg' => 'blue', 'label' => 'Bimbingan Pribadi'],
+                                    'personal' => ['bg' => 'blue', 'label' => 'Bimbingan Pribadi'],
+                                    'belajar' => ['bg' => 'green', 'label' => 'Bimbingan Belajar'],
+                                    'akademik' => ['bg' => 'green', 'label' => 'Bimbingan Akademik'],
+                                    'karir' => ['bg' => 'purple', 'label' => 'Bimbingan Karir'],
+                                    'sosial' => ['bg' => 'orange', 'label' => 'Bimbingan Sosial']
+                                ];
+                                $color = $colors[$jenisLower] ?? ['bg' => 'gray', 'label' => ucfirst($jenis->jenis_bimbingan)];
+                            @endphp
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium">{{ $color['label'] }}</span>
+                                    <span class="text-sm font-bold">{{ $jenis->total }} ({{ number_format($percentage, 1) }}%)</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-{{ $color['bg'] }}-600 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
+                                </div>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-3">
-                                <div class="bg-{{ $color['bg'] }}-600 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
-                            </div>
-                        </div>
-                        @endforeach
+                            @endforeach
+                        @else
+                            <p class="text-gray-500 text-center py-8">Tidak ada data jenis bimbingan</p>
+                        @endif
                     </div>
                 </div>
 
@@ -198,28 +206,33 @@
                             $totalStatus = $statusKonseling->sum('total');
                         @endphp
                         
-                        @foreach($statusKonseling as $status)
-                        @php
-                            $percentage = $totalStatus > 0 ? ($status->total / $totalStatus) * 100 : 0;
-                            $statusColors = [
-                                'menunggu' => ['bg' => 'yellow', 'label' => 'Menunggu'],
-                                'dikonfirmasi' => ['bg' => 'blue', 'label' => 'Dikonfirmasi'],
-                                'selesai' => ['bg' => 'green', 'label' => 'Selesai'],
-                                'ditolak' => ['bg' => 'red', 'label' => 'Ditolak'],
-                                'dibatalkan' => ['bg' => 'red', 'label' => 'Dibatalkan']
-                            ];
-                            $statusColor = $statusColors[$status->status] ?? ['bg' => 'gray', 'label' => ucfirst($status->status)];
-                        @endphp
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-medium">{{ $statusColor['label'] }}</span>
-                                <span class="text-sm font-bold">{{ $status->total }} ({{ number_format($percentage, 1) }}%)</span>
+                        @if($totalStatus > 0)
+                            @foreach($statusKonseling as $status)
+                            @php
+                                $percentage = $totalStatus > 0 ? ($status->total / $totalStatus) * 100 : 0;
+                                $statusLower = strtolower($status->status);
+                                $statusColors = [
+                                    'menunggu' => ['bg' => 'yellow', 'label' => 'Menunggu'],
+                                    'dikonfirmasi' => ['bg' => 'blue', 'label' => 'Dikonfirmasi'],
+                                    'selesai' => ['bg' => 'green', 'label' => 'Selesai'],
+                                    'ditolak' => ['bg' => 'red', 'label' => 'Ditolak'],
+                                    'dibatalkan' => ['bg' => 'red', 'label' => 'Dibatalkan']
+                                ];
+                                $statusColor = $statusColors[$statusLower] ?? ['bg' => 'gray', 'label' => ucfirst($status->status)];
+                            @endphp
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium">{{ $statusColor['label'] }}</span>
+                                    <span class="text-sm font-bold">{{ $status->total }} ({{ number_format($percentage, 1) }}%)</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-{{ $statusColor['bg'] }}-600 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
+                                </div>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-3">
-                                <div class="bg-{{ $statusColor['bg'] }}-600 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
-                            </div>
-                        </div>
-                        @endforeach
+                            @endforeach
+                        @else
+                            <p class="text-gray-500 text-center py-8">Tidak ada data status bimbingan</p>
+                        @endif
                     </div>
                 </div>
             </div>

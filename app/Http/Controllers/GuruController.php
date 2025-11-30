@@ -384,16 +384,29 @@ public function editJadwal($id)
     // Laporan & Statistik
     public function laporan()
     {
+        $guruName = Auth::user()->name;
+        
         $stats = [
-            'total_konseling' => DB::table('janji_konselings')->count(),
-            'konseling_selesai' => DB::table('janji_konselings')->where('status', 'selesai')->count(),
-            'konseling_pending' => DB::table('janji_konselings')->whereIn('status', ['menunggu', 'dikonfirmasi'])->count(),
+            'total_konseling' => DB::table('janji_konselings')
+                ->where('guru_bk', $guruName)
+                ->count(),
+            'konseling_selesai' => DB::table('janji_konselings')
+                ->where('guru_bk', $guruName)
+                ->where('status', 'selesai')
+                ->count(),
+            'konseling_pending' => DB::table('janji_konselings')
+                ->where('guru_bk', $guruName)
+                ->whereIn('status', ['menunggu', 'dikonfirmasi'])
+                ->count(),
             'konseling_bulan_ini' => DB::table('janji_konselings')
+                ->where('guru_bk', $guruName)
                 ->whereMonth('tanggal', \Carbon\Carbon::now()->month)
+                ->whereYear('tanggal', \Carbon\Carbon::now()->year)
                 ->count(),
         ];
 
         $dataPerJenis = DB::table('janji_konselings')
+            ->where('guru_bk', $guruName)
             ->select('jenis_bimbingan', DB::raw('count(*) as total'))
             ->groupBy('jenis_bimbingan')
             ->get();
@@ -431,8 +444,9 @@ public function editJadwal($id)
             $from = $request->input('from');
             $to = $request->input('to');
 
-            // Inisialisasi query
-            $query = DB::table('janji_konselings');
+            // Inisialisasi query - FILTER BERDASARKAN GURU YG LOGIN
+            $query = DB::table('janji_konselings')
+                ->where('guru_bk', Auth::user()->name);
 
             // Tentukan rentang tanggal berdasarkan periode
             $now = \Carbon\Carbon::now();
