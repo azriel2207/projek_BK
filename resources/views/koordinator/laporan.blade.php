@@ -38,11 +38,7 @@
             </a>
             <a href="{{ route('koordinator.laporan') }}" class="block py-3 px-6 bg-blue-700 border-l-4 border-yellow-400">
                 <i class="fas fa-chart-bar mr-3"></i>Laporan
-            </a>
-            <a href="{{ route('koordinator.pengaturan') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
-                <i class="fas fa-cog mr-3"></i>Pengaturan
-            </a>
-            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
+            </a>            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-user-cog mr-3"></i>Profile
             </a>
         </nav>

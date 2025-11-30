@@ -13,7 +13,7 @@
 
         <!-- Back Button -->
         <div class="mb-6">
-            <a href="{{ route('guru.catatan') }}" 
+            <a href="{{ route('guru.catatan.index') }}" 
                class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
                 <i class="fas fa-arrow-left"></i>
                 <span>Kembali ke Daftar Catatan</span>
@@ -117,7 +117,7 @@
 
                     <!-- Action Buttons -->
                     <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-                        <a href="{{ route('guru.catatan') }}" 
+                        <a href="{{ route('guru.catatan.index') }}" 
                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition">
                             <i class="fas fa-arrow-left"></i>
                             <span>Kembali</span>

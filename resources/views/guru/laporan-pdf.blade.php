@@ -101,13 +101,31 @@
         .highlight {
             background-color: #fef3c7;
         }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 5px;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Laporan Konseling</h1>
-        <p>Sistem BK (Bimbingan Konseling)</p>
-        <p>Periode: <strong>{{ $periode }}</strong></p>
+        <h1>LAPORAN BULANAN BIMBINGAN KONSELING</h1>
+        <p>Bulan: <strong>{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</strong></p>
+        <p>Dibuat pada: {{ $tanggal_generate }}</p>
     </div>
 
     <table class="info-table">
@@ -115,13 +133,10 @@
             <td class="info-label">Guru BK:</td>
             <td>{{ $guru_bk }}</td>
         </tr>
-        <tr>
-            <td class="info-label">Tanggal Laporan:</td>
-            <td>{{ $tanggal_generate }}</td>
-        </tr>
     </table>
 
-    <!-- Statistik Ringkas -->
+    <!-- STATISTIK UTAMA -->
+    <div class="section-title">STATISTIK UTAMA</div>
     <div class="stats">
         <div class="stat-box">
             <div class="stat-number">{{ $total_konseling }}</div>
@@ -129,16 +144,16 @@
         </div>
         <div class="stat-box">
             <div class="stat-number">{{ $konseling_selesai }}</div>
-            <div class="stat-label">Konseling Selesai</div>
+            <div class="stat-label">Selesai</div>
         </div>
         <div class="stat-box">
             <div class="stat-number">{{ $konseling_pending }}</div>
-            <div class="stat-label">Konseling Pending</div>
+            <div class="stat-label">Menunggu</div>
         </div>
         <div class="stat-box">
             <div class="stat-number">
                 @if($total_konseling > 0)
-                    {{ number_format(($konseling_selesai / $total_konseling) * 100, 1) }}%
+                    {{ number_format(($konseling_selesai / $total_konseling) * 100, 0) }}%
                 @else
                     0%
                 @endif
@@ -147,39 +162,75 @@
         </div>
     </div>
 
-    <!-- Data Per Jenis Bimbingan -->
-    <div class="section-title">Konseling Per Jenis Bimbingan</div>
+    <!-- DISTRIBUSI JENIS KONSELING -->
+    <div class="section-title">DISTRIBUSI JENIS KONSELING</div>
+    @if($data_per_jenis && count($data_per_jenis) > 0)
+        @php
+            $colorMap = [
+                'pribadi' => '#2563eb',
+                'belajar' => '#16a34a',
+                'karir' => '#7c3aed',
+                'sosial' => '#f97316'
+            ];
+        @endphp
+        @foreach($data_per_jenis as $jenis)
+            @php
+                $percentage = ($jenis->total / max($total_konseling, 1)) * 100;
+                $color = $colorMap[$jenis->jenis_bimbingan] ?? '#6b7280';
+            @endphp
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-weight: bold; text-transform: capitalize;">{{ $jenis->jenis_bimbingan }}</span>
+                    <span style="font-weight: bold;">{{ $jenis->total }} ({{ number_format($percentage, 1) }}%)</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ $percentage }}%; background-color: {{ $color }};">
+                        {{ number_format($percentage, 1) }}%
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @else
+        <div style="text-align: center; padding: 20px; color: #999;">
+            Tidak ada data jenis konseling
+        </div>
+    @endif
+
+    <!-- STATUS KONSELING -->
+    <div class="section-title">STATUS KONSELING</div>
     <table>
         <thead>
             <tr>
-                <th>Jenis Bimbingan</th>
+                <th>Status</th>
                 <th style="text-align: center;">Jumlah</th>
                 <th style="text-align: center;">Persentase</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($data_per_jenis as $jenis)
+            @php
+                $statuses = [
+                    'selesai' => 'Selesai',
+                    'dikonfirmasi' => 'Dikonfirmasi',
+                    'menunggu' => 'Menunggu',
+                    'dibatalkan' => 'Dibatalkan'
+                ];
+            @endphp
+            @foreach($statuses as $statusKey => $statusLabel)
+                @php
+                    $count = $detail_konseling->where('status', $statusKey)->count();
+                    $pct = $total_konseling > 0 ? ($count / $total_konseling) * 100 : 0;
+                @endphp
                 <tr>
-                    <td style="text-transform: capitalize;">{{ $jenis->jenis_bimbingan }}</td>
-                    <td class="center">{{ $jenis->total }}</td>
-                    <td class="center">
-                        @if($total_konseling > 0)
-                            {{ number_format(($jenis->total / $total_konseling) * 100, 1) }}%
-                        @else
-                            0%
-                        @endif
-                    </td>
+                    <td>{{ $statusLabel }}</td>
+                    <td class="center">{{ $count }}</td>
+                    <td class="center">{{ number_format($pct, 1) }}%</td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="3" class="center">Tidak ada data</td>
-                </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 
-    <!-- Detail Konseling -->
-    <div class="section-title">Detail Konseling</div>
+    <!-- DETAIL KONSELING TERBARU -->
+    <div class="section-title">DETAIL KONSELING TERBARU</div>
     <table>
         <thead>
             <tr>
@@ -194,7 +245,7 @@
             @forelse($detail_konseling as $key => $data)
                 <tr>
                     <td class="center">{{ $key + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($data->tanggal)->format('d M Y H:i') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($data->tanggal)->format('d M Y') }}</td>
                     <td>{{ $data->siswa_name }}</td>
                     <td style="text-transform: capitalize;">{{ $data->jenis_bimbingan }}</td>
                     <td>
@@ -208,7 +259,7 @@
                             @elseif($data->status === 'dibatalkan')
                                 background-color: #fee2e2; color: #991b1b;
                             @endif
-                            padding: 4px 8px; border-radius: 4px; font-size: 10px;
+                            padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold;
                         ">
                             {{ ucfirst($data->status) }}
                         </span>

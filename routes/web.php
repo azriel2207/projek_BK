@@ -6,7 +6,6 @@ use App\Http\Controllers\KoordinatorController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\JanjiKonselingController;
 use App\Http\Controllers\Koordinator\LaporanController;
-use App\Http\Controllers\Koordinator\PengaturanController;
 use App\Http\Controllers\CatatanController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Auth;
@@ -75,18 +74,8 @@ Route::middleware(['auth', CheckRole::class.':koordinator,koordinator_bk'])
         Route::get('/laporan/generate-performa', [LaporanController::class, 'generatePerformaGuru'])->name('laporan.generate-performa');
         Route::get('/laporan/generate-prioritas', [LaporanController::class, 'generateKasusPrioritas'])->name('laporan.generate-prioritas');
         
-        // PENGATURAN SISTEM
-        Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
-            Route::get('/', [PengaturanController::class, 'index'])->name('index');
-            Route::get('/umum', [PengaturanController::class, 'general'])->name('general');
-            Route::post('/umum', [PengaturanController::class, 'updateGeneral'])->name('general.update');
-            Route::post('/reset', [PengaturanController::class, 'resetSettings'])->name('reset');
-        });
-        
-        // Legacy route
-        Route::get('/pengaturan', [KoordinatorController::class, 'pengaturan'])->name('pengaturan');
-    });
-
+     
+});
 // =================================================================
 // ROUTES UNTUK GURU BK - VERSI SEDERHANA
 // =================================================================
@@ -127,6 +116,8 @@ Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
             // Daftar & Pencarian
             Route::get('/', [GuruController::class, 'daftarCatatan'])->name('index');
             Route::get('/buat', [GuruController::class, 'buatCatatan'])->name('buat');
+            // Form tambah catatan untuk janji tertentu
+            Route::get('/{id}/tambah', [GuruController::class, 'tambahCatatanForm'])->name('tambah');
             Route::get('/template', [GuruController::class, 'templateCatatan'])->name('template');
             Route::get('/{id}', [GuruController::class, 'detailCatatan'])->name('detail');
             Route::get('/{id}/edit', [GuruController::class, 'editCatatan'])->name('edit');
@@ -137,9 +128,10 @@ Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
         
         // LAPORAN & STATISTIK
         Route::get('/laporan', [GuruController::class, 'laporan'])->name('laporan');
-        Route::get('/laporan/export-pdf', [GuruController::class, 'export_pdf'])->name('laporan.export_pdf');
+        Route::get('/laporan/export-pdf', [GuruController::class, 'exportPdf'])->name('laporan.export_pdf');
         Route::get('/statistik', [GuruController::class, 'statistik'])->name('statistik');
     });
+
 
 // =================================================================
 // ROUTES UNTUK SISWA - MENGGUNAKAN FULL CLASS PATH
@@ -151,6 +143,7 @@ Route::middleware(['auth', CheckRole::class.':siswa'])
         Route::get('/dashboard', [SiswaController::class, 'dashboard'])->name('dashboard');
         Route::get('/janji-konseling', [JanjiKonselingController::class, 'index'])->name('janji-konseling');
         Route::post('/janji-konseling', [JanjiKonselingController::class, 'store'])->name('janji-konseling.store');
+        Route::get('/janji-konseling/{id}/edit', [JanjiKonselingController::class, 'edit'])->name('janji-konseling.edit');
         Route::put('/janji-konseling/{id}', [JanjiKonselingController::class, 'update'])->name('janji-konseling.update');
         Route::delete('/janji-konseling/{id}', [JanjiKonselingController::class, 'destroy'])->name('janji-konseling.destroy');
         Route::get('/riwayat-konseling', [SiswaController::class, 'riwayatKonseling'])->name('riwayat-konseling');

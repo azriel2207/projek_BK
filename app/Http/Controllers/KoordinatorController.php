@@ -636,20 +636,5 @@ class KoordinatorController extends Controller
         }
     }
 
-    /**
-     * PENGATURAN - METHOD YANG DIBUTUHKAN
-     */
-    public function pengaturan()
-    {
-        try {
-            $user = Auth::user();
-            return view('koordinator.pengaturan', compact('user'));
-        } catch (\Exception $e) {
-            Log::error('Error in pengaturan', [
-                'error' => $e->getMessage()
-            ]);
-
-            return back()->with('error', 'Gagal memuat halaman pengaturan');
-        }
-    }
-}
+   
+};

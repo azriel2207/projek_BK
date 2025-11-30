@@ -7,28 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .sidebar {
-            transition: all 0.3s ease;
-        }
-        .main-content {
-            margin-left: 16rem;
-        }
+        .sidebar { transition: all 0.3s ease; }
+        .main-content { margin-left: 16rem; }
         @media (max-width: 768px) {
-            .sidebar {
-                margin-left: -16rem;
-            }
-            .sidebar.active {
-                margin-left: 0;
-            }
-            .main-content {
-                margin-left: 0;
-            }
+            .sidebar { margin-left: -16rem; }
+            .sidebar.active { margin-left: 0; }
+            .main-content { margin-left: 0; }
         }
     </style>
 </head>
 <body class="bg-gray-100">
     <!-- Sidebar -->
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-800 text-white">
+    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-700 text-white">
         <div class="p-4">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-hands-helping text-2xl"></i>
@@ -37,27 +27,30 @@
         </div>
         
         <nav class="mt-8">
-            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 bg-purple-700 border-l-4 border-yellow-400">
+            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 bg-purple-600 border-l-4 border-yellow-400">
                 <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
             </a>
-            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
             </a>
-            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
             </a>
-            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
+            </a>
+            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+                <i class="fas fa-user-cog mr-3"></i>Profile Settings
             </a>
         </nav>
         
         <div class="absolute bottom-0 w-full p-4 border-t border-purple-700">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition">
+                <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition w-full">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </button>
@@ -77,7 +70,7 @@
                     <h2 class="text-xl font-semibold text-gray-800 ml-4">Janji Konseling</h2>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-gray-700">Nama Siswa</span>
+                    <span class="text-gray-700">{{ Auth::user()->name }}</span>
                     <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white">
                         <i class="fas fa-user-graduate"></i>
                     </div>
@@ -98,7 +91,12 @@
             @if($errors->any())
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
                     <i class="fas fa-exclamation-circle mr-2"></i>
-                    Terdapat kesalahan dalam pengisian form. Silakan periksa kembali.
+                    <strong>Terdapat kesalahan:</strong>
+                    <ul class="list-disc list-inside mt-2">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
@@ -111,64 +109,75 @@
                     </button>
                 </div>
 
-                <!-- Form Janji Konseling (Awalnya tersembunyi) -->
+                <!-- Form Janji Konseling -->
                 <div id="formJanji" class="hidden bg-purple-50 p-6 rounded-lg border border-purple-200">
                     <form method="POST" action="{{ route('siswa.janji-konseling.store') }}">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-graduation-cap mr-2 text-purple-600"></i>Jenis Bimbingan
+                                    <i class="fas fa-graduation-cap mr-2 text-purple-600"></i>Jenis Bimbingan *
                                 </label>
-                                <select name="jenis_bimbingan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition" required>
+                                <select name="jenis_bimbingan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('jenis_bimbingan') border-red-500 @enderror" required>
                                     <option value="">Pilih Jenis Bimbingan</option>
-                                    <option value="pribadi">Bimbingan Pribadi</option>
-                                    <option value="belajar">Bimbingan Belajar</option>
-                                    <option value="karir">Bimbingan Karir</option>
-                                    <option value="sosial">Bimbingan Sosial</option>
+                                    <option value="pribadi" @old('jenis_bimbingan') == 'pribadi' ? 'selected' : '' @endold>Bimbingan Pribadi</option>
+                                    <option value="belajar" @old('jenis_bimbingan') == 'belajar' ? 'selected' : '' @endold>Bimbingan Belajar</option>
+                                    <option value="karir" @old('jenis_bimbingan') == 'karir' ? 'selected' : '' @endold>Bimbingan Karir</option>
+                                    <option value="sosial" @old('jenis_bimbingan') == 'sosial' ? 'selected' : '' @endold>Bimbingan Sosial</option>
                                 </select>
+                                @error('jenis_bimbingan')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     <i class="fas fa-user-tie mr-2 text-purple-600"></i>Guru BK
                                 </label>
-                                <select name="guru_bk" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition" required>
-                                    <option value="">Pilih Guru BK</option>
-                                    <option value="Bpk. Ahmad, M.Pd - Spesialis Karir">Bpk. Ahmad, M.Pd - Spesialis Karir</option>
-                                    <option value="Ibu Siti Rahayu, S.Pd - Spesialis Akademik">Ibu Siti Rahayu, S.Pd - Spesialis Akademik</option>
-                                    <option value="Bpk. Budi Santoso, M.Psi - Spesialis Pribadi">Bpk. Budi Santoso, M.Psi - Spesialis Pribadi</option>
+                                <select name="guru_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('guru_id') border-red-500 @enderror">
+                                    <option value="">Pilih Guru BK (Opsional - akan dipilih oleh koordinator)</option>
+                                    @if(isset($gurus) && $gurus->count() > 0)
+                                        @foreach($gurus as $guru)
+                                            <option value="{{ $guru->id }}" @old('guru_id') == $guru->id ? 'selected' : '' @endold>
+                                                {{ $guru->name }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        <option value="">Tidak ada guru BK tersedia</option>
+                                    @endif
                                 </select>
+                                @error('guru_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-calendar-day mr-2 text-purple-600"></i>Tanggal Konseling
+                                    <i class="fas fa-calendar-day mr-2 text-purple-600"></i>Tanggal Konseling *
                                 </label>
-                                <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition" required>
+                                <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('tanggal') border-red-500 @enderror" value="{{ old('tanggal') }}" required>
+                                @error('tanggal')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-clock mr-2 text-purple-600"></i>Waktu
+                                    <i class="fas fa-clock mr-2 text-purple-600"></i>Waktu *
                                 </label>
-                                <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition" required>
+                                <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('waktu') border-red-500 @enderror" required>
                                     <option value="">Pilih Waktu</option>
-                                    <option value="08:00 - 09:00">08:00 - 09:00</option>
-                                    <option value="09:00 - 10:00">09:00 - 10:00</option>
-                                    <option value="10:00 - 11:00">10:00 - 11:00</option>
-                                    <option value="13:00 - 14:00">13:00 - 14:00</option>
-                                    <option value="14:00 - 15:00">14:00 - 15:00</option>
-                                    <option value="15:00 - 16:00">15:00 - 16:00</option>
+                                    <option value="08:00 - 09:00" @old('waktu') == '08:00 - 09:00' ? 'selected' : '' @endold>08:00 - 09:00</option>
+                                    <option value="09:00 - 10:00" @old('waktu') == '09:00 - 10:00' ? 'selected' : '' @endold>09:00 - 10:00</option>
+                                    <option value="10:00 - 11:00" @old('waktu') == '10:00 - 11:00' ? 'selected' : '' @endold>10:00 - 11:00</option>
+                                    <option value="13:00 - 14:00" @old('waktu') == '13:00 - 14:00' ? 'selected' : '' @endold>13:00 - 14:00</option>
+                                    <option value="14:00 - 15:00" @old('waktu') == '14:00 - 15:00' ? 'selected' : '' @endold>14:00 - 15:00</option>
+                                    <option value="15:00 - 16:00" @old('waktu') == '15:00 - 16:00' ? 'selected' : '' @endold>15:00 - 16:00</option>
                                 </select>
+                                @error('waktu')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
                         </div>
 
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-comment-dots mr-2 text-purple-600"></i>Keluhan / Permasalahan
+                                <i class="fas fa-comment-dots mr-2 text-purple-600"></i>Keluhan / Permasalahan *
                             </label>
-                            <textarea name="keluhan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan..." required></textarea>
+                            <textarea name="keluhan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('keluhan') border-red-500 @enderror" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan..." required>{{ old('keluhan') }}</textarea>
+                            @error('keluhan')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div class="flex justify-end space-x-3">
@@ -181,41 +190,43 @@
                 </div>
             </div>
 
-            <!-- Daftar Janji Mendatang -->
+            <!-- Daftar Janji Menunggu Konfirmasi -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Janji Konseling Mendatang</h2>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-hourglass-half mr-2 text-yellow-600"></i>Janji Menunggu Konfirmasi
+                </h2>
                 
-                @if(isset($janjiMendatang) && count($janjiMendatang) > 0)
+                @if(isset($janjiMenunggu) && $janjiMenunggu->count() > 0)
                 <div class="space-y-4">
-                    @foreach($janjiMendatang as $janji)
-                    <div class="flex justify-between items-center p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                    @foreach($janjiMenunggu as $janji)
+                    <div class="flex justify-between items-center p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-2">
                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                                    Bimbingan Pribadi
+                                    {{ ucfirst($janji->jenis_bimbingan) }}
                                 </span>
                                 <span class="text-sm text-gray-600">Guru BK</span>
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
-                                    Menunggu
+                                <span class="bg-yellow-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                    Menunggu Konfirmasi
                                 </span>
                             </div>
-                            <p class="text-gray-700 mb-2">Deskripsi keluhan</p>
+                            <p class="text-gray-700 mb-2 text-sm">{{ Str::limit($janji->keluhan, 150) }}</p>
                             <div class="flex items-center space-x-4 text-sm text-gray-600">
                                 <span class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
-                                    Tanggal Konseling
+                                    {{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}
                                 </span>
                                 <span class="flex items-center">
                                     <i class="fas fa-clock mr-2"></i>
-                                    Waktu Konseling
+                                    {{ $janji->waktu }}
                                 </span>
                             </div>
                         </div>
                         <div class="flex space-x-2">
-                            <button onclick="ubahJanji(1)" class="bg-yellow-100 text-yellow-800 px-3 py-2 rounded-lg text-sm hover:bg-yellow-200 transition flex items-center">
+                            <a href="{{ route('siswa.janji-konseling.edit', $janji->id) }}" class="bg-yellow-100 text-yellow-800 px-3 py-2 rounded-lg text-sm hover:bg-yellow-200 transition flex items-center">
                                 <i class="fas fa-edit mr-1"></i>Ubah
-                            </button>
-                            <form action="#" method="POST" class="inline">
+                            </a>
+                            <form action="{{ route('siswa.janji-konseling.destroy', $janji->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="bg-red-100 text-red-800 px-3 py-2 rounded-lg text-sm hover:bg-red-200 transition flex items-center" onclick="return confirm('Apakah Anda yakin ingin membatalkan janji ini?')">
@@ -228,46 +239,62 @@
                 </div>
                 @else
                 <div class="text-center py-8">
-                    <i class="fas fa-calendar-times text-gray-400 text-4xl mb-3"></i>
-                    <p class="text-gray-500">Belum ada janji konseling mendatang</p>
+                    <i class="fas fa-check-circle text-gray-400 text-4xl mb-3"></i>
+                    <p class="text-gray-500">Tidak ada janji yang menunggu konfirmasi</p>
                 </div>
                 @endif
             </div>
 
-            <!-- Riwayat Janji -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Riwayat Janji Konseling</h2>
+            <!-- Daftar Janji Terkonfirmasi -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-check-circle mr-2 text-green-600"></i>Janji yang Dikonfirmasi
+                </h2>
                 
-                @if(isset($riwayatJanji) && count($riwayatJanji) > 0)
-                <div class="space-y-3">
-                    @foreach($riwayatJanji as $riwayat)
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                                    Selesai
-                                </span>
-                                <span class="text-sm font-medium text-gray-800">Bimbingan Pribadi</span>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-1">Deskripsi konseling</p>
-                            <p class="text-xs text-gray-500 flex items-center space-x-2">
-                                <span>Tanggal</span>
-                                <span>•</span>
-                                <span>Waktu</span>
-                                <span>•</span>
-                                <span>Guru BK</span>
-                            </p>
-                        </div>
-                        <button onclick="showDetail(1)" class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
-                            <i class="fas fa-eye mr-1"></i>Detail
-                        </button>
-                    </div>
-                    @endforeach
+                @if(isset($janjiKonfirmasi) && $janjiKonfirmasi->count() > 0)
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-green-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Tanggal</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Waktu</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Jenis Bimbingan</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Guru BK</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @foreach($janjiKonfirmasi as $janji)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ $janji->waktu }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                                        {{ ucfirst($janji->jenis_bimbingan) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-800">Guru BK</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <a href="{{ route('siswa.janji-konseling.edit', $janji->id) }}" class="text-blue-600 hover:text-blue-800 mr-3">
+                                        <i class="fas fa-edit mr-1"></i>Ubah
+                                    </a>
+                                    <form action="{{ route('siswa.janji-konseling.destroy', $janji->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('Yakin ingin membatalkan?')">
+                                            <i class="fas fa-trash mr-1"></i>Batal
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
                 @else
                 <div class="text-center py-8">
-                    <i class="fas fa-history text-gray-400 text-4xl mb-3"></i>
-                    <p class="text-gray-500">Belum ada riwayat konseling</p>
+                    <i class="fas fa-calendar-times text-gray-400 text-4xl mb-3"></i>
+                    <p class="text-gray-500">Belum ada janji yang dikonfirmasi</p>
                 </div>
                 @endif
             </div>
@@ -284,16 +311,6 @@
         document.getElementById('batalForm').addEventListener('click', function() {
             document.getElementById('formJanji').classList.add('hidden');
         });
-
-        // Fungsi ubah janji
-        function ubahJanji(id) {
-            alert('Fitur ubah janji untuk ID: ' + id);
-        }
-
-        // Fungsi show detail
-        function showDetail(id) {
-            alert('Detail konseling untuk ID: ' + id);
-        }
 
         // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', function() {

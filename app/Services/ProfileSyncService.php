@@ -38,14 +38,18 @@ class ProfileSyncService
         $role = Str::lower(str_replace([' ', '_'], '', (string) $user->role));
 
         if (Str::contains($role, 'siswa')) {
+            // Provide safe default values for required student columns to avoid
+            // DB constraint violations when ProfileSync runs on user creation.
+            $defaultNis = 'NIS' . str_pad((string) $user->id, 6, '0', STR_PAD_LEFT);
             $candidates = [
                 'user_id'      => $user->id,
                 'nama_lengkap' => $user->name,
-                'nis'          => null,
-                'tgl_lahir'    => null,
-                'alamat'       => null,
-                'no_hp'        => $this->pickPhone($user),
-                'kelas'        => null,
+                'nis'          => $user->nis ?? $defaultNis,
+                // default to today so date column is valid; user can update later
+                'tgl_lahir'    => $user->tgl_lahir ?? now()->toDateString(),
+                'alamat'       => $user->alamat ?? '',
+                'no_hp'        => $this->pickPhone($user) ?? '',
+                'kelas'        => $user->kelas ?? '',
             ];
 
             $payload = $this->buildPayloadForModel($candidates, Student::class);
@@ -60,7 +64,8 @@ class ProfileSyncService
                 'nama_lengkap'   => $user->name,
                 'nip'            => $nip,
                 'email'          => $user->email,
-                'no_hp'          => $this->pickPhone($user),
+                // Ensure no_hp is never null because DB requires it
+                'no_hp'          => $this->pickPhone($user) ?? '',
                 'specialization' => null,
                 'office_hours'   => null,
             ];

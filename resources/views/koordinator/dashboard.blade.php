@@ -41,9 +41,6 @@
             <a href="{{ route('koordinator.laporan') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-chart-bar mr-3"></i>Laporan
             </a>
-            <a href="{{ route('koordinator.pengaturan') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
-                <i class="fas fa-cog mr-3"></i>Pengaturan
-            </a>
             <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-user-cog mr-3"></i>Profile
             </a>
@@ -182,17 +179,39 @@
                 <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Statistik Konseling Per Jenis</h3>
                     <div class="space-y-4">
-                        @foreach($jenisKonselingData as $jenis)
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm font-medium">{{ $jenis['color']['label'] }}</span>
-                                <span class="text-sm font-bold">{{ $jenis['total'] }} ({{ number_format($jenis['percentage'], 1) }}%)</span>
+                        @if(isset($jenisKonselingData) && count($jenisKonselingData) > 0)
+                            @foreach($jenisKonselingData as $jenis)
+                                @php
+                                    $label = data_get($jenis, 'color.label', (data_get($jenis, 'jenis') ? ucfirst(data_get($jenis, 'jenis')) : 'Lainnya'));
+                                    $bg = data_get($jenis, 'color.bg', 'gray');
+                                    $total = data_get($jenis, 'total', 0);
+                                    $percentage = number_format(data_get($jenis, 'percentage', 0), 1);
+                                    $colorMap = [
+                                        'blue' => '#2563eb',
+                                        'green' => '#16a34a',
+                                        'purple' => '#7c3aed',
+                                        'orange' => '#f97316',
+                                        'gray' => '#6b7280'
+                                    ];
+                                    $barColor = $colorMap[$bg] ?? $colorMap['gray'];
+                                @endphp
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium">{{ $label }}</span>
+                                        <span class="text-sm font-bold">{{ $total }} ({{ $percentage }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%; background-color: {{ $barColor }};"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="p-8 text-center text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-4" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6"/><path d="M7 10l5-5 5 5"/><path d="M12 15V3"/></svg>
+                                <p class="font-medium">Belum ada data untuk ditampilkan.</p>
+                                <p class="text-sm mt-1">Data jenis konseling akan muncul setelah ada sesi yang tercatat.</p>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-3">
-                                <div class="bg-{{ $jenis['color']['bg'] }}-600 h-3 rounded-full transition-all duration-500" style="width: {{ $jenis['percentage'] }}%"></div>
-                            </div>
-                        </div>
-                        @endforeach
+                        @endif
                     </div>
                 </div>
 
@@ -208,10 +227,7 @@
                             <i class="fas fa-file-alt text-green-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Buat Laporan</p>
                         </a>
-                        <a href="{{ route('koordinator.pengaturan') }}" class="block bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition">
-                            <i class="fas fa-cog text-purple-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium">Pengaturan</p>
-                        </a>
+                        
                     </div>
                 </div>
             </div>

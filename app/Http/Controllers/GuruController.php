@@ -47,6 +47,30 @@ class GuruController extends Controller
                 ->count(),
         ];
 
+        // Temporary debug log: capture stats and recent 'selesai' rows
+        try {
+            $recentSelesai = DB::table('janji_konselings')
+                ->where('status', 'selesai')
+                ->orderBy('tanggal', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function ($r) {
+                    return [
+                        'id' => $r->id,
+                        'user_id' => $r->user_id,
+                        'tanggal' => (string) $r->tanggal,
+                        'status' => $r->status,
+                    ];
+                })->toArray();
+
+            \Log::info('GURU_DASH_STATS', [
+                'computed_stats' => $stats,
+                'recent_selesai_sample' => $recentSelesai
+            ]);
+        } catch (\Exception $e) {
+            // ignore logging errors
+        }
+
         // Jadwal hari ini
         $jadwalHariIni = DB::table('janji_konselings')
             ->join('users', 'janji_konselings.user_id', '=', 'users.id')
@@ -400,7 +424,7 @@ public function editJadwal($id)
     }
 
     // Export laporan ke PDF
-    public function export_pdf(Request $request)
+    public function exportPdf(Request $request)
     {
         try {
             $periode = $request->input('periode', 'bulan');
@@ -552,12 +576,14 @@ public function editJadwal($id)
     {
         $r->validate([
             'user_id' => 'nullable|exists:users,id',
+            'janji_id' => 'nullable|exists:janji_konselings,id',
             'tanggal' => 'required|date',
-            'isi' => 'required|string',
+            'isi' => 'required|string|min:10',
         ]);
 
         DB::table('catatan')->insert([
-            'user_id' => $r->user_id,
+            'user_id' => $r->user_id ?? null,
+            'janji_id' => $r->janji_id ?? null,
             'tanggal' => $r->tanggal,
             'isi' => $r->isi,
             'guru_bk' => Auth::user()->name,
@@ -565,6 +591,79 @@ public function editJadwal($id)
             'updated_at' => now(),
         ]);
 
+        // Set status janji menjadi 'selesai' jika ada janji_id
+        if ($r->janji_id) {
+            DB::table('janji_konselings')
+                ->where('id', $r->janji_id)
+                ->update([
+                    'status' => 'selesai',
+                    'updated_at' => now()
+                ]);
+        }
+
         return redirect()->route('guru.catatan.index')->with('success', 'Catatan berhasil disimpan.');
+    }
+
+    // DETAIL CATATAN
+    public function detailCatatan($id)
+    {
+        // Ambil catatan dan info siswa
+        $cat = DB::table('catatan')
+            ->join('users', 'catatan.user_id', '=', 'users.id')
+            ->select('catatan.*', 'users.name as nama_siswa', 'users.email')
+            ->where('catatan.id', $id)
+            ->first();
+
+        if (! $cat) {
+            abort(404, 'Catatan tidak ditemukan');
+        }
+
+        // Cari janji konseling terkait pada tanggal yang sama (jika ada)
+        $janji = DB::table('janji_konselings')
+            ->where('user_id', $cat->user_id)
+            ->whereDate('tanggal', $cat->tanggal)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Buat objek hasil yang sesuai dengan view
+        $result = (object) [];
+        // Basic fields from catatan
+        foreach (get_object_vars($cat) as $k => $v) {
+            $result->{$k} = $v;
+        }
+
+        // Map janji fields if ditemukan
+        if ($janji) {
+            $result->waktu = $janji->waktu ?? null;
+            $result->jenis_bimbingan = $this->mapJenisBimbinganLabel($janji->jenis_bimbingan ?? null);
+            $result->keluhan = $janji->keluhan ?? null;
+            $result->status = $janji->status ?? 'selesai';
+        } else {
+            // Jika tidak ada janji, isi dengan fallback
+            $result->waktu = $cat->waktu ?? null;
+            $result->jenis_bimbingan = $cat->jenis_bimbingan ?? 'Umum';
+            $result->keluhan = $cat->isi ?? null;
+            $result->status = $cat->status ?? 'selesai';
+        }
+
+        // Gunakan isi catatan sebagai catatan_konselor
+        $result->catatan_konselor = $cat->isi ?? null;
+
+        return view('guru.catatan-detail', ['catatan' => $result]);
+    }
+
+    // Helper untuk mapping jenis_bimbingan ke label yang digunakan di view
+    private function mapJenisBimbinganLabel($jenis)
+    {
+        if (! $jenis) return 'Umum';
+
+        $map = [
+            'belajar' => 'Akademik',
+            'karir' => 'Karir',
+            'pribadi' => 'Personal',
+            'sosial' => 'Sosial',
+        ];
+
+        return $map[$jenis] ?? ucfirst($jenis);
     }
 }

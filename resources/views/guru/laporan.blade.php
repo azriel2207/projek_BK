@@ -3,6 +3,10 @@
 @section('title', 'Laporan & Statistik - Sistem BK')
 
 @section('content')
+<style>
+    hr { display: none; }
+    .divide-y > :not([hidden]) ~ :not([hidden]) { border-top-width: 1px; }
+</style>
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="mb-8">
@@ -17,10 +21,11 @@
             <i class="fas fa-arrow-left"></i>
             <span>Kembali ke Dashboard</span>
         </a>
-        <button  type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
+        <a href="{{ route('guru.laporan.export_pdf') }}" 
+           class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition duration-200">
             <i class="fas fa-download"></i>
             <span>Export Laporan</span>
-        </button>
+        </a>
        
         <select class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <option>Pilih Periode</option>
@@ -84,27 +89,35 @@
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Konseling Per Jenis Bimbingan</h3>
             <div class="space-y-4">
-                @foreach($dataPerJenis as $jenis)
-                @php
-                    $colors = [
-                        'pribadi' => 'blue',
-                        'belajar' => 'green',
-                        'karir' => 'purple',
-                        'sosial' => 'orange'
-                    ];
-                    $color = $colors[$jenis->jenis_bimbingan] ?? 'gray';
-                    $percentage = ($jenis->total / max($stats['total_konseling'], 1)) * 100;
-                @endphp
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-medium capitalize">{{ $jenis->jenis_bimbingan }}</span>
-                        <span class="text-sm font-bold">{{ $jenis->total }}</span>
+                @if(isset($dataPerJenis) && count($dataPerJenis) > 0)
+                    @foreach($dataPerJenis as $jenis)
+                    @php
+                        $colorMap = [
+                            'pribadi' => '#2563eb',
+                            'belajar' => '#16a34a',
+                            'karir' => '#7c3aed',
+                            'sosial' => '#f97316'
+                        ];
+                        $color = $colorMap[$jenis->jenis_bimbingan] ?? '#6b7280';
+                        $percentage = ($jenis->total / max($stats['total_konseling'], 1)) * 100;
+                    @endphp
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium capitalize">{{ $jenis->jenis_bimbingan }}</span>
+                            <span class="text-sm font-bold">{{ $jenis->total }} ({{ number_format($percentage, 1) }}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%; background-color: {{ $color }};"></div>
+                        </div>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div class="bg-{{ $color }}-600 h-3 rounded-full" style="width: {{ $percentage }}%"></div>
+                    @endforeach
+                @else
+                    <div class="p-8 text-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-4" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <p class="font-medium">Belum ada data konseling.</p>
+                        <p class="text-sm mt-1">Data jenis konseling akan muncul setelah ada sesi yang tercatat.</p>
                     </div>
-                </div>
-                @endforeach
+                @endif
             </div>
         </div>
 

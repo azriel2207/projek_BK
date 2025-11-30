@@ -18,7 +18,7 @@
 </head>
 <body class="bg-gray-100">
     <!-- Sidebar -->
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-800 text-white">
+    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-700 text-white">
         <div class="p-4">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-hands-helping text-2xl"></i>
@@ -27,20 +27,23 @@
         </div>
         
         <nav class="mt-8">
-            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
             </a>
-            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
             </a>
-            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
-                <i class="fas fa-graduation-cap mr-3"></i>Konsultasi Belajar
+            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+                <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
             </a>
-            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 bg-purple-700 border-l-4 border-yellow-400">
-                <i class="fas fa-briefcase mr-3"></i>Konsultasi Karir
+            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 bg-purple-600 border-l-4 border-yellow-400">
+                <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
+            </a>
+            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+                <i class="fas fa-user-cog mr-3"></i>Profile Settings
             </a>
         </nav>
         
@@ -168,7 +171,9 @@
                         <i class="fas fa-comments mr-2 text-green-600"></i>Ajukan Konsultasi Karir
                     </h3>
                     
-                    <form id="formKonsultasiKarir" class="space-y-4">
+                    <form id="formKonsultasiKarir" method="POST" action="{{ route('siswa.janji-konseling.store') }}" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="jenis_bimbingan" value="karir">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Topik Konsultasi</label>
                             <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -183,16 +188,41 @@
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Target Karir (jika ada)</label>
-                            <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Contoh: Software Engineer, Dokter, Guru, dll.">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Guru BK (Opsional)</label>
+                            <select name="guru_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="">Pilih Guru BK (Opsional)</option>
+                                @if(isset($gurus) && $gurus->count() > 0)
+                                    @foreach($gurus as $guru)
+                                        <option value="{{ $guru->id }}">{{ $guru->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
-                        
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal yang diinginkan</label>
+                            <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Waktu</label>
+                            <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                <option value="">Pilih Waktu</option>
+                                <option value="08:00 - 09:00">08:00 - 09:00</option>
+                                <option value="09:00 - 10:00">09:00 - 10:00</option>
+                                <option value="10:00 - 11:00">10:00 - 11:00</option>
+                                <option value="13:00 - 14:00">13:00 - 14:00</option>
+                                <option value="14:00 - 15:00">14:00 - 15:00</option>
+                                <option value="15:00 - 16:00">15:00 - 16:00</option>
+                            </select>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pertanyaan/Keluhan Spesifik</label>
-                            <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Jelaskan pertanyaan atau keluhan spesifik mengenai karir..."></textarea>
+                            <textarea name="keluhan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Jelaskan pertanyaan atau keluhan spesifik mengenai karir..." required></textarea>
                         </div>
-                        
-                        <button type="button" onclick="ajukanKonsultasiKarir()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-medium">
+
+                        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-medium">
                             <i class="fas fa-paper-plane mr-2"></i>Ajukan Konsultasi Karir
                         </button>
                     </form>
@@ -205,27 +235,22 @@
                     </h3>
                     
                     <div class="space-y-4">
-                        <div class="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                            <div class="bg-blue-100 p-3 rounded-full">
-                                <i class="fas fa-briefcase text-blue-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-gray-800">Bpk. Ahmad, M.Pd</p>
-                                <p class="text-sm text-gray-600">Spesialis Bimbingan Karir</p>
-                                <p class="text-xs text-blue-600">✅ 15+ tahun pengalaman</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-4 p-4 bg-green-50 rounded-lg">
-                            <div class="bg-green-100 p-3 rounded-full">
-                                <i class="fas fa-network-wired text-green-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-gray-800">Ibu Diana, S.Psi</p>
-                                <p class="text-sm text-gray-600">Spesialis Psikologi Karir</p>
-                                <p class="text-xs text-green-600">✅ Expert assessment minat</p>
-                            </div>
-                        </div>
+                        @if(isset($gurus) && $gurus->count() > 0)
+                            @foreach($gurus as $g)
+                                <div class="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
+                                    <div class="bg-blue-100 p-3 rounded-full">
+                                        <i class="fas fa-briefcase text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">{{ $g->name }}</p>
+                                        <p class="text-sm text-gray-600">Guru BK</p>
+                                        <p class="text-xs text-blue-600">✅ Tersedia untuk konsultasi</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-sm text-gray-600">Belum ada guru BK terdaftar.</div>
+                        @endif
                     </div>
                     
                     <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">

@@ -49,9 +49,7 @@
             <a href="#" class="block py-3 px-6 hover:bg-blue-700 transition">
                 <i class="fas fa-user-tie mr-3"></i>Guru BK
             </a>
-            <a href="#" class="block py-3 px-6 hover:bg-blue-700 transition">
-                <i class="fas fa-cog mr-3"></i>Pengaturan
-            </a>
+           
         </nav>
         
         <div class="absolute bottom-0 w-full p-4 border-t border-blue-700">
@@ -179,10 +177,7 @@
                             <i class="fas fa-chart-line text-green-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Statistik</p>
                         </a>
-                        <a href="#" class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition">
-                            <i class="fas fa-cog text-purple-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium">Pengaturan</p>
-                        </a>
+                        
                         <a href="#" class="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg text-center transition">
                             <i class="fas fa-users text-orange-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Kelola Guru</p>

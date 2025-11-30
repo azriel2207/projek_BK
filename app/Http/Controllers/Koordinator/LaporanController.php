@@ -115,6 +115,13 @@ class LaporanController extends Controller
                     ->get()
             ];
 
+            // Log data for debugging (temporary) to help diagnose empty PDF
+            try {
+                \Log::info('LAPORAN_EXPORT_DATA', $data);
+            } catch (\Exception $e) {
+                // ignore logging errors
+            }
+
             // Generate PDF
             $pdf = Pdf::loadView('koordinator.laporan.pdf', $data);
 

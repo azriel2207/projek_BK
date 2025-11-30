@@ -13,6 +13,7 @@ class JanjiKonseling extends Model
 
     protected $fillable = [
         'user_id',
+        'guru_id',
         'tanggal', 
         'waktu',
         'lokasi',

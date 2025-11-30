@@ -22,47 +22,46 @@
 </head>
 <body class="bg-gray-100">
     <!-- Sidebar -->
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-green-800 text-white">
-        <div class="p-4">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-hands-helping text-2xl"></i>
-                <h1 class="text-xl font-bold">Sistem BK</h1>
-            </div>
-        </div>
-        
-        <nav class="mt-8">
-            <a href="{{ route('guru.dashboard') }}" class="block py-3 px-6 bg-green-700 border-l-4 border-yellow-400">
-                <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
-            </a>
-            <a href="{{ route('guru.jadwal') }}" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-calendar-alt mr-3"></i>Kelola Jadwal
-            </a>
-            <a href="{{ route('guru.siswa') }}" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-user-friends mr-3"></i>Daftar Siswa
-            </a>
-            <a href="{{ route('guru.catatan.index') }}" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-file-medical mr-3"></i>Catatan Konseling
-            </a>
-            <a href="{{ route('guru.laporan') }}" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-chart-line mr-3"></i>Laporan & Statistik
-            </a>
-            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-green-700 transition">
-                <i class="fas fa-user-cog mr-3"></i>Profile Settings
-            </a>
-        </nav>
-        
-        <div class="absolute bottom-0 w-full p-4 border-t border-green-700">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition w-full">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </form>
+<div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-blue-700 text-white">
+    <div class="p-4">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-hands-helping text-2xl"></i>
+            <h1 class="text-xl font-bold">Sistem BK</h1>
         </div>
     </div>
-
-    <!-- Main Content -->
+    
+    <nav class="mt-8">
+        <a href="{{ route('guru.dashboard') }}" class="block py-3 px-6 bg-blue-600 border-l-4 border-yellow-400">
+            <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
+        </a>
+        <a href="{{ route('guru.jadwal') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
+            <i class="fas fa-calendar-alt mr-3"></i>Kelola Jadwal
+        </a>
+        <a href="{{ route('guru.siswa') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
+            <i class="fas fa-user-friends mr-3"></i>Daftar Siswa
+        </a>
+        <a href="{{ route('guru.catatan.index') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
+            <i class="fas fa-file-medical mr-3"></i>Catatan Konseling
+        </a>
+        <a href="{{ route('guru.laporan') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
+            <i class="fas fa-chart-line mr-3"></i>Laporan & Statistik
+        </a>
+        <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
+            <i class="fas fa-user-cog mr-3"></i>Profile Settings
+        </a>
+    </nav>
+    
+    <div class="absolute bottom-0 w-full p-4 border-t border-blue-800">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition w-full">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </form>
+    </div>
+    </div>
+</div>    <!-- Main Content -->
     <div class="main-content min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm">
@@ -91,7 +90,7 @@
         <!-- Content -->
         <main class="p-6">
             <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl shadow-sm p-6 mb-6 text-white">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-sm p-6 mb-6 text-white">
                 <div class="flex justify-between items-center">
                     <div>
                         <h1 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h1>

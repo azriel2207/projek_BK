@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JanjiKonseling;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class JanjiKonselingController extends Controller
 {
@@ -13,31 +14,29 @@ class JanjiKonselingController extends Controller
         try {
             $user = Auth::user();
             
-            // Janji mendatang
-            $janjiMendatang = JanjiKonseling::where('user_id', $user->id)
-                ->whereIn('status', ['menunggu', 'dikonfirmasi'])
+            // Janji menunggu konfirmasi
+            $janjiMenunggu = JanjiKonseling::where('user_id', $user->id)
+                ->where('status', 'menunggu')
+                ->orderBy('tanggal', 'asc')
+                ->get();
+
+            // Janji yang sudah dikonfirmasi
+            $janjiKonfirmasi = JanjiKonseling::where('user_id', $user->id)
+                ->where('status', 'dikonfirmasi')
                 ->where('tanggal', '>=', now()->format('Y-m-d'))
                 ->orderBy('tanggal', 'asc')
-                ->orderBy('waktu', 'asc')
                 ->get();
 
-            // Riwayat
-            $riwayatJanji = JanjiKonseling::where('user_id', $user->id)
-                ->where(function($query) {
-                    $query->whereIn('status', ['selesai', 'dibatalkan'])
-                          ->orWhere('tanggal', '<', now()->format('Y-m-d'));
-                })
-                ->orderBy('tanggal', 'desc')
-                ->orderBy('waktu', 'desc')
+            // Ambil list guru BK dari tabel users dengan role guru_bk/guru
+            $gurus = DB::table('users')
+                ->whereIn('role', ['guru_bk', 'guru'])
+                ->select('id', 'name')
                 ->get();
 
-            return view('siswa.janji-konseling', compact('janjiMendatang', 'riwayatJanji'));
+            return view('siswa.janji-konseling', compact('janjiMenunggu', 'janjiKonfirmasi', 'gurus'));
             
         } catch (\Exception $e) {
-            // Fallback jika error
-            $janjiMendatang = [];
-            $riwayatJanji = [];
-            return view('siswa.janji-konseling', compact('janjiMendatang', 'riwayatJanji'));
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -48,8 +47,17 @@ class JanjiKonselingController extends Controller
             'waktu' => 'required',
             'keluhan' => 'required|string|min:10',
             'jenis_bimbingan' => 'required|in:pribadi,belajar,karir,sosial',
-            'guru_bk' => 'required|string'
+            'guru_id' => 'nullable|exists:users,id'
         ]);
+
+        // Get guru name if guru_id provided, otherwise use input guru_bk if exists
+        $guruId = $request->guru_id;
+        $guruName = 'Guru BK';
+        
+        if ($guruId) {
+            $guru = DB::table('users')->find($guruId);
+            $guruName = $guru->name ?? 'Guru BK';
+        }
 
         JanjiKonseling::create([
             'user_id' => Auth::id(),
@@ -57,12 +65,26 @@ class JanjiKonselingController extends Controller
             'waktu' => $request->waktu,
             'keluhan' => $request->keluhan,
             'jenis_bimbingan' => $request->jenis_bimbingan,
-            'guru_bk' => $request->guru_bk,
+            'guru_id' => $guruId,
+            'guru_bk' => $guruName,
             'status' => 'menunggu'
         ]);
 
         return redirect()->route('siswa.janji-konseling')
-            ->with('success', 'Janji konseling berhasil dibuat');
+            ->with('success', 'Janji konseling berhasil dibuat. Menunggu konfirmasi dari guru BK.');
+    }
+
+    public function edit($id)
+    {
+        $user = Auth::user();
+        $janji = JanjiKonseling::where('user_id', $user->id)->findOrFail($id);
+        
+        $gurus = DB::table('users')
+            ->whereIn('role', ['guru_bk', 'guru'])
+            ->select('id', 'name')
+            ->get();
+
+        return view('siswa.janji-konseling-edit', compact('janji', 'gurus'));
     }
 
     public function update(Request $request, $id)
@@ -74,15 +96,25 @@ class JanjiKonselingController extends Controller
             'waktu' => 'required',
             'keluhan' => 'required|string|min:10',
             'jenis_bimbingan' => 'required|in:pribadi,belajar,karir,sosial',
-            'guru_bk' => 'required|string'
+            'guru_id' => 'nullable|exists:users,id'
         ]);
+
+        // Get guru name if guru_id provided
+        $guruId = $request->guru_id;
+        $guruName = $janji->guru_bk;
+        
+        if ($guruId) {
+            $guru = DB::table('users')->find($guruId);
+            $guruName = $guru->name ?? 'Guru BK';
+        }
 
         $janji->update([
             'tanggal' => $request->tanggal,
             'waktu' => $request->waktu,
             'keluhan' => $request->keluhan,
             'jenis_bimbingan' => $request->jenis_bimbingan,
-            'guru_bk' => $request->guru_bk
+            'guru_id' => $guruId,
+            'guru_bk' => $guruName
         ]);
 
         return redirect()->route('siswa.janji-konseling')
@@ -96,10 +128,5 @@ class JanjiKonselingController extends Controller
 
         return redirect()->route('siswa.janji-konseling')
             ->with('success', 'Janji konseling berhasil dibatalkan');
-    }
-
-    public function yourMethod()
-    {
-        return "JanjiKonselingController berhasil diakses!";
     }
 }

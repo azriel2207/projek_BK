@@ -18,7 +18,7 @@
 </head>
 <body class="bg-gray-100">
     <!-- Sidebar -->
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-800 text-white">
+    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-700 text-white">
         <div class="p-4">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-hands-helping text-2xl"></i>
@@ -27,20 +27,23 @@
         </div>
         
         <nav class="mt-8">
-            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
             </a>
-            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 bg-purple-700 border-l-4 border-yellow-400">
+            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 bg-purple-600 border-l-4 border-yellow-400">
                 <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
             </a>
-            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
             </a>
-            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-700 transition">
+            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
                 <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
+            </a>
+            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+                <i class="fas fa-user-cog mr-3"></i>Profile Settings
             </a>
         </nav>
         
@@ -81,29 +84,50 @@
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <h2 class="text-lg font-semibold text-gray-800">Riwayat Sesi Konseling</h2>
-                    <div class="flex flex-wrap gap-3">
-                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option>Semua Status</option>
-                            <option>Selesai</option>
-                            <option>Dibatalkan</option>
+                    <form method="GET" action="{{ route('siswa.riwayat-konseling') }}" class="flex flex-wrap gap-3">
+                        <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="">Semua Status</option>
+                            <option value="dikonfirmasi" @if(request('status') == 'dikonfirmasi') selected @endif>Dikonfirmasi</option>
+                            <option value="selesai" @if(request('status') == 'selesai') selected @endif>Selesai</option>
+                            <option value="dibatalkan" @if(request('status') == 'dibatalkan') selected @endif>Dibatalkan</option>
                         </select>
-                        <input type="month" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                        <input type="month" name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" value="{{ request('bulan') }}">
+                        <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
                             <i class="fas fa-filter mr-2"></i>Filter
                         </button>
-                    </div>
+                        @if(request('status') || request('bulan'))
+                        <a href="{{ route('siswa.riwayat-konseling') }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition">
+                            <i class="fas fa-times mr-2"></i>Reset
+                        </a>
+                        @endif
+                    </form>
                 </div>
             </div>
 
             <!-- Riwayat List -->
             <div class="bg-white rounded-xl shadow-sm p-6">
+                @if(request('status') || request('bulan'))
+                <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Filter Aktif:</strong>
+                        @if(request('status'))
+                            Status: <span class="font-semibold">{{ ucfirst(request('status')) }}</span>
+                        @endif
+                        @if(request('bulan'))
+                            Bulan: <span class="font-semibold">{{ \Carbon\Carbon::createFromFormat('Y-m', request('bulan'))->translatedFormat('F Y') }}</span>
+                        @endif
+                    </p>
+                </div>
+                @endif
+
                 @if(isset($riwayat) && count($riwayat) > 0)
                 <div class="space-y-4">
                     @foreach($riwayat as $item)
                     <div class="flex flex-col md:flex-row md:items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                         <div class="flex-1 mb-4 md:mb-0">
                             <div class="flex items-center space-x-3 mb-2">
-                                <span class="bg-{{ $item->status == 'selesai' ? 'green' : 'red' }}-100 text-{{ $item->status == 'selesai' ? 'green' : 'red' }}-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <span class="px-3 py-1 rounded-full text-sm font-medium" style="background-color: {{ $item->status == 'selesai' ? '#dcfce7' : '#fee2e2' }}; color: {{ $item->status == 'selesai' ? '#15803d' : '#991b1b' }};">
                                     {{ ucfirst($item->status) }}
                                 </span>
                                 <span class="text-sm font-medium text-gray-800">{{ $item->jenis_bimbingan_text ?? 'Bimbingan Pribadi' }}</span>

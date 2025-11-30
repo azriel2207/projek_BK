@@ -185,7 +185,7 @@
         </a>
         @else
         <!-- Tambah Catatan -->
-        <a href="{{ route('guru.catatan.tambah', $item->id) }}" 
+        <a href="{{ route('guru.catatan.buat') }}" 
            class="text-orange-600 hover:text-orange-900 transition" 
            title="Tambah Catatan">
             <i class="fas fa-notes-medical"></i>
