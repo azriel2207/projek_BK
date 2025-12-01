@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Riwayat Konsultasi Karir - Sistem BK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .sidebar { transition: all 0.3s ease; }
-        .main-content { margin-left: 16rem; }
-        @media (max-width: 768px) {
-            .sidebar { margin-left: -16rem; }
-            .sidebar.active { margin-left: 0; }
-            .main-content { margin-left: 0; }
-        }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <!-- Sidebar -->
+@extends('layouts.siswa-layout')
+
+@section('title', 'Detail Bimbingan Karir')
+
+@section('page-content')
+<div class="container mx-auto px-4 py-8">
     <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-700 text-white">
         <div class="p-4">
             <div class="flex items-center space-x-3">

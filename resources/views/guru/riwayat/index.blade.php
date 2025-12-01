@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.guru-layout')
 
 @section('title', 'Riwayat Konseling - Guru BK')
 
-@section('content')
+@section('page-content')
 @php use Illuminate\Support\Str; @endphp
 <div class="container mx-auto px-6 py-8">
     <div class="mb-6">

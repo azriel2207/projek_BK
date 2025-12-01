@@ -1,6 +1,6 @@
-@extends('layouts.guru')
+@extends('layouts.guru-layout')
 
-@section('content')
+@section('page-content')
 <div class="container mx-auto px-4 py-6">
     <h1 class="text-2xl font-bold mb-6">Semua Permintaan Konseling</h1>
     

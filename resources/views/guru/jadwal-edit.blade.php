@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.guru-layout')
 
 @section('title', 'Edit Jadwal Konseling - Sistem BK')
 
-@section('content')
+@section('page-content')
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto">
         <!-- Header -->

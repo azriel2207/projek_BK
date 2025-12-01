@@ -1,6 +1,6 @@
-@extends('layouts.guru')
+@extends('layouts.guru-layout')
 
-@section('content')
+@section('page-content')
 <div class="container py-6">
     <h3>Atur Kelas - {{ $siswa->name }}</h3>
 

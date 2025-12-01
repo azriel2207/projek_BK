@@ -1,4 +1,4 @@
-@extends('layouts.koordinator')
+@extends('layouts.koordinator-layout')
 
 @section('title', 'Upgrade ke Guru BK')
 

@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.koordinator-layout')
 
 @section('title', 'Edit Siswa')
 
-@section('content')
+@section('page-content')
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">

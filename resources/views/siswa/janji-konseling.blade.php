@@ -1,105 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Janji Konseling - Sistem BK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .sidebar { transition: all 0.3s ease; }
-        .main-content { margin-left: 16rem; }
-        @media (max-width: 768px) {
-            .sidebar { margin-left: -16rem; }
-            .sidebar.active { margin-left: 0; }
-            .main-content { margin-left: 0; }
-        }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <!-- Sidebar -->
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-700 text-white">
-        <div class="p-4">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-hands-helping text-2xl"></i>
-                <h1 class="text-xl font-bold">Sistem BK</h1>
-            </div>
-        </div>
-        
-        <nav class="mt-8">
-            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
-                <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
-            </a>
-            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 bg-purple-600 border-l-4 border-yellow-400">
-                <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
-            </a>
-            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
-                <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
-            </a>
-            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
-                <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
-            </a>
-            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
-                <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
-            </a>
-            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
-                <i class="fas fa-user-cog mr-3"></i>Profile Settings
-            </a>
-        </nav>
-        
-        <div class="absolute bottom-0 w-full p-4 border-t border-purple-700">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition w-full">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </form>
-        </div>
-    </div>
+@extends('layouts.siswa-layout')
 
-    <!-- Main Content -->
-    <div class="main-content min-h-screen">
-        <!-- Header -->
-        <header class="bg-white shadow-sm">
-            <div class="flex justify-between items-center p-4">
-                <div class="flex items-center">
-                    <button id="menu-toggle" class="md:hidden text-gray-600">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                    <h2 class="text-xl font-semibold text-gray-800 ml-4">Janji Konseling</h2>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-gray-700">{{ Auth::user()->name }}</span>
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-                </div>
-            </div>
-        </header>
+@section('header_title', 'Janji Konseling')
 
-        <!-- Content -->
-        <main class="p-6">
-            <!-- Notifikasi -->
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    <strong>Terdapat kesalahan:</strong>
-                    <ul class="list-disc list-inside mt-2">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
+@section('page-content')
             <!-- Buat Janji Baru -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <div class="flex justify-between items-center mb-4">
@@ -120,10 +23,10 @@
                                 </label>
                                 <select name="jenis_bimbingan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('jenis_bimbingan') border-red-500 @enderror" required>
                                     <option value="">Pilih Jenis Bimbingan</option>
-                                    <option value="pribadi" @old('jenis_bimbingan') == 'pribadi' ? 'selected' : '' @endold>Bimbingan Pribadi</option>
-                                    <option value="belajar" @old('jenis_bimbingan') == 'belajar' ? 'selected' : '' @endold>Bimbingan Belajar</option>
-                                    <option value="karir" @old('jenis_bimbingan') == 'karir' ? 'selected' : '' @endold>Bimbingan Karir</option>
-                                    <option value="sosial" @old('jenis_bimbingan') == 'sosial' ? 'selected' : '' @endold>Bimbingan Sosial</option>
+                                    <option value="pribadi"  {{ old('jenis_bimbingan') == 'pribadi' ? 'selected' : '' }}>Bimbingan Pribadi</option>
+                                    <option value="belajar"  {{ old('jenis_bimbingan') == 'belajar' ? 'selected' : '' }}>Bimbingan Belajar</option>
+                                    <option value="karir"  {{ old('jenis_bimbingan') == 'karir' ? 'selected' : '' }}>Bimbingan Karir</option>
+                                    <option value="sosial"  {{ old('jenis_bimbingan') == 'sosial' ? 'selected' : '' }}>Bimbingan Sosial</option>
                                 </select>
                                 @error('jenis_bimbingan')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
@@ -135,7 +38,7 @@
                                     <option value="">Pilih Guru BK (Opsional - akan dipilih oleh koordinator)</option>
                                     @if(isset($gurus) && $gurus->count() > 0)
                                         @foreach($gurus as $guru)
-                                            <option value="{{ $guru->id }}" @old('guru_id') == $guru->id ? 'selected' : '' @endold>
+                                            <option value="{{ $guru->id }}" @old('guru_id') == $guru['id'] ? 'selected' : '' @endold >
                                                 {{ $guru->name }}
                                             </option>
                                         @endforeach
@@ -317,5 +220,4 @@
             document.querySelector('.sidebar').classList.toggle('active');
         });
     </script>
-</body>
-</html>
+@endsection

@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Catatan - Guru BK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
+@extends('layouts.guru-layout')
+
+@section('title', 'Buat Catatan - Guru BK')
+
+@section('page-content')
+<div class="container mx-auto px-4 py-8">
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
             <h1 class="text-2xl font-bold mb-6 text-gray-800">Buat Catatan Siswa</h1>
             

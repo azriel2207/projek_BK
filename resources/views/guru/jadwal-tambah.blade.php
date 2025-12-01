@@ -1,7 +1,7 @@
-@extends('layouts.guru')
+@extends('layouts.guru-layout')
 @section('title', 'Tambah Jadwal Konseling')
 
-@section('content')
+@section('page-content')
 <div class="container mx-auto p-6">
     <div class="mb-6 flex items-center justify-between">
         <div>

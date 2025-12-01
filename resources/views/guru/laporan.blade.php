@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.guru-layout')
 
 @section('title', 'Laporan & Statistik - Sistem BK')
 
-@section('content')
+@section('page-content')
 <style>
     hr { display: none; }
     .divide-y > :not([hidden]) ~ :not([hidden]) { border-top-width: 1px; }

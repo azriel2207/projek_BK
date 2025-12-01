@@ -1,85 +1,99 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Settings - Sistem BK</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">📝 Profile Settings</h4>
-                    </div>
-                    <div class="card-body">
-                        
-                        @if(session('success'))
-                            <div class="alert alert-success">
-                                {{ session('success') }}
-                            </div>
-                        @endif
+@php
+    $layout = 'layouts.master';
+    if (Auth::user()->isGuruBK()) {
+        $layout = 'layouts.guru-layout';
+    } elseif (Auth::user()->isSiswa()) {
+        $layout = 'layouts.siswa-layout';
+    } else {
+        $layout = 'layouts.koordinator-layout';
+    }
+@endphp
 
-                        @if($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+@extends($layout)
 
-                        <form action="{{ route('profile.update') }}" method="POST">
-                            @csrf
-                            @method('PUT')
+@section('title', 'Profile Settings - Sistem BK')
 
-                            <!-- Nama -->
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Nama Lengkap</label>
-                                <input type="text" class="form-control" id="name" name="name" 
-                                       value="{{ old('name', $user->name) }}" required>
-                            </div>
+@section('page-content')
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
+            <h1 class="text-2xl font-bold">📝 Profile Settings</h1>
+        </div>
+        
+        <div class="p-6">
+            @if(session('success'))
+                <div class="mb-4 rounded-md bg-green-50 border border-green-200 p-4 text-green-700">
+                    <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                </div>
+            @endif
 
-                            <!-- Email -->
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" 
-                                       value="{{ old('email', $user->email) }}" required>
-                            </div>
+            @if($errors->any())
+                <div class="mb-4 rounded-md bg-red-50 border border-red-200 p-4 text-red-700">
+                    <ul class="list-disc pl-5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                            <!-- Ganti Password Section -->
-                            <div class="border p-3 mb-3">
-                                <h6>🔒 Ganti Password</h6>
-                                <small class="text-muted">Kosongkan jika tidak ingin mengganti password</small>
-                                
-                                <div class="mb-2">
-                                    <label for="current_password" class="form-label">Password Lama</label>
-                                    <input type="password" class="form-control" id="current_password" name="current_password">
-                                </div>
+            <form action="{{ route('profile.update') }}" method="POST" class="space-y-6">
+                @csrf
+                @method('PUT')
 
-                                <div class="mb-2">
-                                    <label for="new_password" class="form-label">Password Baru</label>
-                                    <input type="password" class="form-control" id="new_password" name="new_password">
-                                </div>
+                <!-- Nama -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                           id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                </div>
 
-                                <div class="mb-2">
-                                    <label for="new_password_confirmation" class="form-label">Konfirmasi Password Baru</label>
-                                    <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation">
-                                </div>
-                            </div>
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                           id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                </div>
 
-                            <button type="submit" class="btn btn-primary">💾 Update Profile</button>
-                            <a href="{{ url('/dashboard') }}" class="btn btn-secondary">← Kembali</a>
-                        </form>
+                <!-- Ganti Password Section -->
+                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">🔒 Ganti Password</h3>
+                    <p class="text-sm text-gray-600 mb-4">Kosongkan jika tidak ingin mengganti password</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">Password Lama</label>
+                            <input type="password" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                   id="current_password" name="current_password">
+                        </div>
+
+                        <div>
+                            <label for="new_password" class="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
+                            <input type="password" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                   id="new_password" name="new_password">
+                        </div>
+
+                        <div>
+                            <label for="new_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password Baru</label>
+                            <input type="password" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                   id="new_password_confirmation" name="new_password_confirmation">
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
+                        <i class="fas fa-save mr-2"></i>Update Profile
+                    </button>
+                    <a href="{{ url('/dashboard') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium text-center transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </div>
+</div>
+@endsection
