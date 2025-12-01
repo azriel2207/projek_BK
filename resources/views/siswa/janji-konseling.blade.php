@@ -117,7 +117,7 @@
                             <div class="flex items-center space-x-4 text-sm text-gray-600">
                                 <span class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
-                                    {{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($janji->tanggal)->format('d-m-Y') }}
                                 </span>
                                 <span class="flex items-center">
                                     <i class="fas fa-clock mr-2"></i>
@@ -169,7 +169,7 @@
                         <tbody class="divide-y divide-gray-200">
                             @foreach($janjiKonfirmasi as $janji)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-800">{{ \Carbon\Carbon::parse($janji->tanggal)->translatedFormat('d M Y') }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-800">{{ \Carbon\Carbon::parse($janji->tanggal)->format('d-m-Y') }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">{{ $janji->waktu }}</td>
                                 <td class="px-4 py-3 text-sm">
                                     <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">

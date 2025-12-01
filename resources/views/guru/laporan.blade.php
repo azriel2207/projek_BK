@@ -183,7 +183,7 @@
                     @foreach($recentData as $data)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            {{ \Carbon\Carbon::parse($data->tanggal)->format('d M Y') }}
+                            {{ \Carbon\Carbon::parse($data->tanggal)->format('d-m-Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             {{ $data->name }}

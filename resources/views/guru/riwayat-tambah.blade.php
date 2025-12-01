@@ -34,7 +34,7 @@
                 <div>
                     <div class="text-sm font-medium text-gray-500">Tanggal & Waktu</div>
                     <div class="text-lg text-gray-900">
-                        {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }} - {{ $jadwal->waktu }}
+                        {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d-m-Y') }} - {{ $jadwal->waktu }}
                     </div>
                 </div>
 

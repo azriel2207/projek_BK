@@ -10,7 +10,7 @@
             <div>
                 <h3 class="font-semibold">{{ $janji->user->name }}</h3>
                 <p class="text-sm text-gray-600">{{ $janji->jenis_bimbingan_text }}</p>
-                <p class="text-sm">{{ $janji->tanggal }} | {{ $janji->waktu }}</p>
+                <p class="text-sm">{{ \Carbon\Carbon::parse($janji->tanggal)->format('d-m-Y') }} | {{ $janji->waktu }}</p>
             </div>
             <form action="{{ route('guru.permintaan.konfirmasi', $janji->id) }}" method="POST">
                 @csrf

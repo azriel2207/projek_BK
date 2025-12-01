@@ -32,23 +32,55 @@ Route::middleware('guest')->group(function () {
 });
 
 // =================================================================
-// ROUTES UNTUK EMAIL VERIFICATION
+// ROUTES UNTUK EMAIL VERIFICATION (Code-based)
 // =================================================================
 Route::middleware('auth')->group(function () {
-    // Halaman pemberitahuan untuk verifikasi email
-    Route::get('/email/verify', function () {
-        return view('auth.verify-email');
-    })->name('verification.notice');
-
-    // Kirim ulang email verifikasi
-    Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
-
-        return back()->with('success', 'Link verifikasi telah dikirim ulang ke email Anda!');
-    })->middleware(['throttle:6,1'])->name('verification.send');
+    // Show verification code form (juga sebagai notice page)
+    Route::get('/email/verify-code', [AuthController::class, 'showVerificationCodeForm'])
+        ->name('verification.code');
+    
+    // Alias untuk verification.notice (used by EnsureEmailIsVerified middleware)
+    Route::get('/email/verify', [AuthController::class, 'showVerificationCodeForm'])
+        ->name('verification.notice');
+    
+    // Submit verification code
+    Route::post('/email/verify-code', [AuthController::class, 'verifyCode'])
+        ->name('verification.submit');
+    
+    // Resend verification code
+    Route::post('/email/resend-code', [AuthController::class, 'resendVerificationCode'])
+        ->middleware(['throttle:3,1'])
+        ->name('verification.resend');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Dashboard Redirect (accessible right after verification)
+    Route::get('/dashboard/redirect', function (Request $request) {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
+        switch($user->role) {
+            case 'koordinator_bk':
+            case 'koordinator':
+                return redirect()->route('koordinator.dashboard');
+                
+            case 'guru_bk':
+            case 'guru':
+                return redirect()->route('guru.dashboard');
+                
+            case 'siswa':
+                return redirect()->route('siswa.dashboard');
+                
+            default:
+                Auth::logout();
+                $request->session()->invalidate();
+                return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
+        }
+    })->name('dashboard.redirect');
 });
 
 // Route untuk verifikasi email (HARUS di luar auth middleware karena user belum login)

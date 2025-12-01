@@ -22,14 +22,20 @@
     <!-- Search Box -->
     <div class="mb-6">
         <form method="GET" action="{{ route('guru.guru') }}" class="mb-6">
-            <div class="flex gap-3 items-center">
-                <input type="text" name="q" value="{{ request('q') }}"
-                       class="w-full rounded-lg border px-4 py-3"
+            <div class="flex gap-3 items-center flex-wrap">
+                <input type="text" name="search" value="{{ request('search') }}"
+                       class="flex-1 min-w-[250px] rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                        placeholder="Cari guru berdasarkan nama atau email..." />
 
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg inline-flex items-center gap-2">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg inline-flex items-center gap-2 transition font-medium">
                     <i class="fas fa-search"></i> Cari
                 </button>
+
+                @if(request('search'))
+                    <a href="{{ route('guru.guru') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-3 rounded-lg inline-flex items-center gap-2 transition font-medium">
+                        <i class="fas fa-times"></i> Reset
+                    </a>
+                @endif
             </div>
         </form>
     </div>
@@ -39,6 +45,9 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <h2 class="text-lg font-semibold text-gray-900">Data Guru BK</h2>
             <p class="text-sm text-gray-600">Total {{ $daftarGuru->total() }} guru terdaftar</p>
+            @if(request('search'))
+                <p class="text-sm text-gray-600 mt-2">Hasil pencarian untuk: <strong>"{{ request('search') }}"</strong></p>
+            @endif
         </div>
         
         <div class="overflow-x-auto">
@@ -88,7 +97,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($guru->created_at)->format('d M Y') }}</div>
+                            <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($guru->created_at)->format('d-m-Y') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -110,9 +119,17 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
-                            <i class="fas fa-inbox text-4xl mb-3 block"></i>
-                            <p class="font-medium">Belum ada guru yang terdaftar</p>
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class="fas fa-user-tie text-5xl mb-3 text-gray-300"></i>
+                                <p class="text-gray-500 font-medium mb-1">Guru BK tidak ditemukan</p>
+                                @if(request('search'))
+                                    <p class="text-sm text-gray-400">Tidak ada hasil untuk pencarian "<strong>{{ request('search') }}</strong>"</p>
+                                    <a href="{{ route('guru.guru') }}" class="text-blue-600 hover:text-blue-800 text-sm mt-3">Lihat semua guru BK</a>
+                                @else
+                                    <p class="text-sm text-gray-400">Belum ada data guru BK terdaftar</p>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforelse

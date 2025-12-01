@@ -115,7 +115,7 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-500">Tanggal Konseling</label>
-                                <p class="text-gray-900 mt-1">{{ \Carbon\Carbon::parse($detail->tanggal)->translatedFormat('d F Y') }}</p>
+                                <p class="text-gray-900 mt-1">{{ \Carbon\Carbon::parse($detail->tanggal)->format('d-m-Y') }}</p>
                             </div>
 
                             <div>
@@ -189,7 +189,7 @@
                         <div class="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full mt-2"></div>
                         <div>
                             <p class="font-medium text-gray-900">Janji Konseling Dibuat</p>
-                            <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($detail->created_at)->translatedFormat('d F Y H:i') }}</p>
+                            <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($detail->created_at)->format('d-m-Y H:i') }}</p>
                         </div>
                     </div>
 

@@ -245,7 +245,7 @@
             @forelse($detail_konseling as $key => $data)
                 <tr>
                     <td class="center">{{ $key + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($data->tanggal)->format('d M Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($data->tanggal)->format('d-m-Y') }}</td>
                     <td>{{ $data->siswa_name }}</td>
                     <td style="text-transform: capitalize;">{{ $data->jenis_bimbingan }}</td>
                     <td>

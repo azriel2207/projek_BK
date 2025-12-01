@@ -254,9 +254,9 @@
                 btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
             });
 
-            // Auto-hide flash messages after 5 seconds
+            // Auto-hide flash messages after 5 seconds (hanya untuk notification)
             setTimeout(function() {
-                const alerts = document.querySelectorAll('.bg-red-100, .bg-green-100');
+                const alerts = document.querySelectorAll('body > .bg-red-100, body > .bg-green-100');
                 alerts.forEach(function(alert) {
                     alert.style.transition = 'opacity 0.5s';
                     alert.style.opacity = '0';

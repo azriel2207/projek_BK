@@ -60,7 +60,7 @@
                             <div class="flex flex-wrap gap-4 text-sm text-gray-600">
                                 <span class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
-                                    {{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') : 'Tanggal tidak tersedia' }}
+                                    {{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') : 'Tanggal tidak tersedia' }}
                                 </span>
                                 <span class="flex items-center">
                                     <i class="fas fa-clock mr-2"></i>

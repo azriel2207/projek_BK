@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('students', function (Blueprint $table) {
+        Schema::create('email_verification_codes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('nama_lengkap', 150);
-            $table->string('nis', 20)->unique();
-            $table->date('tgl_lahir')->nullable();
-            $table->text('alamat')->nullable();
-            $table->string('no_hp', 20)->nullable();
-            $table->string('kelas', 10)->nullable();
+            $table->string('code', 6)->unique(); // 6-digit code
+            $table->timestamp('expires_at');
+            $table->boolean('is_verified')->default(false);
+            $table->integer('attempts')->default(0); // Track failed attempts
             $table->timestamps();
-
+            
+            // Foreign key
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            
+            // Index for faster queries
+            $table->index(['user_id', 'expires_at']);
         });
     }
 
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('students');
+        Schema::dropIfExists('email_verification_codes');
     }
 };

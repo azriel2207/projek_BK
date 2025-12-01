@@ -299,10 +299,10 @@
             });
         });
 
-        // Auto-hide flash messages
+        // Auto-hide flash messages (hanya untuk notification, bukan modal)
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                const flashMessages = document.querySelectorAll('.bg-red-100, .bg-green-100');
+                const flashMessages = document.querySelectorAll('body > .bg-red-100, body > .bg-green-100');
                 flashMessages.forEach(function(message) {
                     message.style.transition = 'opacity 0.5s';
                     message.style.opacity = '0';

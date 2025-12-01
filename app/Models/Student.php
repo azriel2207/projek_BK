@@ -27,29 +27,4 @@ class Student extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function counselingSessions()
-    {
-        return $this->hasMany(CounselingSession::class);
-    }
-
-    public function violations()
-    {
-        return $this->hasMany(Violation::class);
-    }
-
-    public function developments()
-    {
-        return $this->hasMany(StudentDevelopment::class);
-    }
-
-    public function feedbacks()
-    {
-        return $this->hasMany(CounselorFeedback::class);
-    }
-
-    public function attendances()
-    {
-        return $this->hasMany(Attendance::class);
-    }
 }

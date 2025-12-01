@@ -118,7 +118,7 @@
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">
                                 <i class="fas fa-calendar text-gray-400 mr-1"></i>
-                                {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
+                                {{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}
                             </div>
                             <div class="text-xs text-gray-500">
                                 <i class="fas fa-clock text-gray-400 mr-1"></i>

@@ -96,11 +96,11 @@ class KoordinatorController extends Controller
     /**
      * MANAJEMEN GURU BK
      */
-    public function indexGuru()
+    public function indexGuru(Request $request)
     {
         try {
             // Query dari users table dengan role guru_bk, left join dengan counselors
-            $gurus = DB::table('users')
+            $query = DB::table('users')
                 ->leftJoin('counselors', 'users.id', '=', 'counselors.user_id')
                 ->where('users.role', 'guru_bk')
                 ->select(
@@ -115,11 +115,26 @@ class KoordinatorController extends Controller
                     'counselors.specialization',
                     'counselors.office_hours',
                     'users.created_at'
-                )
-                ->orderBy('users.created_at', 'desc')
-                ->paginate(10);
+                );
 
-            return view('koordinator.guru.index', compact('gurus'));
+            // Filter pencarian berdasarkan nama atau email
+            if ($search = $request->input('search')) {
+                $search = trim($search);
+                if (!empty($search)) {
+                    $query->where(function($q) use ($search) {
+                        $q->where('users.name', 'like', '%' . $search . '%')
+                          ->orWhere('users.email', 'like', '%' . $search . '%')
+                          ->orWhere('counselors.nama_lengkap', 'like', '%' . $search . '%')
+                          ->orWhere('counselors.nip', 'like', '%' . $search . '%');
+                    });
+                }
+            }
+
+            $gurus = $query->orderBy('users.created_at', 'desc')
+                ->paginate(10)
+                ->withQueryString();
+
+            return view('koordinator.guru', compact('gurus'));
         } catch (\Exception $e) {
             Log::error('Error loading guru BK list', ['error' => $e->getMessage()]);
             return back()->with('error', 'Gagal memuat data guru BK');

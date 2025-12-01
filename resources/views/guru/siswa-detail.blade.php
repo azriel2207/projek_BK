@@ -51,7 +51,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-500">Tanggal Bergabung</label>
                             <p class="text-gray-900">
-                                {{ \Carbon\Carbon::parse($siswa->created_at)->format('d M Y') }}
+                                {{ \Carbon\Carbon::parse($siswa->created_at)->format('d-m-Y') }}
                             </p>
                         </div>
                         
@@ -133,7 +133,7 @@
                                     <div>
                                         <span class="font-medium text-gray-700">Tanggal:</span>
                                         <span class="text-gray-900">
-                                            {{ \Carbon\Carbon::parse($konseling->tanggal)->format('d M Y') }}
+                                            {{ \Carbon\Carbon::parse($konseling->tanggal)->format('d-m-Y') }}
                                         </span>
                                     </div>
                                     <div>

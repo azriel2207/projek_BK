@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
           crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Flatpickr Date Picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 </head>
 <body class="bg-gray-100">
     <!-- Navigation -->
@@ -58,10 +63,18 @@
 
     <!-- Optional: JavaScript untuk interaksi -->
     <script>
-        // Auto-hide flash messages setelah 5 detik
+        // Initialize Flatpickr for all date inputs dengan format DD/MM/YYYY
         document.addEventListener('DOMContentLoaded', function() {
+            // Format tanggal DD/MM/YYYY untuk Indonesia
+            flatpickr('input[type="date"]', {
+                dateFormat: 'd/m/Y',
+                locale: 'id',
+                allowInput: true
+            });
+
+            // Auto-hide flash messages setelah 5 detik (hanya untuk notification)
             setTimeout(function() {
-                const flashMessages = document.querySelectorAll('.bg-green-100, .bg-red-100');
+                const flashMessages = document.querySelectorAll('main > .bg-green-100, main > .bg-red-100');
                 flashMessages.forEach(function(message) {
                     message.style.transition = 'opacity 0.5s';
                     message.style.opacity = '0';

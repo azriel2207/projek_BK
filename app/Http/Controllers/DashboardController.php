@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Student;
 use App\Models\Counselor;
 use App\Models\CounselingSession;
 use Illuminate\Http\Request;
@@ -35,7 +34,7 @@ class DashboardController extends Controller
     private function adminDashboard()
     {
         $stats = [
-            'totalStudents' => Student::count(),
+            'totalStudents' => User::where('role', 'siswa')->count(),
             'totalCounselors' => Counselor::count(),
             'totalSessions' => CounselingSession::count(),
             'pendingSessions' => CounselingSession::where('status', 'menunggu_konfirmasi')->count(),
@@ -57,7 +56,7 @@ class DashboardController extends Controller
             'upcomingSessions' => CounselingSession::where('counselor_id', $counselor->id)
                 ->where('status', 'dijadwalkan')
                 ->count(),
-            'totalStudents' => Student::count(),
+            'totalStudents' => User::where('role', 'siswa')->count(),
         ];
 
         return view('dashboard.counselor', compact('stats'));

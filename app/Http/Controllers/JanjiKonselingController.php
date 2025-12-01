@@ -14,17 +14,17 @@ class JanjiKonselingController extends Controller
         try {
             $user = Auth::user();
             
-            // Janji menunggu konfirmasi
+            // Janji menunggu konfirmasi - sorted DESC (newest first)
             $janjiMenunggu = JanjiKonseling::where('user_id', $user->id)
                 ->where('status', 'menunggu')
-                ->orderBy('tanggal', 'asc')
+                ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Janji yang sudah dikonfirmasi
+            // Janji yang sudah dikonfirmasi - sorted DESC (newest first)
             $janjiKonfirmasi = JanjiKonseling::where('user_id', $user->id)
                 ->where('status', 'dikonfirmasi')
                 ->where('tanggal', '>=', now()->format('Y-m-d'))
-                ->orderBy('tanggal', 'asc')
+                ->orderBy('tanggal', 'desc')
                 ->get();
 
             // Ambil list guru BK dari tabel users dengan role guru_bk/guru

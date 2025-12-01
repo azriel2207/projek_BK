@@ -116,7 +116,7 @@
                                     <div class="flex flex-wrap gap-3 text-sm text-gray-600 ml-11 mt-2">
                                         <span class="flex items-center">
                                             <i class="fas fa-calendar mr-1"></i>
-                                            {{ \Carbon\Carbon::parse(data_get($janji, 'tanggal', now()))->translatedFormat('d M Y') }}
+                                            {{ \Carbon\Carbon::parse(data_get($janji, 'tanggal', now()))->format('d-m-Y') }}
                                         </span>
                                         <span class="flex items-center">
                                             <i class="fas fa-clock mr-1"></i>
@@ -233,7 +233,7 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-600">
-                                        {{ \Carbon\Carbon::parse(data_get($riwayat, 'tanggal', now()))->translatedFormat('d M Y') }}
+                                        {{ \Carbon\Carbon::parse(data_get($riwayat, 'tanggal', now()))->format('d-m-Y') }}
                                     </td>
                                     <td class="px-4 py-3 text-sm">
                                         <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">

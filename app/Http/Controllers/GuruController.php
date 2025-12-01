@@ -356,10 +356,17 @@ public function editJadwal($id)
             $query->where('students.kelas', $kelas);
         }
 
-        $siswa = $query->orderBy('users.name', 'asc')->paginate(20)->withQueryString();
+        $siswa = $query->orderBy('users.created_at', 'desc')->paginate(20)->withQueryString();
 
-        // untuk dropdown kelas — ambil daftar distinct kelas dari tabel students
-        $kelasList = DB::table('students')->select('kelas')->whereNotNull('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
+        // untuk dropdown kelas — ambil daftar distinct kelas dari tabel students (hanya yang tidak kosong)
+        $kelasList = DB::table('students')
+            ->select('kelas')
+            ->whereNotNull('kelas')
+            ->where('kelas', '!=', '') // Filter string kosong
+            ->where('kelas', '!=', ' ') // Filter spasi
+            ->distinct()
+            ->orderBy('kelas')
+            ->pluck('kelas');
 
         return view('guru.siswa', compact('siswa', 'kelasList'));
     }
@@ -715,13 +722,26 @@ public function editJadwal($id)
     /**
      * Daftar Guru BK
      */
-    public function daftarGuru()
+    public function daftarGuru(Request $request)
     {
-        $daftarGuru = DB::table('users')
+        $query = DB::table('users')
             ->whereIn('role', ['guru_bk', 'guru'])
-            ->select('id', 'name', 'email', 'role', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->select('id', 'name', 'email', 'role', 'created_at');
+
+        // Filter pencarian berdasarkan nama atau email
+        if ($search = $request->input('search')) {
+            $search = trim($search);
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('users.name', 'like', '%' . $search . '%')
+                      ->orWhere('users.email', 'like', '%' . $search . '%');
+                });
+            }
+        }
+
+        $daftarGuru = $query->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('guru.daftar-guru', compact('daftarGuru'));
     }

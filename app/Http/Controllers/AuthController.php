@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Models\EmailVerificationCode;
+use App\Jobs\SendVerificationEmail;
+use App\Notifications\SendVerificationCodeEmail;
 
 class AuthController extends Controller
 {
@@ -90,11 +93,20 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'], // Ambil dari input form
+            'role' => $validated['role'],
         ]);
 
-        // Kirim email verification
-        $user->sendEmailVerificationNotification();
+        // Create verification code
+        $verificationCode = EmailVerificationCode::getOrCreateForUser($user);
+
+        // Send verification code via email
+        try {
+            $user->notify(new SendVerificationCodeEmail($verificationCode));
+            $successMessage = 'Registrasi berhasil! Kode verifikasi telah dikirim ke ' . $user->email . '. Silakan cek email Anda dalam beberapa detik.';
+        } catch (\Exception $e) {
+            \Log::error('Error sending verification code: ' . $e->getMessage());
+            $successMessage = 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.';
+        }
 
         // Log registration
         Log::info('New user registered', [
@@ -107,9 +119,9 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        // Redirect ke halaman verifikasi email
-        return redirect()->route('verification.notice')
-            ->with('success', 'Registrasi berhasil! Silahkan verifikasi email Anda. Link verifikasi telah dikirim ke ' . $user->email);
+        // Redirect ke halaman verify code
+        return redirect()->route('verification.code')
+            ->with('success', $successMessage);
     }
 
     public function logout(Request $request)
@@ -129,6 +141,109 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         
         return redirect('/')->with('success', 'Anda telah logout.');
+    }
+
+    /**
+     * Show verification code form
+     */
+    public function showVerificationCodeForm()
+    {
+        if (!Auth::check() || Auth::user()->email_verified_at) {
+            return redirect()->route('login');
+        }
+
+        return view('auth.verify-code');
+    }
+
+    /**
+     * Verify code submitted by user
+     */
+    public function verifyCode(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->email_verified_at) {
+            return redirect()->route('login');
+        }
+
+        // Validasi input
+        $request->validate([
+            'code' => 'required|string|size:6',
+        ], [
+            'code.required' => 'Kode verifikasi diperlukan',
+            'code.size' => 'Kode verifikasi harus 6 digit',
+        ]);
+
+        // Find verification code
+        $verificationCode = EmailVerificationCode::where('user_id', $user->id)
+            ->where('code', $request->code)
+            ->first();
+
+        // Check if code exists and is valid
+        if (!$verificationCode) {
+            return back()->withErrors([
+                'code' => 'Kode verifikasi tidak valid'
+            ])->withInput();
+        }
+
+        if (!$verificationCode->isValid()) {
+            if ($verificationCode->isExpired()) {
+                $verificationCode->delete();
+                return back()->withErrors([
+                    'code' => 'Kode verifikasi telah expired. Silakan minta kode baru.'
+                ]);
+            }
+
+            if ($verificationCode->attempts >= 5) {
+                $verificationCode->delete();
+                return back()->withErrors([
+                    'code' => 'Terlalu banyak percobaan salah. Silakan minta kode baru.'
+                ]);
+            }
+        }
+
+        // Mark email as verified
+        $user->email_verified_at = now();
+        $user->save();
+        $verificationCode->markAsVerified();
+
+        Log::info('Email verified', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'verified_at' => $user->email_verified_at
+        ]);
+
+        // Refresh user instance and update auth state
+        $user->refresh();
+        Auth::setUser($user);
+        $request->session()->regenerate();
+
+        // Redirect to dashboard redirect route (no verified middleware)
+        return redirect()->route('dashboard.redirect')
+            ->with('success', 'Email berhasil diverifikasi! Selamat datang.');
+    }
+
+    /**
+     * Resend verification code
+     */
+    public function resendVerificationCode(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->email_verified_at) {
+            return redirect()->route('login');
+        }
+
+        // Create new code
+        $verificationCode = EmailVerificationCode::getOrCreateForUser($user);
+
+        try {
+            $user->notify(new SendVerificationCodeEmail($verificationCode));
+            return back()->with('success', 'Kode verifikasi baru telah dikirim ke email Anda.');
+        } catch (\Exception $e) {
+            Log::error('Error resending verification code: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Gagal mengirim kode verifikasi. Silakan coba lagi.']);
+        }
     }
 
     public function showProfile()

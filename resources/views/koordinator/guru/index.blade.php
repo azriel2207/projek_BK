@@ -75,16 +75,29 @@
 
     <!-- Search & Filter -->
     <div class="mb-6 bg-white p-4 rounded-lg shadow">
-        <form action="{{ route('koordinator.guru.index') }}" method="GET" class="flex gap-4">
-            <input type="text" name="search" placeholder="Cari nama atau email..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ request('search') }}">
-            <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg">
-                Cari
+        <form action="{{ route('koordinator.guru.index') }}" method="GET" class="flex gap-3 items-center flex-wrap">
+            <input type="text" name="search" placeholder="Cari guru berdasarkan nama, email, atau NIP..." 
+                   class="flex-1 min-w-[250px] px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                   value="{{ request('search') }}">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2">
+                <i class="fas fa-search"></i> Cari
             </button>
+            @if(request('search'))
+                <a href="{{ route('koordinator.guru.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2">
+                    <i class="fas fa-times"></i> Reset
+                </a>
+            @endif
         </form>
     </div>
 
     <!-- Data Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">Daftar Guru BK</h3>
+            @if(request('search'))
+                <p class="text-sm text-gray-600">Hasil pencarian untuk: <strong>"{{ request('search') }}"</strong></p>
+            @endif
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white">
                 <thead class="bg-gray-200">
@@ -178,8 +191,17 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">
-                            Tidak ada data guru BK
+                        <td colspan="9" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class="fas fa-user-tie text-5xl mb-3 text-gray-300"></i>
+                                <p class="text-gray-500 font-medium mb-1">Guru BK tidak ditemukan</p>
+                                @if(request('search'))
+                                    <p class="text-sm text-gray-400">Tidak ada hasil untuk pencarian "<strong>{{ request('search') }}</strong>"</p>
+                                    <a href="{{ route('koordinator.guru.index') }}" class="text-blue-600 hover:text-blue-800 text-sm mt-3">Lihat semua guru BK</a>
+                                @else
+                                    <p class="text-sm text-gray-400">Belum ada data guru BK terdaftar</p>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforelse

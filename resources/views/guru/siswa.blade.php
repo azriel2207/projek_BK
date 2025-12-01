@@ -24,21 +24,25 @@
     <!-- Search Box -->
     <div class="mb-6">
         <form method="GET" action="{{ route('guru.siswa') }}" class="mb-6">
-            <div class="flex gap-3 items-center">
+            <div class="flex gap-3 items-center flex-wrap">
                 <input type="text" name="q" value="{{ request('q') }}"
-                       class="w-full rounded-lg border px-4 py-3"
+                       class="flex-1 min-w-[250px] rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                        placeholder="Cari siswa berdasarkan nama atau email..." />
 
-                <select name="kelas" class="rounded-lg border px-3 py-3">
-                    <option value="">Semua Kelas</option>
-                    @foreach($kelasList as $k)
-                        <option value="{{ $k }}" {{ request('kelas') == $k ? 'selected' : '' }}>
-                            {{ $k }}
-                        </option>
-                    @endforeach
-                </select>
+                @if($kelasList->count() > 0)
+                    <select name="kelas" class="rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="">Semua Kelas</option>
+                        @foreach($kelasList as $k)
+                            @if($k && trim($k) !== '')
+                                <option value="{{ $k }}" {{ request('kelas') == $k ? 'selected' : '' }}>
+                                    {{ $k }}
+                                </option>
+                            @endif
+                        @endforeach
+                    </select>
+                @endif
 
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg inline-flex items-center gap-2">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg inline-flex items-center gap-2 transition font-medium">
                     <i class="fas fa-search"></i> Cari
                 </button>
 
@@ -99,7 +103,7 @@
                             <div class="text-sm text-gray-900">{{ $item->email }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($item->created_at)->format('d M Y') }}</div>
+                            <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($item->created_at)->format('d-m-Y') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">

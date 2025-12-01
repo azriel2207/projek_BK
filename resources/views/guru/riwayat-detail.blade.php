@@ -44,7 +44,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-500">Tanggal Konseling</label>
                             <p class="text-gray-900">
-                                {{ \Carbon\Carbon::parse($catatan->tanggal)->format('d M Y') }}
+                                {{ \Carbon\Carbon::parse($catatan->tanggal)->format('d-m-Y') }}
                             </p>
                         </div>
                         
@@ -154,7 +154,7 @@
                     <div>
                         <p class="font-medium text-gray-900">Konseling Dibuat</p>
                         <p class="text-sm text-gray-500">
-                            {{ \Carbon\Carbon::parse($catatan->created_at)->format('d M Y H:i') }}
+                            {{ \Carbon\Carbon::parse($catatan->created_at)->format('d-m-Y H:i') }}
                         </p>
                     </div>
                 </div>
@@ -165,7 +165,7 @@
                     <div>
                         <p class="font-medium text-gray-900">Terakhir Diperbarui</p>
                         <p class="text-sm text-gray-500">
-                            {{ \Carbon\Carbon::parse($catatan->updated_at)->format('d M Y H:i') }}
+                            {{ \Carbon\Carbon::parse($catatan->updated_at)->format('d-m-Y H:i') }}
                         </p>
                     </div>
                 </div>

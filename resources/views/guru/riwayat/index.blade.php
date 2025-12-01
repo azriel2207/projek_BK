@@ -5,8 +5,19 @@
 @section('page-content')
 @php use Illuminate\Support\Str; @endphp
 <div class="container mx-auto px-6 py-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Riwayat Konseling Siswa</h1>
+        <p class="text-gray-600">Daftar lengkap konseling yang telah selesai</p>
+    </div>
+
+    <!-- Back Button -->
     <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Riwayat Konseling Siswa</h1>
+        <a href="{{ route('guru.dashboard') }}" 
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition font-medium">
+            <i class="fas fa-arrow-left"></i>
+            <span>Kembali ke Dashboard</span>
+        </a>
     </div>
 
     @if(session('success'))
@@ -36,7 +47,7 @@
                                 {{ $item->jenis_bimbingan }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
                         <td class="px-6 py-4 text-sm">
                             <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
                                 {{ ucfirst($item->status) }}

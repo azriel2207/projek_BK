@@ -45,7 +45,7 @@
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $item->siswa->name }}</td>
                 <td>{{ $item->judul }}</td>
-                <td>{{ $item->tanggal_konseling->format('d/m/Y') }}</td>
+                <td>{{ $item->tanggal_konseling->format('d-m-Y') }}</td>
                 <td>{{ ucfirst($item->jenis_konseling) }}</td>
                 <td>
                     <span class="badge badge-{{ $item->status }}">

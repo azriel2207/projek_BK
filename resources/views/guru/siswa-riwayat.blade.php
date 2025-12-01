@@ -66,7 +66,7 @@
                             <tr class="hover:bg-gray-50 transition duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ \Carbon\Carbon::parse($konseling->tanggal)->format('d M Y') }}
+                                        {{ \Carbon\Carbon::parse($konseling->tanggal)->format('d-m-Y') }}
                                     </div>
                                     <div class="text-sm text-gray-500">{{ $konseling->waktu }}</div>
                                 </td>

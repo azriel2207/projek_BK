@@ -32,7 +32,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600">Tanggal Lahir</label>
-                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->tgl_lahir ? \Carbon\Carbon::parse($siswa->tgl_lahir)->format('d/m/Y') : 'N/A' }}</p>
+                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->tgl_lahir ? \Carbon\Carbon::parse($siswa->tgl_lahir)->format('d-m-Y') : 'N/A' }}</p>
                     </div>
 
                     <div>

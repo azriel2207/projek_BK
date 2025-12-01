@@ -88,10 +88,10 @@
             document.querySelector('.sidebar').classList.toggle('active');
         });
 
-        // Auto-hide flash messages
+        // Auto-hide flash messages (hanya untuk alert notification, bukan modal)
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
+                const alerts = document.querySelectorAll('main > .alert');
                 alerts.forEach(function(alert) {
                     alert.style.transition = 'opacity 0.5s';
                     alert.style.opacity = '0';
