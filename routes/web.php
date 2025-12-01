@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KoordinatorController;
@@ -9,33 +10,119 @@ use App\Http\Controllers\Koordinator\LaporanController;
 use App\Http\Controllers\CatatanController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
-// Landing page
+
+// =================================================================
+// ROUTES UNTUK LANDING PAGE DAN HALAMAN PUBLIK
+// =================================================================
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Auth Routes - TANPA MIDDLEWARE
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Profile routes (untuk semua role yang login)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
-    Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+// =================================================================
+// ROUTES UNTUK AUTHENTIKASI (LOGIN, REGISTER, LOGOUT)
+// =================================================================
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
 // =================================================================
-// ROUTES UNTUK KOORDINATOR BK - MENGGUNAKAN FULL CLASS PATH
+// ROUTES UNTUK EMAIL VERIFICATION
 // =================================================================
-Route::middleware(['auth', CheckRole::class.':koordinator,koordinator_bk'])
-    ->prefix('koordinator')
-    ->name('koordinator.')
-    ->group(function () {
+Route::middleware('auth')->group(function () {
+    // Halaman pemberitahuan untuk verifikasi email
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    // Kirim ulang email verifikasi
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('success', 'Link verifikasi telah dikirim ulang ke email Anda!');
+    })->middleware(['throttle:6,1'])->name('verification.send');
+
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+// Route untuk verifikasi email (HARUS di luar auth middleware karena user belum login)
+Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+    // Find user by ID
+    $user = \App\Models\User::find($id);
+    
+    if (!$user) {
+        return redirect('/login')->with('error', 'User tidak ditemukan.');
+    }
+    
+    // Verify hash matches email
+    if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        return redirect('/login')->with('error', 'Link verifikasi tidak valid.');
+    }
+    
+    // Check if already verified
+    if ($user->hasVerifiedEmail()) {
+        return redirect('/login')->with('success', 'Email Anda sudah terverifikasi.');
+    }
+    
+    // Mark email as verified
+    $user->markEmailAsVerified();
+    
+    // Login user
+    Auth::login($user, true);
+    
+    // Redirect ke dashboard sesuai role setelah verifikasi
+    if ($user->isKoordinatorBK()) {
+        return redirect()->route('koordinator.dashboard')->with('success', 'Email berhasil diverifikasi! Selamat datang.');
+    } elseif ($user->isGuruBK()) {
+        return redirect()->route('guru.dashboard')->with('success', 'Email berhasil diverifikasi! Selamat datang.');
+    } else {
+        return redirect()->route('siswa.dashboard')->with('success', 'Email berhasil diverifikasi! Selamat datang.');
+    }
+})->middleware(['signed'])->name('verification.verify');
+
+// =================================================================
+// PROTECTED ROUTES - HARUS LOGIN DAN EMAIL TERVERIFIKASI
+// =================================================================
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Profile routes
+    Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
+    Route::post('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    
+    // Dashboard Redirect Berdasarkan Role
+    Route::middleware(['auth'])->get('/dashboard', function () {
+        $user = Auth::user();
+        
+        switch($user->role) {
+            case 'koordinator_bk':
+            case 'koordinator':
+                return redirect()->route('koordinator.dashboard');
+                
+            case 'guru_bk':
+            case 'guru':
+                return redirect()->route('guru.dashboard');
+                
+            case 'siswa':
+                return redirect()->route('siswa.dashboard');
+                
+            default:
+                Auth::logout();
+                return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
+        }
+    })->name('dashboard');
+
+    // =================================================================
+    // ROUTES UNTUK KOORDINATOR BK - MENGGUNAKAN FULL CLASS PATH
+    // =================================================================
+    Route::middleware(['auth', CheckRole::class.':koordinator,koordinator_bk'])
+        ->prefix('koordinator')
+        ->name('koordinator.')
+        ->group(function () {
         Route::get('/dashboard', [KoordinatorController::class, 'dashboard'])->name('dashboard');
         
         // Guru routes
@@ -75,14 +162,15 @@ Route::middleware(['auth', CheckRole::class.':koordinator,koordinator_bk'])
         Route::get('/laporan/generate-prioritas', [LaporanController::class, 'generateKasusPrioritas'])->name('laporan.generate-prioritas');
         
      
-});
-// =================================================================
-// ROUTES UNTUK GURU BK - VERSI SEDERHANA
-// =================================================================
-Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
-    ->prefix('guru')
-    ->name('guru.')
-    ->group(function () {
+    });
+
+    // =================================================================
+    // ROUTES UNTUK GURU BK - VERSI SEDERHANA
+    // =================================================================
+    Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
+        ->prefix('guru')
+        ->name('guru.')
+        ->group(function () {
         
         // DASHBOARD
         Route::get('/dashboard', [GuruController::class, 'dashboard'])->name('dashboard');
@@ -139,13 +227,13 @@ Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
     });
 
 
-// =================================================================
-// ROUTES UNTUK SISWA - MENGGUNAKAN FULL CLASS PATH
-// =================================================================
-Route::middleware(['auth', CheckRole::class.':siswa'])
-    ->prefix('siswa')
-    ->name('siswa.')
-    ->group(function () {
+    // =================================================================
+    // ROUTES UNTUK SISWA - MENGGUNAKAN FULL CLASS PATH
+    // =================================================================
+    Route::middleware(['auth', CheckRole::class.':siswa'])
+        ->prefix('siswa')
+        ->name('siswa.')
+        ->group(function () {
         Route::get('/dashboard', [SiswaController::class, 'dashboard'])->name('dashboard');
         Route::get('/janji-konseling', [JanjiKonselingController::class, 'index'])->name('janji-konseling');
         Route::post('/janji-konseling', [JanjiKonselingController::class, 'store'])->name('janji-konseling.store');
@@ -159,27 +247,27 @@ Route::middleware(['auth', CheckRole::class.':siswa'])
         Route::get('/riwayat-karir/{id}', [SiswaController::class, 'detailRiwayatKarir'])->name('riwayat-karir-detail');
     });
 
-// =================================================================
-// FALLBACK DASHBOARD REDIRECT
-// =================================================================
-Route::middleware(['auth'])->get('/dashboard', function () {
-    $user = Auth::user();
-    
-    switch($user->role) {
-        case 'koordinator_bk':
-        case 'koordinator':
-            return redirect()->route('koordinator.dashboard');
-            
-        case 'guru_bk':
-        case 'guru':
-            return redirect()->route('guru.dashboard');
-            
-        case 'siswa':
-            return redirect()->route('siswa.dashboard');
-            
-        default:
-            Auth::logout();
-            return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
-    }
-})->name('dashboard');
-    
+    // =================================================================
+    // FALLBACK DASHBOARD REDIRECT
+    // =================================================================
+    Route::middleware(['auth'])->get('/dashboard', function () {    
+        $user = Auth::user();
+        
+        switch($user->role) {
+            case 'koordinator_bk':
+            case 'koordinator':
+                return redirect()->route('koordinator.dashboard');
+                
+            case 'guru_bk':
+            case 'guru':
+                return redirect()->route('guru.dashboard');
+                
+            case 'siswa':
+                return redirect()->route('siswa.dashboard');
+                
+            default:
+                Auth::logout();
+                return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
+        }
+    })->name('dashboard');
+});

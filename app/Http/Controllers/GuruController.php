@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Catatan;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class GuruController extends Controller
 {
@@ -63,7 +64,7 @@ class GuruController extends Controller
                     ];
                 })->toArray();
 
-            \Log::info('GURU_DASH_STATS', [
+            Log::info('GURU_DASH_STATS', [
                 'computed_stats' => $stats,
                 'recent_selesai_sample' => $recentSelesai
             ]);

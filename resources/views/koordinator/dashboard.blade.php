@@ -106,7 +106,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Total Siswa</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ $stats['total_siswa'] }}
+                                {{ $stats['total_siswa'] ?? 0 }}
                             </p>
                             <p class="text-blue-600 text-sm mt-2">
                                 <i class="fas fa-users"></i> Terdaftar
@@ -124,7 +124,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Guru BK</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ $stats['total_guru'] }}
+                                {{ $stats['total_guru'] ?? 0 }}
                             </p>
                             <p class="text-green-600 text-sm mt-2">
                                 <i class="fas fa-user-tie"></i> Aktif
@@ -142,7 +142,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Konseling Bulan Ini</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ $stats['konseling_bulan_ini'] }}
+                                {{ $stats['konseling_bulan_ini'] ?? 0 }}
                             </p>
                             <p class="text-purple-600 text-sm mt-2">
                                 <i class="fas fa-comments"></i> Sesi
@@ -160,7 +160,7 @@
                         <div>
                             <p class="text-gray-500 text-sm">Menunggu Konfirmasi</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
-                                {{ $stats['menunggu_konfirmasi'] }}
+                                {{ $stats['menunggu_konfirmasi'] ?? 0 }}
                             </p>
                             <p class="text-orange-600 text-sm mt-2">
                                 <i class="fas fa-exclamation-triangle"></i> Perlu tindakan
@@ -244,12 +244,24 @@
                 <div class="space-y-4">
                     @forelse($recentActivities as $activity)
                     <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                        <div class="bg-{{ $activity->status == 'selesai' ? 'green' : ($activity->status == 'menunggu' ? 'yellow' : 'blue') }}-100 p-2 rounded-full">
-                            <i class="fas fa-{{ $activity->status == 'selesai' ? 'check' : ($activity->status == 'menunggu' ? 'clock' : 'calendar') }} text-{{ $activity->status == 'selesai' ? 'green' : ($activity->status == 'menunggu' ? 'yellow' : 'blue') }}-600"></i>
+                        @php
+                            $statusColor = match($activity->status ?? 'pending') {
+                                'selesai' => 'bg-green-100',
+                                'menunggu' => 'bg-yellow-100',
+                                default => 'bg-blue-100'
+                            };
+                            $statusIcon = match($activity->status ?? 'pending') {
+                                'selesai' => 'fa-check text-green-600',
+                                'menunggu' => 'fa-clock text-yellow-600',
+                                default => 'fa-calendar text-blue-600'
+                            };
+                        @endphp
+                        <div class="{{ $statusColor }} p-2 rounded-full">
+                            <i class="fas {{ $statusIcon }}"></i>
                         </div>
                         <div class="flex-1">
-                            <p class="font-medium text-gray-800">{{ $activity->name }}</p>
-                            <p class="text-sm text-gray-600">{{ ucfirst($activity->jenis_bimbingan) }} - {{ ucfirst($activity->status) }}</p>
+                            <p class="font-medium text-gray-800">{{ $activity->name ?? 'Unknown' }}</p>
+                            <p class="text-sm text-gray-600">{{ ucfirst($activity->jenis_bimbingan ?? 'general') }} - {{ ucfirst($activity->status ?? 'pending') }}</p>
                             <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($activity->created_at)->diffForHumans() }}</p>
                         </div>
                     </div>

@@ -28,6 +28,10 @@ class AuthController extends Controller
         $request->session()->regenerate();
         
         $user = Auth::user();
+        // Ensure $user is an instance of App\Models\User
+        if (!$user instanceof \App\Models\User) {
+            $user = User::find($user->id);
+        }
         
         // Log untuk debug
         Log::info('Login success', [
@@ -87,12 +91,10 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'], // Ambil dari input form
-            'email_verified_at' => now(),
         ]);
 
-        // Auto login
-        Auth::login($user);
-        $request->session()->regenerate();
+        // Kirim email verification
+        $user->sendEmailVerificationNotification();
 
         // Log registration
         Log::info('New user registered', [
@@ -101,14 +103,13 @@ class AuthController extends Controller
             'user_id' => $user->id
         ]);
 
-        // Redirect sesuai role
-        if ($user->role === 'guru_bk') {
-            return redirect()->route('guru.dashboard')
-                ->with('success', 'Registrasi berhasil! Selamat datang di Dashboard Guru BK.');
-        } else {
-            return redirect()->route('siswa.dashboard')
-                ->with('success', 'Registrasi berhasil! Selamat datang di Sistem BK.');
-        }
+        // Auto login
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        // Redirect ke halaman verifikasi email
+        return redirect()->route('verification.notice')
+            ->with('success', 'Registrasi berhasil! Silahkan verifikasi email Anda. Link verifikasi telah dikirim ke ' . $user->email);
     }
 
     public function logout(Request $request)
@@ -155,18 +156,22 @@ class AuthController extends Controller
         ]);
 
         // Update name dan email
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+        if (!$user instanceof \App\Models\User) {
+            $user = \App\Models\User::find($user->id);
+        }
+        if ($user) {
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->save();
+        }
 
         // Update password jika diisi
         if ($request->filled('current_password')) {
+            // Pastikan password lama sesuai
             if (Hash::check($request->current_password, $user->password)) {
-                $user->update([
-                    'password' => Hash::make($request->new_password)
-                ]);
-                
+                $user->password = Hash::make($request->new_password);
+                $user->save();
+
                 Log::info('Password updated', ['user_id' => $user->id]);
             } else {
                 return back()->withErrors([

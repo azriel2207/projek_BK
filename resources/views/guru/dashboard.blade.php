@@ -462,4 +462,14 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                const alerts
+                const alerts = document.querySelectorAll('[role="alert"]');
+                alerts.forEach(alert => {
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 5000);
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

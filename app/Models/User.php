@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\CustomVerifyEmailNotification;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -15,8 +17,8 @@ class User extends Authenticatable
         'email', 
         'password',
         'role',
-        'phone', // tambahkan ini
-        'class'  // tambahkan ini jika perlu
+        'phone',
+        'class'
     ];
 
     protected $hidden = [
@@ -32,6 +34,7 @@ class User extends Authenticatable
         ];
     }
 
+    // Role check methods
     public function isKoordinatorBK()
     {
         return $this->role === 'koordinator_bk';
@@ -47,14 +50,34 @@ class User extends Authenticatable
         return $this->role === 'siswa';
     }
 
-    // Tambahkan relasi untuk konseling
-    public function counselingRequestsAsStudent()
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
     {
-        return $this->hasMany(CounselingRequest::class, 'student_id');
+        $this->notify(new CustomVerifyEmailNotification());
     }
 
-    public function counselingRequestsAsCounselor()
+    // Relationships
+    public function student()
     {
-        return $this->hasMany(CounselingRequest::class, 'counselor_id');
+        return $this->hasOne(Student::class, 'user_id');
+    }
+
+    public function counselor()
+    {
+        return $this->hasOne(Counselor::class, 'user_id');
+    }
+
+    public function janjiKonselings()
+    {
+        return $this->hasMany(JanjiKonseling::class, 'user_id');
+    }
+
+    public function catatanKonselings()
+    {
+        return $this->hasMany(Catatan::class, 'user_id');
     }
 }
