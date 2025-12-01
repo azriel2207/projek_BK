@@ -86,7 +86,7 @@
                             <label for="no_hp" class="block text-gray-700 font-bold mb-2">No HP *</label>
                             <input type="text" name="no_hp" id="no_hp" 
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   value="{{ old('no_hp', $siswa->no_hp) }}" required>
+                                   value="{{ old('no_hp', $siswa->phone ?? $siswa->no_hp ?? '') }}" required>
                         </div>
 
                         <!-- Password -->

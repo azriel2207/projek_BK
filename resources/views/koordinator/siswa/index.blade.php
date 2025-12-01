@@ -134,7 +134,7 @@
                             {{ $siswa->email }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ $siswa->no_hp ?? '-' }}
+                            {{ $siswa->phone ?? $siswa->no_hp ?? '-' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-2">

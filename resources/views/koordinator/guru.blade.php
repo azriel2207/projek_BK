@@ -7,10 +7,10 @@
                     <h1 class="text-2xl font-bold text-gray-800">Manajemen Guru BK</h1>
                     <p class="text-gray-600">Kelola data guru bimbingan dan konseling</p>
                 </div>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition font-medium">
+                <a href="{{ route('koordinator.guru.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition font-medium">
                     <i class="fas fa-plus"></i>
                     <span>Tambah Guru BK</span>
-                </button>
+                </a>
             </div>
 
             <!-- Stats Cards -->
@@ -152,12 +152,16 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button class="text-blue-600 hover:text-blue-900 mr-3 transition">
+                                    <a href="{{ route('koordinator.guru.edit', $guru->id) }}" class="text-blue-600 hover:text-blue-900 mr-3 transition">
                                         <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="text-red-600 hover:text-red-900 transition">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
+                                    </a>
+                                    <form method="POST" action="{{ route('koordinator.guru.destroy', $guru->id) }}" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus guru ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900 transition">
+                                            <i class="fas fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             @empty

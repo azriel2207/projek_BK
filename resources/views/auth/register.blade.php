@@ -76,7 +76,7 @@
                             id="password" 
                             name="password" 
                             required
-                            placeholder="Minimal 6 karakter"
+                            placeholder="Minimal 8 karakter"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('password') border-red-500 @enderror"
                         >
                         <button type="button" onclick="togglePassword('password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">

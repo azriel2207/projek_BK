@@ -159,7 +159,7 @@ class KoordinatorController extends Controller
                 'office_hours' => 'nullable|string',
             ]);
 
-            // Buat user
+            // Buat user (hanya dengan kolom yang ada di users table)
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -169,7 +169,7 @@ class KoordinatorController extends Controller
                 'email_verified_at' => now(),
             ]);
 
-            // Buat counselor
+            // Buat counselor record secara manual dengan semua data
             Counselor::create([
                 'user_id' => $user->id,
                 'nama_lengkap' => $validated['name'],
@@ -247,7 +247,7 @@ class KoordinatorController extends Controller
                 'password' => 'nullable|min:8|confirmed',
             ]);
 
-            // Update user
+            // Update user (hanya kolom yang ada di users table)
             $updateData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -260,7 +260,7 @@ class KoordinatorController extends Controller
 
             $user->update($updateData);
 
-            // Update atau create counselor record
+            // Update counselor record
             $counselor = Counselor::where('user_id', $user->id)->first();
             
             if ($counselor) {
@@ -268,18 +268,8 @@ class KoordinatorController extends Controller
                     'nama_lengkap' => $validated['name'],
                     'nip' => $validated['nip'] ?? $counselor->nip,
                     'no_hp' => $validated['phone'],
-                    'specialization' => $validated['specialization'],
-                    'office_hours' => $validated['office_hours'],
-                ]);
-            } else {
-                // Create counselor record jika belum ada
-                Counselor::create([
-                    'user_id' => $user->id,
-                    'nama_lengkap' => $validated['name'],
-                    'nip' => $validated['nip'] ?? 'NIP' . $user->id,
-                    'no_hp' => $validated['phone'],
-                    'specialization' => $validated['specialization'] ?? 'Umum',
-                    'office_hours' => $validated['office_hours'] ?? '08:00 - 16:00',
+                    'specialization' => $validated['specialization'] ?? $counselor->specialization,
+                    'office_hours' => $validated['office_hours'] ?? $counselor->office_hours,
                 ]);
             }
 
@@ -377,6 +367,7 @@ class KoordinatorController extends Controller
                     'users.id',
                     'users.name',
                     'users.email',
+                    'users.phone',
                     'students.id as student_id',
                     'students.nis',
                     'students.nama_lengkap',
@@ -424,16 +415,17 @@ class KoordinatorController extends Controller
                 'no_hp' => 'required|string',
             ]);
 
-            // Buat user
+            // Buat user (hanya dengan kolom yang ada di users table)
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'siswa',
                 'email_verified_at' => now(),
+                'phone' => $validated['no_hp'],
             ]);
 
-            // Buat student
+            // Buat student record secara manual karena data tidak ada di users table
             Student::create([
                 'user_id' => $user->id,
                 'nama_lengkap' => $validated['name'],
@@ -554,10 +546,11 @@ class KoordinatorController extends Controller
                 'password' => 'nullable|min:8|confirmed',
             ]);
 
-            // Update user
+            // Update user (hanya kolom yang ada di users table)
             $updateData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'phone' => $validated['no_hp'],
             ];
 
             if ($request->filled('password')) {
@@ -566,7 +559,7 @@ class KoordinatorController extends Controller
 
             $user->update($updateData);
 
-            // Update atau create student record
+            // Update student record
             $siswa = Student::where('user_id', $user->id)->first();
             
             if ($siswa) {
@@ -577,17 +570,6 @@ class KoordinatorController extends Controller
                     'alamat' => $validated['alamat'] ?? $siswa->alamat,
                     'no_hp' => $validated['no_hp'] ?? $siswa->no_hp,
                     'kelas' => $validated['kelas'] ?? $siswa->kelas,
-                ]);
-            } else {
-                // Create student record jika belum ada
-                Student::create([
-                    'user_id' => $user->id,
-                    'nama_lengkap' => $validated['name'],
-                    'nis' => $validated['nis'] ?? 'NIS' . $user->id,
-                    'tgl_lahir' => $validated['tgl_lahir'],
-                    'alamat' => $validated['alamat'],
-                    'no_hp' => $validated['no_hp'],
-                    'kelas' => $validated['kelas'] ?? 'N/A',
                 ]);
             }
 
@@ -695,9 +677,10 @@ class KoordinatorController extends Controller
             ]);
 
             DB::transaction(function () use ($user, $request) {
-                // Update role user
+                // Update user dengan nip agar ProfileSync menggunakannya
                 $user->update([
                     'role' => 'guru_bk',
+                    'nip' => $request->nip,
                     'updated_at' => now()
                 ]);
 
@@ -706,17 +689,15 @@ class KoordinatorController extends Controller
                     $user->student->delete();
                 }
 
-                // Buat data guru BK
-                Counselor::create([
-                    'user_id' => $user->id,
-                    'nama_lengkap' => $user->name,
-                    'nip' => $request->nip,
-                    'no_hp' => $user->phone,
-                    'specialization' => $request->specialization,
-                    'office_hours' => $request->office_hours,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                // Update counselor record (Observer sudah membuat saat role berubah)
+                $counselor = Counselor::where('user_id', $user->id)->first();
+                if ($counselor) {
+                    $counselor->update([
+                        'nip' => $request->nip,
+                        'specialization' => $request->specialization,
+                        'office_hours' => $request->office_hours,
+                    ]);
+                }
             });
 
             Log::info('User upgraded to guru BK', [

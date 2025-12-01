@@ -52,7 +52,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600">No HP</label>
-                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->no_hp ?? 'N/A' }}</p>
+                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->phone ?? $siswa->no_hp ?? 'N/A' }}</p>
                     </div>
 
                     <div>

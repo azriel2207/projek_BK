@@ -138,7 +138,7 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
                     <div class="space-y-3">
-                        <a href="{{ route('koordinator.guru.index') }}" class="block bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
+                        <a href="{{ route('koordinator.guru.create') }}" class="block bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
                             <i class="fas fa-user-plus text-blue-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Tambah Guru BK</p>
                         </a>
