@@ -62,7 +62,7 @@
                 </div>
                 
                 <div class="p-6">
-                    <form action="{{ route('guru.catatan.simpan') }}" method="POST">
+                    <form action="{{ route('guru.riwayat.simpan') }}" method="POST">
                         @csrf
                         <input type="hidden" name="user_id" value="{{ $jadwal->user_id ?? '' }}">
                         <input type="hidden" name="janji_id" value="{{ $jadwal->id ?? '' }}">

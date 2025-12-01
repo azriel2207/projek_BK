@@ -105,7 +105,7 @@
                                         <i class="fas fa-eye"></i> Detail
                                     </a>
                                     @if($konseling->status == 'selesai' && $konseling->catatan_konselor)
-                                    <a href="{{ route('guru.catatan.detail', $konseling->id) }}" 
+                                    <a href="{{ route('guru.riwayat.detail', $konseling->id) }}" 
                                        class="text-green-600 hover:text-green-900">
                                         <i class="fas fa-clipboard-check"></i> Catatan
                                     </a>

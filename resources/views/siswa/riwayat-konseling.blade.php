@@ -155,14 +155,9 @@
                             @endif
                         </div>
                         <div class="flex space-x-2">
-                            <button onclick="showDetail({{ $item->id }})" class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition flex items-center">
+                            <a href="{{ route('siswa.riwayat-konseling-detail', $item->id) }}" class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition inline-flex items-center">
                                 <i class="fas fa-eye mr-2"></i>Detail
-                            </button>
-                            @if($item->status == 'selesai')
-                            <button onclick="downloadSertifikat({{ $item->id }})" class="bg-green-100 text-green-800 px-4 py-2 rounded-lg text-sm hover:bg-green-200 transition flex items-center">
-                                <i class="fas fa-download mr-2"></i>Sertifikat
-                            </button>
-                            @endif
+                            </a>
                         </div>
                     </div>
                     @endforeach
@@ -198,14 +193,6 @@
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('active');
         });
-
-        function showDetail(id) {
-            alert('Detail riwayat konseling ID: ' + id + '\n\nFitur detail sedang dikembangkan.');
-        }
-
-        function downloadSertifikat(id) {
-            alert('Download sertifikat untuk ID: ' + id + '\n\nFitur download sedang dikembangkan.');
-        }
     </script>
 </body>
 </html>

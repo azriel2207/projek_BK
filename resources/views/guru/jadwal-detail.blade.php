@@ -121,7 +121,7 @@
                 </a>
                 
                 @if($jadwal->status != 'selesai' && $jadwal->status != 'dibatalkan')
-                <a href="{{ route('guru.catatan.tambah', $jadwal->id) }}" 
+                <a href="{{ route('guru.riwayat.tambah', $jadwal->id) }}" 
                    class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
                     <i class="fas fa-notes-medical"></i>
                     <span>Tambah Catatan</span>

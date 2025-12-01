@@ -99,8 +99,24 @@ class KoordinatorController extends Controller
     public function indexGuru()
     {
         try {
-            $gurus = Counselor::with('user')
-                ->orderBy('created_at', 'desc')
+            // Query dari users table dengan role guru_bk, left join dengan counselors
+            $gurus = DB::table('users')
+                ->leftJoin('counselors', 'users.id', '=', 'counselors.user_id')
+                ->where('users.role', 'guru_bk')
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.email',
+                    'users.phone',
+                    'counselors.id as counselor_id',
+                    'counselors.nama_lengkap',
+                    'counselors.nip',
+                    'counselors.no_hp',
+                    'counselors.specialization',
+                    'counselors.office_hours',
+                    'users.created_at'
+                )
+                ->orderBy('users.created_at', 'desc')
                 ->paginate(10);
 
             return view('koordinator.guru.index', compact('gurus'));
@@ -169,7 +185,26 @@ class KoordinatorController extends Controller
     public function editGuru($id)
     {
         try {
-            $guru = Counselor::findOrFail($id);
+            // Query user dengan role guru_bk, left join dengan counselors
+            $guru = DB::table('users')
+                ->leftJoin('counselors', 'users.id', '=', 'counselors.user_id')
+                ->where('users.id', $id)
+                ->where('users.role', 'guru_bk')
+                ->select(
+                    'users.*',
+                    'counselors.id as counselor_id',
+                    'counselors.nama_lengkap',
+                    'counselors.nip',
+                    'counselors.no_hp',
+                    'counselors.specialization',
+                    'counselors.office_hours'
+                )
+                ->first();
+
+            if (!$guru) {
+                abort(404, 'Guru BK tidak ditemukan');
+            }
+
             return view('koordinator.guru.edit', compact('guru'));
         } catch (\Exception $e) {
             Log::error('Error editing guru BK', ['error' => $e->getMessage(), 'id' => $id]);
@@ -180,14 +215,18 @@ class KoordinatorController extends Controller
     public function updateGuru(Request $request, $id)
     {
         try {
-            $guru = Counselor::findOrFail($id);
-            $user = $guru->user;
+            // Get user
+            $user = User::findOrFail($id);
+
+            if ($user->role !== 'guru_bk') {
+                abort(403, 'User bukan guru BK');
+            }
 
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
                 'phone' => 'required|string|unique:users,phone,' . $user->id,
-                'nip' => 'required|string|unique:counselors,nip,' . $guru->id,
+                'nip' => 'nullable|string',
                 'specialization' => 'nullable|string',
                 'office_hours' => 'nullable|string',
                 'password' => 'nullable|min:8|confirmed',
@@ -206,17 +245,31 @@ class KoordinatorController extends Controller
 
             $user->update($updateData);
 
-            // Update counselor
-            $guru->update([
-                'nama_lengkap' => $validated['name'],
-                'nip' => $validated['nip'],
-                'no_hp' => $validated['phone'],
-                'specialization' => $validated['specialization'],
-                'office_hours' => $validated['office_hours'],
-            ]);
+            // Update atau create counselor record
+            $counselor = Counselor::where('user_id', $user->id)->first();
+            
+            if ($counselor) {
+                $counselor->update([
+                    'nama_lengkap' => $validated['name'],
+                    'nip' => $validated['nip'] ?? $counselor->nip,
+                    'no_hp' => $validated['phone'],
+                    'specialization' => $validated['specialization'],
+                    'office_hours' => $validated['office_hours'],
+                ]);
+            } else {
+                // Create counselor record jika belum ada
+                Counselor::create([
+                    'user_id' => $user->id,
+                    'nama_lengkap' => $validated['name'],
+                    'nip' => $validated['nip'] ?? 'NIP' . $user->id,
+                    'no_hp' => $validated['phone'],
+                    'specialization' => $validated['specialization'] ?? 'Umum',
+                    'office_hours' => $validated['office_hours'] ?? '08:00 - 16:00',
+                ]);
+            }
 
             Log::info('Guru BK updated', [
-                'guru_id' => $guru->id,
+                'user_id' => $user->id,
                 'updated_by' => Auth::id()
             ]);
 
@@ -236,17 +289,20 @@ class KoordinatorController extends Controller
     public function destroyGuru($id)
     {
         try {
-            $guru = Counselor::findOrFail($id);
-            $user = $guru->user;
+            $user = User::findOrFail($id);
 
-            // Hapus data terkait
-            $guru->delete();
-            if ($user) {
-                $user->delete();
+            if ($user->role !== 'guru_bk') {
+                abort(403, 'User bukan guru BK');
             }
 
+            // Hapus counselor record jika ada
+            Counselor::where('user_id', $user->id)->delete();
+            
+            // Hapus user
+            $user->delete();
+
             Log::info('Guru BK deleted', [
-                'guru_id' => $id,
+                'user_id' => $id,
                 'deleted_by' => Auth::id()
             ]);
 
@@ -265,7 +321,25 @@ class KoordinatorController extends Controller
     public function showGuru($id)
     {
         try {
-            $guru = Counselor::with('user')->findOrFail($id);
+            // Query user dengan role guru_bk, left join dengan counselors
+            $guru = DB::table('users')
+                ->leftJoin('counselors', 'users.id', '=', 'counselors.user_id')
+                ->where('users.id', $id)
+                ->where('users.role', 'guru_bk')
+                ->select(
+                    'users.*',
+                    'counselors.id as counselor_id',
+                    'counselors.nama_lengkap',
+                    'counselors.nip',
+                    'counselors.no_hp',
+                    'counselors.specialization',
+                    'counselors.office_hours'
+                )
+                ->first();
+
+            if (!$guru) {
+                abort(404, 'Guru BK tidak ditemukan');
+            }
 
             return view('koordinator.guru.show', compact('guru'));
         } catch (\Exception $e) {
@@ -280,10 +354,22 @@ class KoordinatorController extends Controller
     public function indexSiswa()
     {
         try {
-            $siswas = Student::with(['user' => function ($query) {
-                $query->select('id', 'name', 'email');
-            }])
-                ->orderBy('created_at', 'desc')
+            // Query dari users table dengan role siswa, left join dengan students
+            $siswas = DB::table('users')
+                ->leftJoin('students', 'users.id', '=', 'students.user_id')
+                ->where('users.role', 'siswa')
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.email',
+                    'students.id as student_id',
+                    'students.nis',
+                    'students.nama_lengkap',
+                    'students.kelas',
+                    'students.no_hp',
+                    'users.created_at'
+                )
+                ->orderBy('users.created_at', 'desc')
                 ->paginate(10);
 
             Log::info('Data siswa loaded', [
@@ -356,18 +442,37 @@ class KoordinatorController extends Controller
     public function showSiswa($id)
     {
         try {
-            $siswa = Student::with('user')->findOrFail($id);
+            // Query user dengan role siswa, left join dengan students
+            $siswa = DB::table('users')
+                ->leftJoin('students', 'users.id', '=', 'students.user_id')
+                ->where('users.id', $id)
+                ->where('users.role', 'siswa')
+                ->select(
+                    'users.*',
+                    'students.id as student_id',
+                    'students.nis',
+                    'students.nama_lengkap',
+                    'students.kelas',
+                    'students.alamat',
+                    'students.tgl_lahir',
+                    'students.no_hp'
+                )
+                ->first();
+
+            if (!$siswa) {
+                abort(404, 'Siswa tidak ditemukan');
+            }
 
             Log::info('Siswa detail accessed', [
-                'siswa_id' => $id,
-                'user_id' => Auth::id()
+                'user_id' => $id,
+                'accessed_by' => Auth::id()
             ]);
 
             return view('koordinator.siswa.show', compact('siswa'));
         } catch (\Exception $e) {
             Log::error('Error showing siswa', [
                 'error' => $e->getMessage(),
-                'siswa_id' => $id
+                'user_id' => $id
             ]);
 
             return back()->with('error', 'Siswa tidak ditemukan');
@@ -377,18 +482,37 @@ class KoordinatorController extends Controller
     public function editSiswa($id)
     {
         try {
-            $siswa = Student::with('user')->findOrFail($id);
+            // Query user dengan role siswa, left join dengan students
+            $siswa = DB::table('users')
+                ->leftJoin('students', 'users.id', '=', 'students.user_id')
+                ->where('users.id', $id)
+                ->where('users.role', 'siswa')
+                ->select(
+                    'users.*',
+                    'students.id as student_id',
+                    'students.nis',
+                    'students.nama_lengkap',
+                    'students.kelas',
+                    'students.alamat',
+                    'students.tgl_lahir',
+                    'students.no_hp'
+                )
+                ->first();
+
+            if (!$siswa) {
+                abort(404, 'Siswa tidak ditemukan');
+            }
 
             Log::info('Edit siswa form accessed', [
-                'siswa_id' => $id,
-                'user_id' => Auth::id()
+                'user_id' => $id,
+                'accessed_by' => Auth::id()
             ]);
 
             return view('koordinator.siswa.edit', compact('siswa'));
         } catch (\Exception $e) {
             Log::error('Error showing edit siswa form', [
                 'error' => $e->getMessage(),
-                'siswa_id' => $id
+                'user_id' => $id
             ]);
 
             return back()->with('error', 'Siswa tidak ditemukan');
@@ -398,17 +522,20 @@ class KoordinatorController extends Controller
     public function updateSiswa(Request $request, $id)
     {
         try {
-            $siswa = Student::findOrFail($id);
-            $user = $siswa->user;
+            $user = User::findOrFail($id);
+
+            if ($user->role !== 'siswa') {
+                abort(403, 'User bukan siswa');
+            }
 
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'nis' => 'required|string|unique:students,nis,' . $siswa->id,
-                'alamat' => 'required|string',
-                'kelas' => 'required|string',
-                'tgl_lahir' => 'required|date',
-                'no_hp' => 'required|string',
+                'nis' => 'nullable|string',
+                'alamat' => 'nullable|string',
+                'kelas' => 'nullable|string',
+                'tgl_lahir' => 'nullable|date',
+                'no_hp' => 'nullable|string',
                 'password' => 'nullable|min:8|confirmed',
             ]);
 
@@ -424,18 +551,33 @@ class KoordinatorController extends Controller
 
             $user->update($updateData);
 
-            // Update student
-            $siswa->update([
-                'nama_lengkap' => $validated['name'],
-                'nis' => $validated['nis'],
-                'tgl_lahir' => $validated['tgl_lahir'],
-                'alamat' => $validated['alamat'],
-                'no_hp' => $validated['no_hp'],
-                'kelas' => $validated['kelas'],
-            ]);
+            // Update atau create student record
+            $siswa = Student::where('user_id', $user->id)->first();
+            
+            if ($siswa) {
+                $siswa->update([
+                    'nama_lengkap' => $validated['name'],
+                    'nis' => $validated['nis'] ?? $siswa->nis,
+                    'tgl_lahir' => $validated['tgl_lahir'] ?? $siswa->tgl_lahir,
+                    'alamat' => $validated['alamat'] ?? $siswa->alamat,
+                    'no_hp' => $validated['no_hp'] ?? $siswa->no_hp,
+                    'kelas' => $validated['kelas'] ?? $siswa->kelas,
+                ]);
+            } else {
+                // Create student record jika belum ada
+                Student::create([
+                    'user_id' => $user->id,
+                    'nama_lengkap' => $validated['name'],
+                    'nis' => $validated['nis'] ?? 'NIS' . $user->id,
+                    'tgl_lahir' => $validated['tgl_lahir'],
+                    'alamat' => $validated['alamat'],
+                    'no_hp' => $validated['no_hp'],
+                    'kelas' => $validated['kelas'] ?? 'N/A',
+                ]);
+            }
 
             Log::info('Student updated', [
-                'student_id' => $siswa->id,
+                'user_id' => $user->id,
                 'updated_by' => Auth::id()
             ]);
 
@@ -455,16 +597,23 @@ class KoordinatorController extends Controller
     public function destroySiswa($id)
     {
         try {
-            $siswa = Student::findOrFail($id);
-            $user = $siswa->user;
+            $user = User::findOrFail($id);
 
-            $siswa->delete();
-            if ($user) {
-                $user->delete();
+            if ($user->role !== 'siswa') {
+                abort(403, 'User bukan siswa');
             }
 
+            // Delete associated student record
+            $siswa = Student::where('user_id', $user->id)->first();
+            if ($siswa) {
+                $siswa->delete();
+            }
+
+            // Delete user
+            $user->delete();
+
             Log::info('Student deleted', [
-                'student_id' => $id,
+                'user_id' => $id,
                 'deleted_by' => Auth::id()
             ]);
 

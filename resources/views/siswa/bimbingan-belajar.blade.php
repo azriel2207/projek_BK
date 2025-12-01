@@ -197,65 +197,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Riwayat Konsultasi Belajar -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-history mr-2 text-purple-600"></i>Riwayat Konsultasi Belajar
-                </h3>
-                
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                                    Selesai
-                                </span>
-                                <span class="text-sm font-medium text-gray-800">Kesulitan Matematika</span>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-2">Kesulitan memahami materi aljabar kelas 10</p>
-                            <div class="flex flex-wrap gap-4 text-sm text-gray-500">
-                                <span class="flex items-center">
-                                    <i class="fas fa-calendar mr-2"></i>15 Okt 2024
-                                </span>
-                                <span class="flex items-center">
-                                    <i class="fas fa-user-tie mr-2"></i>Ibu Siti Rahayu
-                                </span>
-                            </div>
-                        </div>
-                        <button class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition">
-                            <i class="fas fa-eye mr-2"></i>Detail
-                        </button>
-                    </div>
-                    
-                    <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                                    Menunggu
-                                </span>
-                                <span class="text-sm font-medium text-gray-800">Manajemen Waktu</span>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-2">Sulit mengatur waktu belajar dan organisasi</p>
-                            <div class="flex flex-wrap gap-4 text-sm text-gray-500">
-                                <span class="flex items-center">
-                                    <i class="fas fa-calendar mr-2"></i>Diajukan 2 hari lalu
-                                </span>
-                                <span class="flex items-center">
-                                    <i class="fas fa-clock mr-2"></i>Menunggu jadwal
-                                </span>
-                            </div>
-                        </div>
-                        <button class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition">
-                            <i class="fas fa-edit mr-2"></i>Edit
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="text-center mt-6">
-                    <p class="text-gray-500 text-sm">Belum ada riwayat konsultasi? Ajukan konsultasi pertama Anda!</p>
-                </div>
-            </div>
         </main>
     </div>
 

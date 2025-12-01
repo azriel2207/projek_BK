@@ -22,22 +22,22 @@
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-600">Nama Lengkap</label>
-                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->nama_lengkap ?? $siswa->user->name }}</p>
+                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->nama_lengkap ?? $siswa->name }}</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600">NIS</label>
-                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->nis }}</p>
+                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->nis ?? 'N/A' }}</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600">Tanggal Lahir</label>
-                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->tgl_lahir ? $siswa->tgl_lahir->format('d/m/Y') : 'N/A' }}</p>
+                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->tgl_lahir ? \Carbon\Carbon::parse($siswa->tgl_lahir)->format('d/m/Y') : 'N/A' }}</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600">Kelas</label>
-                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->kelas }}</p>
+                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->kelas ?? 'N/A' }}</p>
                     </div>
                 </div>
 
@@ -47,7 +47,7 @@
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-600">Email</label>
-                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->user->email }}</p>
+                        <p class="mt-1 text-lg text-gray-900">{{ $siswa->email }}</p>
                     </div>
 
                     <div>
@@ -64,7 +64,7 @@
                         <label class="block text-sm font-medium text-gray-600">Role</label>
                         <p class="mt-1">
                             <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                                {{ $siswa->user->role }}
+                                {{ $siswa->role }}
                             </span>
                         </p>
                     </div>
@@ -78,10 +78,10 @@
                     <i class="fas fa-edit mr-2"></i>Edit
                 </a>
                 
-                @if($siswa->user->role === 'siswa')
-                <a href="{{ route('koordinator.siswa.upgrade-form', $siswa->user->id) }}" 
+                @if($siswa->role === 'siswa')
+                <a href="{{ route('koordinator.siswa.upgrade-form', $siswa->id) }}" 
                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition"
-                   onclick="return confirm('Upgrade {{ $siswa->nama_lengkap ?? $siswa->user->name }} menjadi Guru BK?')">
+                   onclick="return confirm('Upgrade {{ $siswa->nama_lengkap ?? $siswa->name }} menjadi Guru BK?')">
                     <i class="fas fa-user-graduate mr-2"></i>Upgrade ke Guru BK
                 </a>
                 @endif
@@ -91,7 +91,7 @@
                     @method('DELETE')
                     <button type="submit" 
                             class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition"
-                            onclick="return confirm('Hapus siswa {{ $siswa->nama_lengkap ?? $siswa->user->name }}?')">
+                            onclick="return confirm('Hapus siswa {{ $siswa->nama_lengkap ?? $siswa->name }}?')">
                         <i class="fas fa-trash mr-2"></i>Hapus
                     </button>
                 </form>

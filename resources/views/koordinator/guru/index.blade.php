@@ -28,6 +28,51 @@
         </div>
     @endif
 
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Guru BK</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $gurus->total() }}</p>
+                </div>
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <i class="fas fa-user-tie text-blue-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Konseling Semua Guru</p>
+                    @php
+                        $totalKonseling = DB::table('janji_konselings')->count();
+                    @endphp
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalKonseling }}</p>
+                </div>
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <i class="fas fa-comments text-green-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Rata-rata Konseling/Guru</p>
+                    @php
+                        $rataRata = $gurus->total() > 0 ? round($totalKonseling / $gurus->total(), 1) : 0;
+                    @endphp
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $rataRata }}</p>
+                </div>
+                <div class="bg-purple-100 p-4 rounded-lg">
+                    <i class="fas fa-chart-line text-purple-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Search & Filter -->
     <div class="mb-6 bg-white p-4 rounded-lg shadow">
         <form action="{{ route('koordinator.guru.index') }}" method="GET" class="flex gap-4">
@@ -50,31 +95,56 @@
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">EMAIL</th>
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">TELEPON</th>
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">SPESIALISASI</th>
+                        <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">KONSELING</th>
+                        <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">SISWA DIBIMBING</th>
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">AKSI</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($gurus as $guru)
+                    @php
+                        $jumlahKonseling = DB::table('janji_konselings')
+                            ->where('janji_konselings.guru_bk', $guru->name)
+                            ->count();
+                        $siswaDibimbing = DB::table('janji_konselings')
+                            ->where('janji_konselings.guru_bk', $guru->name)
+                            ->distinct('janji_konselings.user_id')
+                            ->count('janji_konselings.user_id');
+                    @endphp
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 border-b border-gray-300">
                             {{ ($gurus->currentPage() - 1) * $gurus->perPage() + $loop->iteration }}
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
-                            {{ $guru->nama_lengkap ?? $guru->user->name }}
+                            {{ $guru->nama_lengkap ?? $guru->name }}
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
                             {{ $guru->nip ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
-                            {{ $guru->user->email }}
+                            {{ $guru->email }}
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
-                            {{ $guru->no_hp ?? $guru->user->phone ?? 'N/A' }}
+                            {{ $guru->no_hp ?? $guru->phone ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
                             <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                                 {{ $guru->specialization ?? 'Umum' }}
                             </span>
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-300">
+                            <div class="flex items-center">
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    {{ $jumlahKonseling }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-300">
+                            <div class="flex items-center">
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    {{ $siswaDibimbing }}
+                                </span>
+                            </div>
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
                             <div class="flex items-center space-x-2">
@@ -99,7 +169,7 @@
                                     <button type="submit" 
                                             class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition"
                                             title="Hapus"
-                                            onclick="return confirm('Hapus guru BK {{ $guru->nama_lengkap ?? $guru->user->name }}?')">
+                                            onclick="return confirm('Hapus guru BK {{ $guru->nama_lengkap ?? $guru->name }}?')">
                                         Hapus
                                     </button>
                                 </form>
@@ -108,7 +178,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">
                             Tidak ada data guru BK
                         </td>
                     </tr>

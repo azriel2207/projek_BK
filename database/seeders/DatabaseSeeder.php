@@ -31,24 +31,24 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'name' => 'Guru BK',
-                'email' => 'gurubk@gmail.com',
-                'password' => Hash::make('123456'),
-                'role' => 'guru_bk', // PERBAIKAN: gunakan guru_bk bukan guru
-                'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Siswa Contoh',
-                'email' => 'siswa@gmail.com',
-                'password' => Hash::make('123456'),
-                'role' => 'siswa',
-                'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
+            //[
+            //    'name' => 'Guru BK',
+            //    'email' => 'gurubk@gmail.com',
+            //    'password' => Hash::make('123456'),
+            //    'role' => 'guru_bk', // PERBAIKAN: gunakan guru_bk bukan guru
+            //    'email_verified_at' => now(),
+            //    'created_at' => now(),
+            //    'updated_at' => now(),
+            //],
+            //[
+             //   'name' => 'Siswa Contoh',
+              //  'email' => 'siswa@gmail.com',
+             //   'password' => Hash::make('123456'),
+             //   'role' => 'siswa',
+            //    'email_verified_at' => now(),
+            //    'created_at' => now(),
+            //    'updated_at' => now(),
+            //]
         ];
 
         // Insert data
@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('✅ User data berhasil ditambahkan!');
         $this->command->info('📧 Email: bk@gmail.com | 🔑 Password: 123456 (Koordinator BK)');
-        $this->command->info('📧 Email: gurubk@gmail.com | 🔑 Password: 123456 (Guru BK)');
-        $this->command->info('📧 Email: siswa@gmail.com | 🔑 Password: 123456 (Siswa)');
+       // $this->command->info('📧 Email: gurubk@gmail.com | 🔑 Password: 123456 (Guru BK)');
+       // $this->command->info('📧 Email: siswa@gmail.com | 🔑 Password: 123456 (Siswa)');
     }
 }

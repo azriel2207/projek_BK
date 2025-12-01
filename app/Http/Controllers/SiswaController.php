@@ -112,6 +112,18 @@ class SiswaController extends Controller
 
         $riwayat = $query->orderBy('tanggal', 'desc')->get();
 
+        // Map jenis_bimbingan to text label
+        $jenisBimbinganMap = [
+            'pribadi' => 'Bimbingan Pribadi',
+            'belajar' => 'Bimbingan Belajar',
+            'karir' => 'Bimbingan Karir',
+            'sosial' => 'Bimbingan Sosial'
+        ];
+
+        foreach ($riwayat as $item) {
+            $item->jenis_bimbingan_text = $jenisBimbinganMap[$item->jenis_bimbingan] ?? 'Bimbingan Pribadi';
+        }
+
         return view('siswa.riwayat-konseling', compact('riwayat'));
     }
 
@@ -122,21 +134,13 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
         
-        // Get riwayat konseling dengan jenis bimbingan 'belajar'
-        $riwayatBelajar = DB::table('janji_konselings')
-            ->where('user_id', $user->id)
-            ->where('jenis_bimbingan', 'belajar')
-            ->whereIn('status', ['dikonfirmasi', 'selesai', 'dibatalkan'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
-        
         // Ambil daftar guru BK untuk pilihan
         $gurus = DB::table('users')
             ->whereIn('role', ['guru_bk', 'guru'])
             ->select('id', 'name')
             ->get();
 
-        return view('siswa.bimbingan-belajar', compact('riwayatBelajar', 'gurus'));
+        return view('siswa.bimbingan-belajar', compact('gurus'));
     }
 
     /**
@@ -146,20 +150,52 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
         
-        // Get riwayat konseling dengan jenis bimbingan 'karir'
-        $riwayatKarir = DB::table('janji_konselings')
-            ->where('user_id', $user->id)
-            ->where('jenis_bimbingan', 'karir')
-            ->whereIn('status', ['dikonfirmasi', 'selesai', 'dibatalkan'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
-        
         // Ambil daftar guru BK untuk pilihan
         $gurus = DB::table('users')
             ->whereIn('role', ['guru_bk', 'guru'])
             ->select('id', 'name')
             ->get();
 
-        return view('siswa.bimbingan-karir', compact('riwayatKarir', 'gurus'));
+        return view('siswa.bimbingan-karir', compact('gurus'));
+    }
+
+    /**
+     * Detail Riwayat Konseling
+     */
+    public function detailRiwayatKonseling($id)
+    {
+        $user = Auth::user();
+        
+        $detail = DB::table('janji_konselings')
+            ->where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$detail) {
+            abort(404, 'Riwayat konseling tidak ditemukan');
+        }
+
+        return view('siswa.riwayat-konseling-detail', compact('detail'));
+    }
+
+    /**
+     * Detail Riwayat Karir
+     */
+    public function detailRiwayatKarir($id)
+    {
+        $user = Auth::user();
+
+        $detail = DB::table('janji_konselings')
+            ->where('id', $id)
+            ->where('user_id', $user->id)
+            ->where('jenis_bimbingan', 'karir')
+            ->where('status', 'selesai')
+            ->first();
+
+        if (!$detail) {
+            abort(404, 'Riwayat karir tidak ditemukan');
+        }
+
+        return view('siswa.riwayat-karir-detail', compact('detail'));
     }
 }

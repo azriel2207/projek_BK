@@ -40,8 +40,11 @@
         <a href="{{ route('guru.siswa') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
             <i class="fas fa-user-friends mr-3"></i>Daftar Siswa
         </a>
-        <a href="{{ route('guru.catatan.index') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
-            <i class="fas fa-file-medical mr-3"></i>Catatan Konseling
+        <a href="{{ route('guru.guru') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
+            <i class="fas fa-user-tie mr-3"></i>Daftar Guru
+        </a>
+        <a href="{{ route('guru.riwayat.index') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
+            <i class="fas fa-file-medical mr-3"></i>Riwayat Konseling
         </a>
         <a href="{{ route('guru.laporan') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
             <i class="fas fa-chart-line mr-3"></i>Laporan & Statistik
@@ -73,12 +76,6 @@
                     <h2 class="text-xl font-semibold text-gray-800 ml-4">Dashboard Guru BK</h2>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button class="text-gray-600 hover:text-gray-800">
-                            <i class="fas fa-bell text-xl"></i>
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
-                        </button>
-                    </div>
                     <span class="text-gray-700">{{ Auth::user()->name }}</span>
                     <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white">
                         <i class="fas fa-user-tie"></i>
@@ -277,62 +274,21 @@
                 </div>
             </div>
 
-            <!-- Riwayat Konseling -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                        <i class="fas fa-history mr-2 text-purple-600"></i>Riwayat Konseling Terbaru
-                    </h3>
-                    <a href="{{ route('guru.catatan.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                        Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
+            <!-- Riwayat Konseling (Stats Only) -->
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-2">Konseling Selesai Bulan Ini</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ isset($stats['selesai_bulan_ini']) ? $stats['selesai_bulan_ini'] : 0 }}</p>
+                    </div>
+                    <div class="text-5xl text-purple-200">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
                 </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis Bimbingan</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @if(isset($riwayatKonseling) && $riwayatKonseling->count() > 0)
-                                @foreach($riwayatKonseling->take(5) as $riwayat)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 text-sm text-gray-800">{{ $riwayat->name }}</td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                            {{ $riwayat->jenis_bimbingan }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600">
-                                        {{ \Carbon\Carbon::parse($riwayat->tanggal)->translatedFormat('d M Y') }}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                            {{ ucfirst($riwayat->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <button onclick="tambahCatatan({{ $riwayat->id }})" class="text-blue-600 hover:text-blue-800">
-                                            <i class="fas fa-file-alt mr-1"></i>Catatan
-                                        </button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            @else
-                                <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                        Belum ada riwayat konseling
-                                    </td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
+                <div class="mt-4 pt-4 border-t border-purple-200">
+                    <a href="{{ route('guru.riwayat.index') }}" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                        <i class="fas fa-arrow-right mr-1"></i>Lihat Riwayat Lengkap
+                    </a>
                 </div>
             </div>
         </main>

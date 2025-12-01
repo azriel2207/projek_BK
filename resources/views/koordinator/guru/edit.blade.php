@@ -29,41 +29,41 @@
                 <!-- Nama -->
                 <div class="col-span-2">
                     <label for="name" class="block text-gray-700 font-bold mb-2">Nama Lengkap *</label>
-                    <input type="text" name="name" id="name" class="w-full px-4 py-2 border @error('name') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('name', $guru->user->name) }}" required>
+                    <input type="text" name="name" id="name" class="w-full px-4 py-2 border @error('name') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('name', $guru->name) }}" required>
                     @error('name')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-gray-700 font-bold mb-2">Email *</label>
-                    <input type="email" name="email" id="email" class="w-full px-4 py-2 border @error('email') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('email', $guru->user->email) }}" required>
+                    <input type="email" name="email" id="email" class="w-full px-4 py-2 border @error('email') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('email', $guru->email) }}" required>
                     @error('email')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- Telepon -->
                 <div>
                     <label for="phone" class="block text-gray-700 font-bold mb-2">Telepon *</label>
-                    <input type="tel" name="phone" id="phone" class="w-full px-4 py-2 border @error('phone') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('phone', $guru->user->phone) }}" required>
+                    <input type="tel" name="phone" id="phone" class="w-full px-4 py-2 border @error('phone') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('phone', $guru->phone ?? $guru->no_hp) }}" required>
                     @error('phone')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- NIP -->
                 <div>
                     <label for="nip" class="block text-gray-700 font-bold mb-2">NIP *</label>
-                    <input type="text" name="nip" id="nip" class="w-full px-4 py-2 border @error('nip') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('nip', $guru->nip) }}" required>
+                    <input type="text" name="nip" id="nip" class="w-full px-4 py-2 border @error('nip') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('nip', $guru->nip ?? '') }}" required>
                     @error('nip')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- Spesialisasi -->
                 <div>
                     <label for="specialization" class="block text-gray-700 font-bold mb-2">Spesialisasi</label>
-                    <input type="text" name="specialization" id="specialization" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('specialization', $guru->specialization) }}">
+                    <input type="text" name="specialization" id="specialization" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('specialization', $guru->specialization ?? '') }}">
                 </div>
 
                 <!-- Jam Kerja -->
                 <div>
                     <label for="office_hours" class="block text-gray-700 font-bold mb-2">Jam Kerja</label>
-                    <input type="text" name="office_hours" id="office_hours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('office_hours', $guru->office_hours) }}">
+                    <input type="text" name="office_hours" id="office_hours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('office_hours', $guru->office_hours ?? '') }}">
                 </div>
 
                 <!-- Password -->

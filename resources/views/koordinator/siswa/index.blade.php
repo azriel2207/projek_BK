@@ -3,7 +3,7 @@
 @section('title', 'Data Siswa')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
@@ -32,7 +32,75 @@
     </div>
     @endif
 
-    <!-- Table Card -->
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Siswa</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $siswas->total() }}</p>
+                </div>
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <i class="fas fa-users text-blue-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        @php
+            $totalAktif = DB::table('users')->where('role', 'siswa')->count();
+        @endphp
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Siswa Aktif</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalAktif }}</p>
+                </div>
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <i class="fas fa-user-check text-green-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        @php
+            $totalKonseling = DB::table('janji_konselings')->count();
+        @endphp
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Total Konseling</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalKonseling }}</p>
+                </div>
+                <div class="bg-purple-100 p-4 rounded-lg">
+                    <i class="fas fa-comments text-purple-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        @php
+            $rataRata = $totalAktif > 0 ? round($totalKonseling / $totalAktif, 1) : 0;
+        @endphp
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Konseling/Siswa</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $rataRata }}</p>
+                </div>
+                <div class="bg-orange-100 p-4 rounded-lg">
+                    <i class="fas fa-chart-line text-orange-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="mb-6 bg-white p-4 rounded-lg shadow">
+        <form action="{{ route('koordinator.siswa.index') }}" method="GET" class="flex gap-4">
+            <input type="text" name="search" placeholder="Cari nama atau NIS..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ request('search') }}">
+            <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg">
+                Cari
+            </button>
+        </form>
+    </div>
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -54,19 +122,19 @@
                             {{ $siswas->firstItem() + $index }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {{ $siswa->nis }}
+                            {{ $siswa->nis ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $siswa->nama_lengkap }}
+                            {{ $siswa->nama_lengkap ?? $siswa->name }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $siswa->kelas }}
+                            {{ $siswa->kelas ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ $siswa->user->email ?? '-' }}
+                            {{ $siswa->email }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ $siswa->no_hp }}
+                            {{ $siswa->no_hp ?? '-' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-2">

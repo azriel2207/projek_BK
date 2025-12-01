@@ -13,22 +13,22 @@
         </div>
 
         <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ $guru->user->name }}</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ $guru->nama_lengkap ?? $guru->name }}</h2>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-600 text-sm">NIP</p>
-                    <p class="text-gray-900 font-semibold">{{ $guru->nip }}</p>
+                    <p class="text-gray-900 font-semibold">{{ $guru->nip ?? 'N/A' }}</p>
                 </div>
 
                 <div>
                     <p class="text-gray-600 text-sm">Email</p>
-                    <p class="text-gray-900 font-semibold">{{ $guru->user->email }}</p>
+                    <p class="text-gray-900 font-semibold">{{ $guru->email }}</p>
                 </div>
 
                 <div>
                     <p class="text-gray-600 text-sm">Telepon</p>
-                    <p class="text-gray-900 font-semibold">{{ $guru->user->phone }}</p>
+                    <p class="text-gray-900 font-semibold">{{ $guru->no_hp ?? $guru->phone ?? 'N/A' }}</p>
                 </div>
 
                 <div>
@@ -49,17 +49,40 @@
             <div class="grid grid-cols-3 gap-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <p class="text-gray-600 text-sm">Total Sesi Konseling</p>
-                    <p class="text-2xl font-bold text-blue-600">{{ $guru->counselingSessions->count() }}</p>
+                    <p class="text-2xl font-bold text-blue-600">
+                        @php
+                            $konseling = DB::table('janji_konselings')
+                                ->where('guru_bk', $guru->name)
+                                ->count();
+                        @endphp
+                        {{ $konseling }}
+                    </p>
                 </div>
 
                 <div class="bg-green-50 p-4 rounded-lg">
                     <p class="text-gray-600 text-sm">Sesi Aktif</p>
-                    <p class="text-2xl font-bold text-green-600">{{ $guru->counselingSessions->where('status', 'active')->count() }}</p>
+                    <p class="text-2xl font-bold text-green-600">
+                        @php
+                            $aktif = DB::table('janji_konselings')
+                                ->where('guru_bk', $guru->name)
+                                ->where('status', 'active')
+                                ->count();
+                        @endphp
+                        {{ $aktif }}
+                    </p>
                 </div>
 
                 <div class="bg-yellow-50 p-4 rounded-lg">
                     <p class="text-gray-600 text-sm">Sesi Selesai</p>
-                    <p class="text-2xl font-bold text-yellow-600">{{ $guru->counselingSessions->where('status', 'completed')->count() }}</p>
+                    <p class="text-2xl font-bold text-yellow-600">
+                        @php
+                            $selesai = DB::table('janji_konselings')
+                                ->where('guru_bk', $guru->name)
+                                ->where('status', 'completed')
+                                ->count();
+                        @endphp
+                        {{ $selesai }}
+                    </p>
                 </div>
             </div>
         </div>

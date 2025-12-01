@@ -178,14 +178,25 @@
         
         <!-- Catatan (jika status selesai) -->
         @if($item->status == 'selesai')
-        <a href="{{ route('guru.catatan.detail', $item->id) }}" 
+        <a href="{{ route('guru.riwayat.detail', $item->id) }}" 
            class="text-purple-600 hover:text-purple-900 transition" 
            title="Lihat Catatan">
             <i class="fas fa-file-alt"></i>
         </a>
+        @elseif($item->status == 'dikonfirmasi')
+        <!-- Mark as Selesai -->
+        <form action="{{ route('guru.permintaan.selesai', $item->id) }}" method="POST" class="inline">
+            @csrf
+            <button type="submit" 
+                    class="text-green-600 hover:text-green-900 transition" 
+                    title="Mark Selesai"
+                    onclick="return confirm('Tandai konseling ini sebagai selesai?')">
+                <i class="fas fa-check-double"></i>
+            </button>
+        </form>
         @else
         <!-- Tambah Catatan -->
-        <a href="{{ route('guru.catatan.buat') }}" 
+        <a href="{{ route('guru.riwayat.buat') }}" 
            class="text-orange-600 hover:text-orange-900 transition" 
            title="Tambah Catatan">
             <i class="fas fa-notes-medical"></i>

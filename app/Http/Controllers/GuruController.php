@@ -89,6 +89,8 @@ class GuruController extends Controller
             ->limit(10)
             ->get();
 
+
+
         return view('guru.dashboard', compact('stats', 'permintaanBaru', 'jadwalHariIni', 'riwayatKonseling'));
     }
 
@@ -215,6 +217,12 @@ public function editJadwal($id)
                 'updated_at' => now(),
             ]);
 
+        // Jika status berubah ke selesai, redirect ke halaman riwayat
+        if ($request->status === 'selesai') {
+            return redirect()->route('guru.riwayat.index')
+                ->with('success', 'Konseling selesai. Riwayat telah ditambahkan.');
+        }
+
         return redirect()->route('guru.jadwal')->with('success', 'Jadwal berhasil diperbarui');
     }
 
@@ -245,7 +253,7 @@ public function editJadwal($id)
             abort(404, 'Jadwal tidak ditemukan');
         }
 
-        return view('guru.catatan-tambah', compact('jadwal'));
+        return view('guru.riwayat-tambah', compact('jadwal'));
     }
 
     // Kelola Permintaan
@@ -287,7 +295,24 @@ public function editJadwal($id)
                 'updated_at' => now()
             ]);
 
-        return redirect()->back()->with('success', 'Permintaan berhasil ditolak');
+        return redirect()->back()->with('success', 'Janji konseling berhasil ditolak');
+    }
+
+    public function selesaiJanji(Request $request, $id)
+    {
+        $request->validate([
+            'catatan' => 'nullable|string|min:10'
+        ]);
+
+        DB::table('janji_konselings')
+            ->where('id', $id)
+            ->update([
+                'status' => 'selesai',
+                'catatan_konselor' => $request->catatan ?? '',
+                'updated_at' => now()
+            ]);
+
+        return redirect()->back()->with('success', 'Konseling berhasil ditandai selesai');
     }
 
     public function reschedule(Request $request, $id)
@@ -356,29 +381,34 @@ public function editJadwal($id)
 
     // Catatan Konseling
     public function daftarCatatan()
-{
-    // Ganti dengan query database yang sebenarnya
-    $catatan = DB::table('catatan')
-        ->join('users', 'catatan.user_id', '=', 'users.id')
-        ->select(
-            'catatan.*',
-            'users.name as nama_siswa'
-        )
-        ->orderBy('catatan.tanggal', 'desc')
-        ->orderBy('catatan.created_at', 'desc')
-        ->paginate(20);
+    {
+        // Ambil data dari janji_konselings yang status selesai (riwayat konseling)
+        $catatan = DB::table('janji_konselings')
+            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+            ->select(
+                'janji_konselings.id',
+                'janji_konselings.tanggal',
+                'janji_konselings.jenis_bimbingan',
+                'janji_konselings.status',
+                'janji_konselings.updated_at',
+                'users.name as nama_siswa'
+            )
+            ->where('janji_konselings.status', 'selesai')
+            ->where('janji_konselings.guru_bk', Auth::user()->name)
+            ->orderBy('janji_konselings.tanggal', 'desc')
+            ->paginate(20);
 
-    return view('guru.catatan.index', compact('catatan'));
-}
+        return view('guru.riwayat.index', compact('catatan'));
+    }
 
     // public function buatCatatan()
     // {
-    //     return view('guru.catatan.buat');
+    //     return view('guru.riwayat.buat');
     // }
 
     public function templateCatatan()
     {
-        return view('guru.catatan.template');
+        return view('guru.riwayat.template');
     }
 
     // Laporan & Statistik
@@ -582,7 +612,7 @@ public function editJadwal($id)
                  ->orderBy('name')
                  ->get();
 
-    return view('guru.catatan-create', compact('siswas'));
+    return view('guru.riwayat-create', compact('siswas'));
 }
 
 
@@ -615,7 +645,7 @@ public function editJadwal($id)
                 ]);
         }
 
-        return redirect()->route('guru.catatan.index')->with('success', 'Catatan berhasil disimpan.');
+        return redirect()->route('guru.riwayat.index')->with('success', 'Catatan berhasil disimpan.');
     }
 
     // DETAIL CATATAN
@@ -663,7 +693,7 @@ public function editJadwal($id)
         // Gunakan isi catatan sebagai catatan_konselor
         $result->catatan_konselor = $cat->isi ?? null;
 
-        return view('guru.catatan-detail', ['catatan' => $result]);
+        return view('guru.riwayat-detail', ['catatan' => $result]);
     }
 
     // Helper untuk mapping jenis_bimbingan ke label yang digunakan di view
@@ -680,4 +710,19 @@ public function editJadwal($id)
 
         return $map[$jenis] ?? ucfirst($jenis);
     }
+
+    /**
+     * Daftar Guru BK
+     */
+    public function daftarGuru()
+    {
+        $daftarGuru = DB::table('users')
+            ->whereIn('role', ['guru_bk', 'guru'])
+            ->select('id', 'name', 'email', 'role', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('guru.daftar-guru', compact('daftarGuru'));
+    }
+
 }

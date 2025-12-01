@@ -43,7 +43,7 @@
                             <label for="name" class="block text-gray-700 font-bold mb-2">Nama Lengkap *</label>
                             <input type="text" name="name" id="name" 
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   value="{{ old('name', $siswa->user->name) }}" required>
+                                   value="{{ old('name', $siswa->name) }}" required>
                         </div>
 
                         <!-- Email -->
@@ -51,7 +51,7 @@
                             <label for="email" class="block text-gray-700 font-bold mb-2">Email *</label>
                             <input type="email" name="email" id="email" 
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   value="{{ old('email', $siswa->user->email) }}" required>
+                                   value="{{ old('email', $siswa->email) }}" required>
                         </div>
 
                         <!-- NIS -->
@@ -59,7 +59,7 @@
                             <label for="nis" class="block text-gray-700 font-bold mb-2">NIS *</label>
                             <input type="text" name="nis" id="nis" 
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   value="{{ old('nis', $siswa->nis) }}" required>
+                                   value="{{ old('nis', $siswa->nis ?? '') }}" required>
                         </div>
 
                         <!-- Tanggal Lahir -->
@@ -67,7 +67,7 @@
                             <label for="tgl_lahir" class="block text-gray-700 font-bold mb-2">Tanggal Lahir *</label>
                             <input type="date" name="tgl_lahir" id="tgl_lahir" 
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   value="{{ old('tgl_lahir', $siswa->tgl_lahir ? $siswa->tgl_lahir->format('Y-m-d') : '') }}" required>
+                                   value="{{ old('tgl_lahir', $siswa->tgl_lahir ? \Carbon\Carbon::parse($siswa->tgl_lahir)->format('Y-m-d') : '') }}" required>
                         </div>
                     </div>
 

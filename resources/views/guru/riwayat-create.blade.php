@@ -11,7 +11,7 @@
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
             <h1 class="text-2xl font-bold mb-6 text-gray-800">Buat Catatan Siswa</h1>
             
-            <form action="{{ route('guru.catatan.simpan') }}" method="POST">
+            <form action="{{ route('guru.riwayat.simpan') }}" method="POST">
                 @csrf
                 
                 <div class="mb-4">
@@ -46,7 +46,7 @@
                 </div>
 
                 <div class="flex justify-end space-x-3">
-                    <a href="{{ route('guru.catatan.index') }}" 
+                    <a href="{{ route('guru.riwayat.index') }}" 
                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-200">
                         Batal
                     </a>

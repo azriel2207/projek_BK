@@ -78,6 +78,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
+            'role' => 'required|in:siswa,guru_bk',
         ]);
 
         // Create user
@@ -85,7 +86,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'siswa', // Default role
+            'role' => $validated['role'], // Ambil dari input form
             'email_verified_at' => now(),
         ]);
 
@@ -100,9 +101,14 @@ class AuthController extends Controller
             'user_id' => $user->id
         ]);
 
-        // Redirect ke dashboard siswa
-        return redirect()->route('siswa.dashboard')
-            ->with('success', 'Registrasi berhasil! Selamat datang di Sistem BK.');
+        // Redirect sesuai role
+        if ($user->role === 'guru_bk') {
+            return redirect()->route('guru.dashboard')
+                ->with('success', 'Registrasi berhasil! Selamat datang di Dashboard Guru BK.');
+        } else {
+            return redirect()->route('siswa.dashboard')
+                ->with('success', 'Registrasi berhasil! Selamat datang di Sistem BK.');
+        }
     }
 
     public function logout(Request $request)

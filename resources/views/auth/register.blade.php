@@ -66,6 +66,30 @@
                         @enderror
                     </div>
 
+                    <!-- Pilih Role -->
+                    <div class="mb-6">
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-id-badge mr-2 text-blue-500"></i>Pilih Jenis Akun
+                        </label>
+                        <select 
+                            id="role" 
+                            name="role" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('role') border-red-500 @enderror"
+                        >
+                            <option value="">-- Pilih Jenis Akun --</option>
+                            <option value="siswa" {{ old('role') === 'siswa' ? 'selected' : '' }}>
+                                👨‍🎓 Siswa (Akses Konseling)
+                            </option>
+                            <option value="guru_bk" {{ old('role') === 'guru_bk' ? 'selected' : '' }}>
+                                👨‍🏫 Guru BK (Kelola Konseling)
+                            </option>
+                        </select>
+                        @error('role')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Password -->
                     <div class="mb-6">
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
@@ -165,15 +189,14 @@
                 </div>
 
                 <!-- Important Notice -->
-                <div class="bg-white/10 rounded-lg p-4 border-l-4 border-yellow-400">
+                <div class="bg-white/10 rounded-lg p-4 border-l-4 border-green-400">
                     <div class="flex items-start space-x-3">
-                        <i class="fas fa-exclamation-triangle text-yellow-300 mt-1"></i>
+                        <i class="fas fa-check-circle text-green-300 mt-1"></i>
                         <div>
-                            <h4 class="font-semibold text-yellow-300 mb-1">Perhatian</h4>
+                            <h4 class="font-semibold text-green-300 mb-1">Informasi</h4>
                             <p class="text-blue-100 text-sm">
-                                Akun yang didaftarkan akan secara otomatis memiliki role <strong>Siswa</strong>. 
-                                Untuk akses sebagai <strong>Guru BK</strong> atau <strong>Koordinator BK</strong>, 
-                                harap hubungi administrator sistem.
+                                Pilih jenis akun saat registrasi sesuai dengan kebutuhan Anda. 
+                                Akun <strong>Guru BK</strong> dapat langsung mengelola konseling siswa.
                             </p>
                         </div>
                     </div>

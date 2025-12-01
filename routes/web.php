@@ -101,8 +101,9 @@ Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
         Route::post('/permintaan/{id}/konfirmasi', [GuruController::class, 'konfirmasiJanji'])->name('permintaan.konfirmasi');
         Route::put('/permintaan/{id}/tolak', [GuruController::class, 'tolakJanji'])->name('permintaan.tolak');
         Route::put('/permintaan/{id}/reschedule', [GuruController::class, 'reschedule'])->name('permintaan.reschedule');
+        Route::post('/permintaan/{id}/selesai', [GuruController::class, 'selesaiJanji'])->name('permintaan.selesai');
         
-        // MANAJEMEN SISWA
+        // MANAJEMEN SISWA & GURU
         Route::get('/siswa', [GuruController::class, 'daftarSiswa'])->name('siswa');
         Route::get('/siswa/{id}', [GuruController::class, 'detailSiswa'])->name('siswa.detail');
         Route::get('/siswa/{id}/riwayat', [GuruController::class, 'riwayatSiswa'])->name('siswa.riwayat');
@@ -111,8 +112,13 @@ Route::middleware(['auth', CheckRole::class.':guru_bk,guru'])
         Route::get('/siswa/{id}/kelas', [GuruController::class, 'editKelas'])->name('siswa.kelas.edit');
         Route::put('/siswa/{id}/kelas', [GuruController::class, 'updateKelas'])->name('siswa.kelas.update');
         
+        // MANAJEMEN GURU BK
+        Route::get('/guru', [GuruController::class, 'daftarGuru'])->name('guru');
+        
+
+        
         // ========== ROUTES UNTUK CATATAN KONSELING ==========
-        Route::prefix('catatan')->name('catatan.')->group(function () {
+        Route::prefix('riwayat')->name('riwayat.')->group(function () {
             // Daftar & Pencarian
             Route::get('/', [GuruController::class, 'daftarCatatan'])->name('index');
             Route::get('/buat', [GuruController::class, 'buatCatatan'])->name('buat');
@@ -147,8 +153,10 @@ Route::middleware(['auth', CheckRole::class.':siswa'])
         Route::put('/janji-konseling/{id}', [JanjiKonselingController::class, 'update'])->name('janji-konseling.update');
         Route::delete('/janji-konseling/{id}', [JanjiKonselingController::class, 'destroy'])->name('janji-konseling.destroy');
         Route::get('/riwayat-konseling', [SiswaController::class, 'riwayatKonseling'])->name('riwayat-konseling');
+        Route::get('/riwayat-konseling/{id}', [SiswaController::class, 'detailRiwayatKonseling'])->name('riwayat-konseling-detail');
         Route::get('/bimbingan-belajar', [SiswaController::class, 'bimbinganBelajar'])->name('bimbingan-belajar');
         Route::get('/bimbingan-karir', [SiswaController::class, 'bimbinganKarir'])->name('bimbingan-karir');
+        Route::get('/riwayat-karir/{id}', [SiswaController::class, 'detailRiwayatKarir'])->name('riwayat-karir-detail');
     });
 
 // =================================================================
@@ -174,4 +182,4 @@ Route::middleware(['auth'])->get('/dashboard', function () {
             return redirect('/login')->with('error', 'Role tidak valid: ' . $user->role);
     }
 })->name('dashboard');
-
+    
