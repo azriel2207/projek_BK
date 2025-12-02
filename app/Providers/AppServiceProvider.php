@@ -3,24 +3,45 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Models\User;
-use App\Models\Counselor;
-use App\Observers\UserObserver;
-use App\Observers\CounselorObserver;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\Discord\Provider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register()
+    /**
+     * Register any application services.
+     */
+    public function register(): void
     {
-        //
+        // register bindings here if needed
     }
 
-    public function boot()
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
     {
-        // register observer supaya User create/update otomatis sinkron ke student/counselor
-        User::observe(UserObserver::class);
-        
-        // register observer supaya Counselor update otomatis sinkron ke User
-        Counselor::observe(CounselorObserver::class);
+        // Share authenticated user data with all views
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $user = Auth::user();
+                $name = $user->name;
+                $role = $user->role;
+                $avatar = $user->provider == null
+                    ? url('assets/images/user/' . $user->avatar)
+                    : $user->avatar;
+
+                $view->with(compact('user', 'name', 'role', 'avatar'));
+            }
+        });
+
+        // Register Socialite provider
+        Event::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event) {
+            $event->extendSocialite('discord', Provider::class);
+        });
+
     }
 }

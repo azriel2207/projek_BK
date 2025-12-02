@@ -43,6 +43,12 @@ class AuthController extends Controller
             'user_id' => $user->id
         ]);
         
+        // Cek apakah email sudah terverifikasi
+        if (!$user->hasVerifiedEmail()) {
+            // Redirect ke halaman verifikasi email
+            return redirect()->route('verification.code');
+        }
+        
         // Redirect berdasarkan role
         switch($user->role) {
             case 'koordinator_bk':

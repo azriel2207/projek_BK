@@ -283,6 +283,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/bimbingan-belajar', [SiswaController::class, 'bimbinganBelajar'])->name('bimbingan-belajar');
         Route::get('/bimbingan-karir', [SiswaController::class, 'bimbinganKarir'])->name('bimbingan-karir');
         Route::get('/riwayat-karir/{id}', [SiswaController::class, 'detailRiwayatKarir'])->name('riwayat-karir-detail');
+        // Routes untuk Catatan dari Guru BK
+        Route::get('/catatan', [SiswaController::class, 'daftarCatatan'])->name('catatan.index');
+        Route::get('/catatan/{id}', [SiswaController::class, 'detailCatatan'])->name('catatan.detail');
     });
 
     // =================================================================

@@ -46,6 +46,10 @@ class SiswaController extends Controller
                 ->where('user_id', $user->id)
                 ->where('status', 'menunggu')
                 ->count(),
+                
+            'catatan_baru' => DB::table('catatan')
+                ->where('user_id', $user->id)
+                ->count(),
         ];
         
         // Get upcoming appointments
@@ -197,5 +201,47 @@ class SiswaController extends Controller
         }
 
         return view('siswa.riwayat-karir-detail', compact('detail'));
+    }
+
+    /**
+     * Daftar Catatan dari Guru BK
+     */
+    public function daftarCatatan()
+    {
+        $user = Auth::user();
+        
+        $catatan = DB::table('catatan')
+            ->where('user_id', $user->id)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10);
+        
+        return view('siswa.daftar-catatan', compact('catatan'));
+    }
+
+    /**
+     * Detail Catatan dari Guru BK
+     */
+    public function detailCatatan($id)
+    {
+        $user = Auth::user();
+        
+        $catatan = DB::table('catatan')
+            ->where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+        
+        if (!$catatan) {
+            abort(404, 'Catatan tidak ditemukan');
+        }
+        
+        // Ambil info janji konseling jika ada janji_id
+        $janji = null;
+        if ($catatan->janji_id) {
+            $janji = DB::table('janji_konselings')
+                ->where('id', $catatan->janji_id)
+                ->first();
+        }
+        
+        return view('siswa.detail-catatan', compact('catatan', 'janji'));
     }
 }

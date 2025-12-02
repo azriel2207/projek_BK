@@ -10,6 +10,9 @@
     <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
         <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
     </a>
+    <a href="{{ route('siswa.catatan.index') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+        <i class="fas fa-sticky-note mr-3"></i>Catatan dari Guru BK
+    </a>
     <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
         <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
     </a>

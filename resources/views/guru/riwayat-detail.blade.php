@@ -1,184 +1,121 @@
 @extends('layouts.guru-layout')
 
-@section('title', 'Detail Riwayat Konseling - Sistem BK')
+@section('title', 'Detail Catatan - Sistem BK')
 
 @section('page-content')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
+<div class="w-full min-h-screen bg-gray-50 px-4 py-8">
+    <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-8">
+        <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Detail Catatan Konseling</h1>
-            <p class="text-gray-600">Lihat detail lengkap catatan konseling siswa</p>
+            <p class="text-gray-600">Informasi lengkap catatan konseling siswa</p>
         </div>
 
-        <!-- Back Button -->
-        <div class="mb-6">
+        <!-- Back Button & Actions -->
+        <div class="mb-6 flex gap-3">
             <a href="{{ route('guru.riwayat.index') }}" 
                class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
                 <i class="fas fa-arrow-left"></i>
-                <span>Kembali ke Daftar Catatan</span>
+                <span>Kembali</span>
+            </a>
+            <a href="{{ route('guru.siswa.riwayat', $catatan->user_id) }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
+                <i class="fas fa-history"></i>
+                <span>Lihat Riwayat Siswa</span>
+            </a>
+            <a href="{{ route('guru.siswa.detail', $catatan->user_id) }}" 
+               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
+                <i class="fas fa-user"></i>
+                <span>Detail Siswa</span>
             </a>
         </div>
 
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column - Student Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Student Information Sidebar -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-user-graduate text-blue-500"></i>
-                        Informasi Siswa
-                    </h2>
+                <div class="bg-white rounded-lg shadow-sm p-6 sticky top-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Siswa</h2>
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-500">Nama Siswa</label>
-                            <p class="text-lg font-semibold text-gray-900">{{ $catatan->nama_siswa }}</p>
+                            <label class="block text-xs font-medium text-gray-500 uppercase">Nama Siswa</label>
+                            <p class="text-gray-900 font-semibold">{{ $catatan->nama_siswa }}</p>
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-500">Email</label>
-                            <p class="text-gray-900">{{ $catatan->email }}</p>
+                            <label class="block text-xs font-medium text-gray-500 uppercase">Email</label>
+                            <p class="text-gray-900 text-sm break-all">{{ $catatan->email }}</p>
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-500">Tanggal Konseling</label>
-                            <p class="text-gray-900">
-                                {{ \Carbon\Carbon::parse($catatan->tanggal)->format('d-m-Y') }}
+                            <label class="block text-xs font-medium text-gray-500 uppercase">Tanggal Konseling</label>
+                            <p class="text-gray-900 font-medium">{{ \Carbon\Carbon::parse($catatan->tanggal)->format('d M Y') }}</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase">Jenis Bimbingan</label>
+                            <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded text-sm font-medium mt-1">
+                                {{ $catatan->jenis_bimbingan ?? 'Umum' }}
+                            </span>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase">Status</label>
+                            <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded text-sm font-medium mt-1">
+                                {{ ucfirst($catatan->status ?? 'selesai') }}
+                            </span>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-200">
+                            <p class="text-xs text-gray-500">
+                                <i class="fas fa-clock mr-1"></i>
+                                <span class="block mt-1">Dibuat: {{ \Carbon\Carbon::parse($catatan->created_at)->format('d M Y H:i') }}</span>
                             </p>
                         </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500">Waktu</label>
-                            <p class="text-gray-900">{{ $catatan->waktu }}</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500">Jenis Bimbingan</label>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                @if($catatan->jenis_bimbingan == 'Akademik') bg-blue-100 text-blue-800
-                                @elseif($catatan->jenis_bimbingan == 'Karir') bg-green-100 text-green-800
-                                @elseif($catatan->jenis_bimbingan == 'Personal') bg-purple-100 text-purple-800
-                                @else bg-yellow-100 text-yellow-800
-                                @endif">
-                                {{ $catatan->jenis_bimbingan }}
-                            </span>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500">Status</label>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                @if($catatan->status == 'selesai') bg-green-100 text-green-800
-                                @elseif($catatan->status == 'dikonfirmasi') bg-blue-100 text-blue-800
-                                @elseif($catatan->status == 'menunggu') bg-yellow-100 text-yellow-800
-                                @else bg-red-100 text-red-800
-                                @endif">
-                                @if($catatan->status == 'selesai') Selesai
-                                @elseif($catatan->status == 'dikonfirmasi') Dikonfirmasi
-                                @elseif($catatan->status == 'menunggu') Menunggu
-                                @else Dibatalkan
-                                @endif
-                            </span>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column - Session Details -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-sticky-note text-green-500"></i>
-                        Keluhan / Permasalahan Awal
-                    </h2>
+            <!-- Main Content -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Catatan Content - Full Width -->
+                <div class="bg-white rounded-lg shadow-sm p-8">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Isi Catatan</h2>
                     
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        @if($catatan->keluhan)
-                            <p class="text-gray-700 whitespace-pre-line">{{ $catatan->keluhan }}</p>
-                        @else
-                            <p class="text-gray-500 italic">Tidak ada keluhan yang dicatat</p>
-                        @endif
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 min-h-96">
+                        <p class="text-gray-800 leading-relaxed whitespace-pre-wrap font-base">{{ $catatan->isi_catatan ?? $catatan->catatan_konselor }}</p>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <p class="text-sm text-gray-500">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            <span>Dibuat pada: {{ \Carbon\Carbon::parse($catatan->created_at)->format('d M Y H:i') }}</span>
+                        </p>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-clipboard-check text-purple-500"></i>
-                        Catatan Konselor
-                    </h2>
+                <!-- Janji Konseling Info -->
+                @if($janji)
+                <div class="bg-white rounded-lg shadow-sm p-8">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Informasi Janji Konseling</h2>
                     
-                    <div class="bg-blue-50 rounded-lg p-4">
-                        @if($catatan->catatan_konselor)
-                            <p class="text-gray-700 whitespace-pre-line">{{ $catatan->catatan_konselor }}</p>
-                        @else
-                            <p class="text-gray-500 italic">Belum ada catatan dari konselor</p>
-                        @endif
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-                        <a href="{{ route('guru.riwayat.index') }}" 
-                           class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Kembali</span>
-                        </a>
+                    <div class="grid grid-cols-2 gap-6 bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 block mb-2">Waktu Konseling</label>
+                            <p class="text-gray-900 font-medium">{{ $janji->waktu ?? '-' }}</p>
+                        </div>
                         
-                        @if(!$catatan->catatan_konselor)
-                        <a href="{{ route('guru.riwayat.tambah', $catatan->id) }}" 
-                           class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition">
-                            <i class="fas fa-plus"></i>
-                            <span>Tambah Catatan</span>
-                        </a>
-                        @else
-                        <a href="{{ route('guru.riwayat.tambah', $catatan->id) }}" 
-                           class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition">
-                            <i class="fas fa-edit"></i>
-                            <span>Edit Catatan</span>
-                        </a>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 block mb-2">Lokasi</label>
+                            <p class="text-gray-900 font-medium">{{ $janji->lokasi ?? '-' }}</p>
+                        </div>
+                        
+                        @if($janji->keluhan)
+                        <div class="col-span-2">
+                            <label class="text-sm font-medium text-gray-600 block mb-2">Keluhan/Masalah</label>
+                            <p class="text-gray-800 leading-relaxed">{{ $janji->keluhan }}</p>
+                        </div>
                         @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Timeline -->
-        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <i class="fas fa-history text-orange-500"></i>
-                Timeline Konseling
-            </h2>
-            
-            <div class="space-y-4">
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full mt-2"></div>
-                    <div>
-                        <p class="font-medium text-gray-900">Konseling Dibuat</p>
-                        <p class="text-sm text-gray-500">
-                            {{ \Carbon\Carbon::parse($catatan->created_at)->format('d-m-Y H:i') }}
-                        </p>
-                    </div>
-                </div>
-                
-                @if($catatan->updated_at != $catatan->created_at)
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0 w-3 h-3 bg-blue-500 rounded-full mt-2"></div>
-                    <div>
-                        <p class="font-medium text-gray-900">Terakhir Diperbarui</p>
-                        <p class="text-sm text-gray-500">
-                            {{ \Carbon\Carbon::parse($catatan->updated_at)->format('d-m-Y H:i') }}
-                        </p>
-                    </div>
-                </div>
-                @endif
-                
-                @if($catatan->status == 'selesai' && $catatan->catatan_konselor)
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0 w-3 h-3 bg-purple-500 rounded-full mt-2"></div>
-                    <div>
-                        <p class="font-medium text-gray-900">Konseling Diselesaikan</p>
-                        <p class="text-sm text-gray-500">
-                            Dengan catatan dari konselor
-                        </p>
                     </div>
                 </div>
                 @endif
