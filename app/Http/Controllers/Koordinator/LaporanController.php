@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\JanjiKonseling;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 
@@ -84,14 +85,24 @@ class LaporanController extends Controller
     {
         try {
             // Handle both form data and JSON
-            $periode = $request->input('periode', date('Y-m'));
+            $periodeInput = $request->input('periode', 'bulan_ini');
             
-            // Parse periode (format: YYYY-MM)
-            $tahun = substr($periode, 0, 4);
-            $bulan = substr($periode, 5, 2);
+            // Jika format YYYY-MM, gunakan langsung
+            if (preg_match('/^\d{4}-\d{2}$/', $periodeInput)) {
+                $tahun = substr($periodeInput, 0, 4);
+                $bulan = substr($periodeInput, 5, 2);
+                $periode = $periodeInput;
+            } else {
+                // Jika format seperti bulan_ini, 3_bulan, dll - konversi ke YYYY-MM
+                $dateRange = $this->getDateRange($periodeInput);
+                // $dateRange[0] adalah Carbon object
+                $tahun = $dateRange[0]->year;
+                $bulan = $dateRange[0]->month;
+                $periode = $dateRange[0]->format('Y-m');
+            }
             
             // Validasi input
-            if (!is_numeric($tahun) || !is_numeric($bulan)) {
+            if (!is_numeric($tahun) || !is_numeric($bulan) || $bulan < 1 || $bulan > 12) {
                 if ($request->ajax()) {
                     return response()->json(['error' => 'Format periode tidak valid'], 400);
                 }
@@ -147,7 +158,7 @@ class LaporanController extends Controller
 
             // Log data for debugging (temporary) to help diagnose empty PDF
             try {
-                \Log::info('LAPORAN_EXPORT_DATA', $data);
+                Log::info('LAPORAN_EXPORT_DATA', $data);
             } catch (\Exception $e) {
                 // ignore logging errors
             }
@@ -161,7 +172,7 @@ class LaporanController extends Controller
             return $pdf->download($filename);
 
         } catch (\Exception $e) {
-            \Log::error('PDF Export Error: ' . $e->getMessage());
+            Log::error('PDF Export Error: ' . $e->getMessage());
             
             if ($request->ajax()) {
                 return response()->json(['error' => 'Terjadi kesalahan saat generate PDF: ' . $e->getMessage()], 500);

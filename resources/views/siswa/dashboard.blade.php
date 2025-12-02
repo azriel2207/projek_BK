@@ -1,8 +1,9 @@
 @extends('layouts.siswa-layout')
 
 @section('page-content')
-            <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-sm p-6 mb-6 text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-md p-6 mb-6 text-white">
                 <div class="flex justify-between items-center">
                     <div>
                         <h1 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h1>
@@ -14,17 +15,17 @@
                 </div>
             </div>
 
-            <!-- Notifikasi -->
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+        <!-- Notifikasi -->
+        @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded mb-6">
                     <i class="fas fa-check-circle mr-2"></i>
                     {{ session('success') }}
-                </div>
-            @endif
+            </div>
+        @endif
 
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm">Janji Menunggu</p>
@@ -39,7 +40,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm">Janji Hari Ini</p>
@@ -49,12 +50,12 @@
                             </p>
                         </div>
                         <div class="bg-green-100 p-3 rounded-lg">
-                            <i class="fas fa-checkmark text-green-600 text-2xl"></i>
+                            <i class="fas fa-check text-green-600 text-2xl"></i>
                         </div>
                     </div>
                 </div>
                 
-                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm">Total Konseling</p>
@@ -69,7 +70,7 @@
                     </div>
                 </div>
                 
-                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm">Bulan Ini</p>
@@ -85,10 +86,10 @@
                 </div>
             </div>
 
-            <!-- Main Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <!-- Janji Mendatang -->
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-800 flex items-center">
                             <i class="fas fa-calendar-check mr-2 text-blue-600"></i>Janji Konseling Mendatang
@@ -123,17 +124,25 @@
                                             {{ data_get($janji, 'waktu', '-') }}
                                         </span>
                                         <span class="flex items-center">
-                                            <span class="bg-{{ data_get($janji, 'status') === 'dikonfirmasi' ? 'green' : 'yellow' }}-100 text-{{ data_get($janji, 'status') === 'dikonfirmasi' ? 'green' : 'yellow' }}-800 px-2 py-0.5 rounded text-xs font-medium">
-                                                {{ ucfirst(data_get($janji, 'status', 'menunggu')) }}
-                                            </span>
+                                            @if(data_get($janji, 'status') === 'dikonfirmasi')
+                                                <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-medium">
+                                                    {{ ucfirst(data_get($janji, 'status', 'menunggu')) }}
+                                                </span>
+                                            @else
+                                                <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs font-medium">
+                                                    {{ ucfirst(data_get($janji, 'status', 'menunggu')) }}
+                                                </span>
+                                            @endif
                                         </span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col space-y-2 ml-4">
-                                    <button onclick="editJanji({{ data_get($janji, 'id') }})" class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm hover:bg-yellow-200 transition flex items-center whitespace-nowrap">
+                                    <button class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm hover:bg-yellow-200 transition flex items-center whitespace-nowrap edit-janji-btn"
+                                            data-id="{{ data_get($janji, 'id') }}">
                                         <i class="fas fa-edit mr-1"></i>Ubah
                                     </button>
-                                    <button onclick="batalJanji({{ data_get($janji, 'id') }})" class="bg-red-100 text-red-800 px-3 py-1 rounded text-sm hover:bg-red-200 transition flex items-center whitespace-nowrap">
+                                    <button class="bg-red-100 text-red-800 px-3 py-1 rounded text-sm hover:bg-red-200 transition flex items-center whitespace-nowrap batal-janji-btn"
+                                            data-id="{{ data_get($janji, 'id') }}">
                                         <i class="fas fa-times mr-1"></i>Batal
                                     </button>
                                 </div>
@@ -158,7 +167,7 @@
                 </div>
 
                 <!-- Statistik Bimbingan -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="bg-white rounded-xl shadow-md p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                         <i class="fas fa-chart-pie mr-2 text-purple-600"></i>Konseling Per Jenis
                     </h3>
@@ -181,12 +190,12 @@
                                     $persentase = data_get($item, 'persentase', 0);
                                 @endphp
                                 <div>
-                                    <div class="flex justify-between items-center mb-2">
+                                    <div class="flex justify-between mb-1">
                                         <span class="text-sm font-medium text-gray-700">{{ ucfirst($jenis) }}</span>
                                         <span class="text-sm font-semibold text-gray-800">{{ data_get($item, 'total', 0) }} ({{ $persentase }}%)</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2">
-                                        <div class="h-2 rounded-full" style="width: {{ $persentase }}%; background-color: {{ $warna }};"></div>
+                                        <div class="h-2 rounded-full progress-bar" data-width="{{ $persentase }}" data-color="{{ $warna }}"></div>
                                     </div>
                                 </div>
                             @endforeach
@@ -201,7 +210,7 @@
             </div>
 
             <!-- Riwayat Konseling Terbaru -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-history mr-2 text-purple-600"></i>Riwayat Konseling Terbaru
@@ -241,7 +250,7 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-sm">
-                                        <button onclick="lihatDetail({{ data_get($riwayat, 'id') }})" class="text-blue-600 hover:text-blue-800">
+                                        <button class="text-blue-600 hover:text-blue-800 lihat-detail-btn" data-id="{{ data_get($riwayat, 'id') }}">
                                             <i class="fas fa-eye mr-1"></i>Detail
                                         </button>
                                     </td>
@@ -270,7 +279,7 @@
 
         function editJanji(id) {
             // Redirect ke form edit janji
-            window.location.href = `/siswa/janji-konseling/${id}/edit`;
+            window.location.href = `/siswa/janji-konseling/${String(id)}/edit`;
         }
 
         function batalJanji(id) {
@@ -278,7 +287,7 @@
                 // Delete via POST method
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = `/siswa/janji-konseling/${id}`;
+                form.action = `/siswa/janji-konseling/${String(id)}`;
                 
                 const methodInput = document.createElement('input');
                 methodInput.type = 'hidden';
@@ -298,7 +307,44 @@
         }
 
         function lihatDetail(id) {
-            window.location.href = `/siswa/riwayat-konseling/${id}`;
+            window.location.href = `/siswa/riwayat-konseling/${String(id)}`;
         }
+
+        // Event listeners for button handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply styles to progress bars
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const width = bar.dataset.width;
+                const color = bar.dataset.color;
+                bar.style.width = width + '%';
+                bar.style.backgroundColor = color;
+            });
+
+            // Edit janji buttons
+            const editButtons = document.querySelectorAll('.edit-janji-btn');
+            editButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editJanji(this.dataset.id);
+                });
+            });
+
+            // Batal janji buttons
+            const batalButtons = document.querySelectorAll('.batal-janji-btn');
+            batalButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    batalJanji(this.dataset.id);
+                });
+            });
+
+            // Lihat detail buttons
+            const detailButtons = document.querySelectorAll('.lihat-detail-btn');
+            detailButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    lihatDetail(this.dataset.id);
+                });
+            });
+        });
     </script>
+    </div>
 @endsection

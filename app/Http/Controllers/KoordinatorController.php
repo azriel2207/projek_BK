@@ -426,7 +426,14 @@ class KoordinatorController extends Controller
             ]);
 
             // Buat student record secara manual karena data tidak ada di users table
-            Student::create([
+            Log::info('Creating student record', [
+                'user_id' => $user->id,
+                'name' => $validated['name'],
+                'nis' => $validated['nis'],
+                'kelas' => $validated['kelas'],
+            ]);
+
+            $student = Student::create([
                 'user_id' => $user->id,
                 'nama_lengkap' => $validated['name'],
                 'nis' => $validated['nis'],
@@ -436,11 +443,22 @@ class KoordinatorController extends Controller
                 'kelas' => $validated['kelas'],
             ]);
 
+            Log::info('Student created successfully', [
+                'student_id' => $student->id,
+                'user_id' => $student->user_id,
+                'nis' => $student->nis,
+                'kelas' => $student->kelas,
+            ]);
+
             return redirect()->route('koordinator.siswa.index')
                 ->with('success', 'Siswa berhasil ditambahkan');
 
         } catch (\Exception $e) {
-            Log::error('Error storing siswa', ['error' => $e->getMessage()]);
+            Log::error('Error storing siswa', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id_created' => $user->id ?? null,
+            ]);
             return back()->withInput()
                 ->with('error', 'Gagal menambahkan siswa: ' . $e->getMessage());
         }
@@ -538,11 +556,11 @@ class KoordinatorController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'nis' => 'nullable|string',
-                'alamat' => 'nullable|string',
-                'kelas' => 'nullable|string',
-                'tgl_lahir' => 'nullable|date',
-                'no_hp' => 'nullable|string',
+                'nis' => 'required|string|unique:students,nis,' . ($user->student?->id ?? 'NULL'),
+                'alamat' => 'required|string',
+                'kelas' => 'required|string',
+                'tgl_lahir' => 'required|date',
+                'no_hp' => 'required|string',
                 'password' => 'nullable|min:8|confirmed',
             ]);
 
@@ -562,14 +580,47 @@ class KoordinatorController extends Controller
             // Update student record
             $siswa = Student::where('user_id', $user->id)->first();
             
+            Log::info('Student update - before', [
+                'user_id' => $user->id,
+                'siswa_exists' => $siswa ? true : false,
+                'siswa_id' => $siswa->id ?? null,
+                'validated_nis' => $validated['nis'],
+                'validated_kelas' => $validated['kelas'],
+            ]);
+            
             if ($siswa) {
-                $siswa->update([
+                $updateResult = $siswa->update([
                     'nama_lengkap' => $validated['name'],
-                    'nis' => $validated['nis'] ?? $siswa->nis,
-                    'tgl_lahir' => $validated['tgl_lahir'] ?? $siswa->tgl_lahir,
-                    'alamat' => $validated['alamat'] ?? $siswa->alamat,
-                    'no_hp' => $validated['no_hp'] ?? $siswa->no_hp,
-                    'kelas' => $validated['kelas'] ?? $siswa->kelas,
+                    'nis' => $validated['nis'],
+                    'tgl_lahir' => $validated['tgl_lahir'],
+                    'alamat' => $validated['alamat'],
+                    'no_hp' => $validated['no_hp'],
+                    'kelas' => $validated['kelas'],
+                ]);
+                
+                Log::info('Student updated - after', [
+                    'user_id' => $user->id,
+                    'update_result' => $updateResult,
+                    'nis_in_db' => $siswa->fresh()->nis,
+                    'kelas_in_db' => $siswa->fresh()->kelas,
+                ]);
+            } else {
+                // Create student record if it doesn't exist
+                $createResult = Student::create([
+                    'user_id' => $user->id,
+                    'nama_lengkap' => $validated['name'],
+                    'nis' => $validated['nis'],
+                    'tgl_lahir' => $validated['tgl_lahir'],
+                    'alamat' => $validated['alamat'],
+                    'no_hp' => $validated['no_hp'],
+                    'kelas' => $validated['kelas'],
+                ]);
+                
+                Log::info('Student created - new', [
+                    'user_id' => $user->id,
+                    'created_id' => $createResult->id,
+                    'nis_in_db' => $createResult->nis,
+                    'kelas_in_db' => $createResult->kelas,
                 ]);
             }
 

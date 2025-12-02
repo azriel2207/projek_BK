@@ -108,7 +108,7 @@
                         @method('DELETE')
                         <button type="submit" 
                                 class="text-red-600 hover:text-red-900 flex items-center"
-                                onclick="return confirm('Hapus siswa {{ $student->nama_lengkap }}?')"
+                                onclick="confirmDelete('{{ addslashes($student->nama_lengkap) }}'); return false;"
                                 title="Hapus Siswa">
                             <i class="fas fa-trash mr-1"></i>
                             Hapus

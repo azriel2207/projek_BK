@@ -110,6 +110,7 @@
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">SPESIALISASI</th>
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">KONSELING</th>
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">SISWA DIBIMBING</th>
+                        <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">TANGGAL BERGABUNG</th>
                         <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-700">AKSI</th>
                     </tr>
                 </thead>
@@ -160,6 +161,9 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
+                            {{ \Carbon\Carbon::parse($guru->created_at)->format('d-m-Y') }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-300">
                             <div class="flex items-center space-x-2">
                                 <!-- Tombol View -->
                                 <a href="{{ route('koordinator.guru.show', $guru->id) }}" 
@@ -182,7 +186,7 @@
                                     <button type="submit" 
                                             class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition"
                                             title="Hapus"
-                                            onclick="return confirm('Hapus guru BK {{ $guru->nama_lengkap ?? $guru->name }}?')">
+                                            onclick="confirmDelete('{{ addslashes($guru->nama_lengkap ?? $guru->name) }}'); return false;">
                                         Hapus
                                     </button>
                                 </form>

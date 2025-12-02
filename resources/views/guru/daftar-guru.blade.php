@@ -106,13 +106,9 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <a href="#" class="text-blue-600 hover:text-blue-900 transition duration-150 flex items-center space-x-1">
+                                <a href="{{ route('guru.guru.detail', $guru->id) }}" class="text-blue-600 hover:text-blue-900 transition duration-150 flex items-center space-x-1">
                                     <i class="fas fa-eye"></i>
                                     <span>Lihat</span>
-                                </a>
-                                <a href="#" class="text-green-600 hover:text-green-900 transition duration-150 flex items-center space-x-1">
-                                    <i class="fas fa-edit"></i>
-                                    <span>Edit</span>
                                 </a>
                             </div>
                         </td>

@@ -132,7 +132,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" 
-                            onclick="return confirm('Apakah Anda yakin ingin menghapus jadwal ini?')"
+                            onclick="return confirmDelete('jadwal konseling'); return false;"
                             class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
                         <i class="fas fa-trash"></i>
                         <span>Hapus Jadwal</span>

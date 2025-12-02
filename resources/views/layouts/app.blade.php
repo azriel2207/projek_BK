@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
 </head>
 <body class="bg-gray-100">
     <!-- Navigation -->
@@ -44,24 +48,29 @@
 
     <!-- Main Content -->
     <main class="container mx-auto mt-6 p-4">
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                <i class="fas fa-check-circle mr-2"></i>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                {{ session('error') }}
-            </div>
-        @endif
-
         @yield('content')
     </main>
 
+    <!-- Popup Utilities -->
+    <script src="{{ asset('js/popup-utils.js') }}"></script>
+
     <!-- Optional: JavaScript untuk interaksi -->
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showSuccess("{{ session('success') }}");
+            });
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showError("{{ session('error') }}");
+            });
+        </script>
+    @endif
+
     <script>
         // Initialize Flatpickr for all date inputs dengan format DD/MM/YYYY
         document.addEventListener('DOMContentLoaded', function() {
@@ -71,16 +80,6 @@
                 locale: 'id',
                 allowInput: true
             });
-
-            // Auto-hide flash messages setelah 5 detik (hanya untuk notification)
-            setTimeout(function() {
-                const flashMessages = document.querySelectorAll('main > .bg-green-100, main > .bg-red-100');
-                flashMessages.forEach(function(message) {
-                    message.style.transition = 'opacity 0.5s';
-                    message.style.opacity = '0';
-                    setTimeout(() => message.remove(), 500);
-                });
-            }, 5000);
         });
     </script>
 </body>

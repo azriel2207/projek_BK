@@ -88,7 +88,7 @@
         </div>
     </div>
 
-            <!-- Main Content Grid -->
+    <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <!-- Permintaan Konseling -->
         <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
@@ -135,8 +135,13 @@
                                         <i class="fas fa-check mr-1"></i>Konfirmasi
                                     </button>
                                 </form>
-                                <button onclick="showDetailModal({{ $janji->id }}, '{{ addslashes($janji->name) }}', '{{ addslashes(str_replace('_', ' ', $janji->jenis_bimbingan)) }}', '{{ addslashes($janji->keluhan) }}', '{{ \Carbon\Carbon::parse($janji->tanggal)->format('d-m-Y') }}', '{{ $janji->waktu }}')"
-                                        class="w-full bg-blue-100 text-blue-800 px-3 py-2 rounded text-xs hover:bg-blue-200 transition font-medium flex items-center justify-center">
+                                <button class="w-full bg-blue-100 text-blue-800 px-3 py-2 rounded text-xs hover:bg-blue-200 transition font-medium flex items-center justify-center detail-btn"
+                                        data-id="{{ $janji->id }}"
+                                        data-nama="{{ $janji->name }}"
+                                        data-jenis="{{ str_replace('_', ' ', $janji->jenis_bimbingan) }}"
+                                        data-keluhan="{{ $janji->keluhan }}"
+                                        data-tanggal="{{ \Carbon\Carbon::parse($janji->tanggal)->format('d-m-Y') }}"
+                                        data-waktu="{{ $janji->waktu }}">
                                     <i class="fas fa-eye mr-1"></i>Detail
                                 </button>
                             </div>
@@ -212,66 +217,74 @@
         </div>
     </div>
 
-    <!-- Modal Detail -->
-    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white p-6 rounded-t-xl sticky top-0">
+    <!-- Modal Detail - Enhanced with animations -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden backdrop-blur-sm transition-all duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+            <div class="bg-gradient-to-r from-blue-600 via-blue-500 to-green-600 text-white p-6 rounded-t-2xl sticky top-0 shadow-md">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-bold flex items-center">
-                        <i class="fas fa-info-circle mr-2"></i>Detail Permintaan Konseling
+                    <h3 class="text-xl font-bold flex items-center">
+                        <div class="bg-white bg-opacity-20 p-2 rounded-full mr-3">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        Detail Permintaan Konseling
                     </h3>
-                    <button onclick="closeDetailModal()" class="text-white hover:text-gray-200 text-2xl">
+                    <button onclick="closeDetailModal()" class="text-white hover:text-gray-100 text-2xl hover:bg-white hover:bg-opacity-20 p-2 rounded-full transition">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
             
             <div class="p-6 space-y-4">
-                <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg">
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <i class="fas fa-user text-blue-600 text-lg"></i>
+                <!-- Student Info Card -->
+                <div class="flex items-start space-x-4 p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-l-4 border-blue-600 shadow-sm hover:shadow-md transition">
+                    <div class="bg-blue-600 p-3 rounded-full shadow-md">
+                        <i class="fas fa-user text-white text-lg"></i>
                     </div>
                     <div class="flex-1">
-                        <label class="text-xs font-semibold text-gray-500 uppercase">Nama Siswa</label>
-                        <p id="modal-nama" class="text-base font-semibold text-gray-800 mt-1"></p>
+                        <label class="text-xs font-bold text-blue-700 uppercase tracking-wider">👤 Nama Siswa</label>
+                        <p id="modal-nama" class="text-lg font-bold text-blue-900 mt-1"></p>
                     </div>
                 </div>
 
+                <!-- Consultation Type & Date -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-green-50 rounded-lg">
-                        <label class="text-xs font-semibold text-gray-500 uppercase flex items-center">
-                            <i class="fas fa-bookmark mr-2 text-green-600"></i>Jenis Bimbingan
+                    <div class="p-5 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border-l-4 border-green-600 shadow-sm hover:shadow-md transition">
+                        <label class="text-xs font-bold text-green-700 uppercase tracking-wider flex items-center">
+                            <i class="fas fa-bookmark mr-2"></i>Jenis Bimbingan
                         </label>
-                        <p id="modal-jenis" class="text-gray-800 font-medium mt-1"></p>
+                        <p id="modal-jenis" class="text-gray-800 font-semibold mt-2"></p>
                     </div>
 
-                    <div class="p-4 bg-yellow-50 rounded-lg">
-                        <label class="text-xs font-semibold text-gray-500 uppercase flex items-center">
-                            <i class="fas fa-calendar mr-2 text-yellow-600"></i>Tanggal
+                    <div class="p-5 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border-l-4 border-amber-600 shadow-sm hover:shadow-md transition">
+                        <label class="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center">
+                            <i class="fas fa-calendar-alt mr-2"></i>Tanggal
                         </label>
-                        <p id="modal-tanggal" class="text-gray-800 font-medium mt-1"></p>
+                        <p id="modal-tanggal" class="text-gray-800 font-semibold mt-2"></p>
                     </div>
                 </div>
 
-                <div class="p-4 bg-purple-50 rounded-lg">
-                    <label class="text-xs font-semibold text-gray-500 uppercase flex items-center">
-                        <i class="fas fa-clock mr-2 text-purple-600"></i>Waktu
+                <!-- Time -->
+                <div class="p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-l-4 border-purple-600 shadow-sm hover:shadow-md transition">
+                    <label class="text-xs font-bold text-purple-700 uppercase tracking-wider flex items-center">
+                        <i class="fas fa-clock mr-2"></i>Waktu Konseling
                     </label>
-                    <p id="modal-waktu" class="text-gray-800 font-medium mt-1"></p>
+                    <p id="modal-waktu" class="text-gray-800 font-semibold mt-2"></p>
                 </div>
 
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <label class="text-xs font-semibold text-gray-500 uppercase flex items-center mb-2">
-                        <i class="fas fa-comment-dots mr-2 text-gray-600"></i>Keluhan / Permasalahan
+                <!-- Complaint -->
+                <div class="p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-l-4 border-gray-600 shadow-sm">
+                    <label class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center mb-3">
+                        <i class="fas fa-comment-dots mr-2"></i>Keluhan / Permasalahan
                     </label>
-                    <p id="modal-keluhan" class="text-gray-700 leading-relaxed text-sm"></p>
+                    <p id="modal-keluhan" class="text-gray-700 leading-relaxed text-base bg-white bg-opacity-50 p-3 rounded-lg"></p>
                 </div>
 
-                <div class="flex gap-3 pt-4">
-                    <button onclick="konfirmasiDariModal()" class="flex-1 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium text-sm flex items-center justify-center">
-                        <i class="fas fa-check mr-2"></i>Konfirmasi
+                <!-- Action Buttons -->
+                <div class="flex gap-3 pt-6 border-t border-gray-200">
+                    <button onclick="konfirmasiDariModal()" class="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold text-sm flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105">
+                        <i class="fas fa-check mr-2"></i>Konfirmasi Janji
                     </button>
-                    <button onclick="closeDetailModal()" class="flex-1 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition font-medium text-sm flex items-center justify-center">
+                    <button onclick="closeDetailModal()" class="flex-1 bg-gray-300 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-400 transition font-semibold text-sm flex items-center justify-center shadow-md hover:shadow-lg">
                         <i class="fas fa-times mr-2"></i>Tutup
                     </button>
                 </div>
@@ -292,20 +305,26 @@
 
         function konfirmasiJanji(id) {
             if(!id) return;
-            if(confirm('Konfirmasi janji konseling ini?')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/guru/permintaan/${id}/konfirmasi`;
-                
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_token';
-                csrfInput.value = '{{ csrf_token() }}';
-                form.appendChild(csrfInput);
-                
-                document.body.appendChild(form);
-                form.submit();
-            }
+            
+            showConfirm(
+                '<i class="fas fa-handshake text-blue-500 text-3xl mb-3"></i><br><strong>Konfirmasi Janji Konseling</strong>',
+                'question',
+                () => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/guru/permintaan/${id}/konfirmasi`;
+                    
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_token';
+                    csrfInput.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfInput);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                'Konfirmasi Janji?'
+            );
         }
 
         function showDetailModal(id, nama, jenis, keluhan, tanggal, waktu) {
@@ -316,11 +335,20 @@
             document.getElementById('modal-tanggal').textContent = tanggal || '';
             document.getElementById('modal-waktu').textContent = waktu || '';
             document.getElementById('detailModal').classList.remove('hidden');
+            
+            // Add smooth slide-in animation
+            const modal = document.getElementById('detailModal');
+            modal.style.animation = 'fadeIn 0.3s ease-in';
         }
 
         function closeDetailModal() {
             const dm = document.getElementById('detailModal');
-            if(dm) dm.classList.add('hidden');
+            if(dm) {
+                dm.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    dm.classList.add('hidden');
+                }, 300);
+            }
             currentModalId = null;
         }
 
@@ -330,6 +358,50 @@
                 konfirmasiJanji(currentModalId);
             }
         }
+
+        // Detail button event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers untuk detail buttons
+            const detailButtons = document.querySelectorAll('.detail-btn');
+            detailButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const nama = this.dataset.nama;
+                    const jenis = this.dataset.jenis;
+                    const keluhan = this.dataset.keluhan;
+                    const tanggal = this.dataset.tanggal;
+                    const waktu = this.dataset.waktu;
+                    showDetailModal(id, nama, jenis, keluhan, tanggal, waktu);
+                });
+            });
+        });
+
+        // Add CSS animations for modal
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                to {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+            }
+        `;
+        document.head.appendChild(style);
 
         // Auto-close alerts (hanya untuk notification, bukan modal)
         document.addEventListener('DOMContentLoaded', function() {

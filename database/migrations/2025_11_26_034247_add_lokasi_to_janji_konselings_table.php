@@ -6,17 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Migration ini sudah tidak diperlukan karena kolom 'lokasi' 
+     * sudah ada di migration create_janji_konseling_table
+     * Dibiarkan kosong untuk menghindari duplicate column error
+     */
     public function up()
     {
-        Schema::table('janji_konselings', function (Blueprint $table) {
-            $table->string('lokasi')->nullable()->after('waktu');
-        });
+        // Kolom lokasi sudah ada di create table, skip
     }
 
     public function down()
     {
-        Schema::table('janji_konselings', function (Blueprint $table) {
-            $table->dropColumn('lokasi');
-        });
+        // Skip
     }
 };

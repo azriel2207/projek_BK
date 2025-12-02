@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Student;
+use App\Models\Counselor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Catatan;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -338,37 +341,79 @@ public function editJadwal($id)
     // Kelola Siswa
     public function daftarSiswa(\Illuminate\Http\Request $request)
     {
-        $query = DB::table('users')
-            ->where('role', 'siswa')
-            ->leftJoin('students', 'students.user_id', '=', 'users.id')
-            ->select('users.*', 'students.kelas as kelas');
+        try {
+            // Query siswa dengan students table
+            $query = DB::table('users')
+                ->where('role', 'siswa')
+                ->leftJoin('students', 'students.user_id', '=', 'users.id')
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.email',
+                    'users.phone',
+                    'users.class',
+                    'students.id as student_id',
+                    'students.nis',
+                    'students.nama_lengkap',
+                    'students.kelas',
+                    'students.tgl_lahir',
+                    'students.alamat',
+                    'students.no_hp',
+                    'users.created_at'
+                );
 
-        // pencarian nama / email
-        if ($search = $request->query('q')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('users.name', 'like', '%'.$search.'%')
-                  ->orWhere('users.email', 'like', '%'.$search.'%');
-            });
+            // pencarian nama / email
+            if ($search = $request->query('q')) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('users.name', 'like', '%'.$search.'%')
+                      ->orWhere('users.email', 'like', '%'.$search.'%');
+                });
+            }
+
+            // filter kelas (exact match)
+            if ($kelas = $request->query('kelas')) {
+                $query->where('students.kelas', $kelas);
+            }
+
+            // Order by latest created_at dan paginate
+            $siswa = $query->orderBy('users.created_at', 'desc')
+                ->paginate(20)
+                ->withQueryString();
+
+            // Debug log untuk melihat data yang ter-load
+            Log::info('Guru loaded siswa list - DETAIL', [
+                'total' => $siswa->total(),
+                'count' => $siswa->count(),
+                'current_page' => $siswa->currentPage(),
+                'guru_id' => Auth::id(),
+                'first_item' => $siswa->count() > 0 ? [
+                    'id' => $siswa->first()->id,
+                    'name' => $siswa->first()->name,
+                    'kelas' => $siswa->first()->kelas,
+                    'email' => $siswa->first()->email,
+                ] : null,
+            ]);
+
+            // untuk dropdown kelas — ambil daftar distinct kelas dari tabel students (hanya yang tidak kosong)
+            $kelasList = DB::table('students')
+                ->select('kelas')
+                ->whereNotNull('kelas')
+                ->where('kelas', '!=', '') // Filter string kosong
+                ->where('kelas', '!=', ' ') // Filter spasi
+                ->distinct()
+                ->orderBy('kelas')
+                ->pluck('kelas');
+
+            return view('guru.siswa', compact('siswa', 'kelasList'));
+        } catch (\Exception $e) {
+            Log::error('Error loading siswa list in guru', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'guru_id' => Auth::id()
+            ]);
+
+            return back()->with('error', 'Gagal memuat data siswa: ' . $e->getMessage());
         }
-
-        // filter kelas (exact match)
-        if ($kelas = $request->query('kelas')) {
-            $query->where('students.kelas', $kelas);
-        }
-
-        $siswa = $query->orderBy('users.created_at', 'desc')->paginate(20)->withQueryString();
-
-        // untuk dropdown kelas — ambil daftar distinct kelas dari tabel students (hanya yang tidak kosong)
-        $kelasList = DB::table('students')
-            ->select('kelas')
-            ->whereNotNull('kelas')
-            ->where('kelas', '!=', '') // Filter string kosong
-            ->where('kelas', '!=', ' ') // Filter spasi
-            ->distinct()
-            ->orderBy('kelas')
-            ->pluck('kelas');
-
-        return view('guru.siswa', compact('siswa', 'kelasList'));
     }
 
     public function detailSiswa($id)
@@ -385,6 +430,155 @@ public function editJadwal($id)
             ->get();
 
         return view('guru.siswa-detail', compact('siswa', 'riwayatKonseling'));
+    }
+
+    /**
+     * Edit Siswa - Load form edit siswa (sama seperti koordinator)
+     */
+    public function editSiswa($id)
+    {
+        try {
+            // Query user dengan role siswa, left join dengan students
+            $siswa = DB::table('users')
+                ->leftJoin('students', 'users.id', '=', 'students.user_id')
+                ->where('users.id', $id)
+                ->where('users.role', 'siswa')
+                ->select(
+                    'users.*',
+                    'students.id as student_id',
+                    'students.nis',
+                    'students.nama_lengkap',
+                    'students.kelas',
+                    'students.tgl_lahir',
+                    'students.alamat',
+                    'students.no_hp'
+                )
+                ->first();
+
+            if (!$siswa) {
+                abort(404, 'Siswa tidak ditemukan');
+            }
+
+            Log::info('Edit siswa form accessed from guru', [
+                'user_id' => $id,
+                'accessed_by' => Auth::id()
+            ]);
+
+            return view('guru.siswa-edit-form', compact('siswa'));
+        } catch (\Exception $e) {
+            Log::error('Error showing edit siswa form from guru', [
+                'error' => $e->getMessage(),
+                'user_id' => $id
+            ]);
+
+            return back()->with('error', 'Siswa tidak ditemukan');
+        }
+    }
+
+    /**
+     * Update Siswa - Update data siswa (sama logic dengan koordinator)
+     */
+    public function updateSiswa(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            if ($user->role !== 'siswa') {
+                abort(403, 'User bukan siswa');
+            }
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'nis' => 'required|string|unique:students,nis,' . ($user->student?->id ?? 'NULL'),
+                'alamat' => 'required|string',
+                'kelas' => 'required|string',
+                'tgl_lahir' => 'required|date',
+                'no_hp' => 'required|string',
+                'password' => 'nullable|min:8|confirmed',
+            ]);
+
+            // Update user (hanya kolom yang ada di users table)
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['no_hp'],
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
+
+            $user->update($updateData);
+
+            // Update student record
+            $siswa = Student::where('user_id', $user->id)->first();
+            
+            Log::info('Student update from guru - before', [
+                'user_id' => $user->id,
+                'siswa_exists' => $siswa ? true : false,
+                'siswa_id' => $siswa->id ?? null,
+                'validated_nis' => $validated['nis'],
+                'validated_kelas' => $validated['kelas'],
+                'updated_by' => Auth::id(),
+            ]);
+            
+            if ($siswa) {
+                $updateResult = $siswa->update([
+                    'nama_lengkap' => $validated['name'],
+                    'nis' => $validated['nis'],
+                    'tgl_lahir' => $validated['tgl_lahir'],
+                    'alamat' => $validated['alamat'],
+                    'no_hp' => $validated['no_hp'],
+                    'kelas' => $validated['kelas'],
+                ]);
+                
+                Log::info('Student updated from guru - after', [
+                    'user_id' => $user->id,
+                    'update_result' => $updateResult,
+                    'nis_in_db' => $siswa->fresh()->nis,
+                    'kelas_in_db' => $siswa->fresh()->kelas,
+                    'updated_by' => Auth::id(),
+                ]);
+            } else {
+                // Create student record if it doesn't exist
+                $createResult = Student::create([
+                    'user_id' => $user->id,
+                    'nama_lengkap' => $validated['name'],
+                    'nis' => $validated['nis'],
+                    'tgl_lahir' => $validated['tgl_lahir'],
+                    'alamat' => $validated['alamat'],
+                    'no_hp' => $validated['no_hp'],
+                    'kelas' => $validated['kelas'],
+                ]);
+                
+                Log::info('Student created from guru - new', [
+                    'user_id' => $user->id,
+                    'created_id' => $createResult->id,
+                    'nis_in_db' => $createResult->nis,
+                    'kelas_in_db' => $createResult->kelas,
+                    'created_by' => Auth::id(),
+                ]);
+            }
+
+            Log::info('Student updated from guru', [
+                'user_id' => $user->id,
+                'updated_by' => Auth::id()
+            ]);
+
+            return redirect()->route('guru.siswa')
+                ->with('success', 'Siswa berhasil diupdate');
+
+        } catch (\Exception $e) {
+            Log::error('Error updating student from guru', [
+                'error' => $e->getMessage(),
+                'user_id' => $id,
+                'updated_by' => Auth::id(),
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Gagal mengupdate siswa: ' . $e->getMessage());
+        }
     }
 
     // Catatan Konseling
@@ -720,6 +914,95 @@ public function editJadwal($id)
     }
 
     /**
+     * EDIT CATATAN
+     */
+    public function editCatatan($id)
+    {
+        try {
+            $catatan = DB::table('catatan')
+                ->join('users', 'catatan.user_id', '=', 'users.id')
+                ->select('catatan.*', 'users.name as nama_siswa')
+                ->where('catatan.id', $id)
+                ->first();
+
+            if (!$catatan) {
+                abort(404, 'Catatan tidak ditemukan');
+            }
+
+            return view('guru.riwayat-edit', compact('catatan'));
+        } catch (\Exception $e) {
+            Log::error('Error loading catatan for edit', [
+                'error' => $e->getMessage(),
+                'catatan_id' => $id
+            ]);
+
+            return back()->with('error', 'Gagal memuat catatan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * UPDATE CATATAN
+     */
+    public function updateCatatan(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'isi' => 'required|string|min:10',
+                'tanggal' => 'required|date'
+            ]);
+
+            DB::table('catatan')
+                ->where('id', $id)
+                ->update([
+                    'isi' => $request->isi,
+                    'tanggal' => $request->tanggal,
+                    'updated_at' => now()
+                ]);
+
+            Log::info('Catatan updated', [
+                'catatan_id' => $id,
+                'guru_id' => Auth::id()
+            ]);
+
+            return redirect()->route('guru.riwayat.index')
+                ->with('success', 'Catatan berhasil diupdate');
+        } catch (\Exception $e) {
+            Log::error('Error updating catatan', [
+                'error' => $e->getMessage(),
+                'catatan_id' => $id
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Gagal mengupdate catatan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * HAPUS CATATAN
+     */
+    public function hapusCatatan($id)
+    {
+        try {
+            DB::table('catatan')->where('id', $id)->delete();
+
+            Log::info('Catatan deleted', [
+                'catatan_id' => $id,
+                'guru_id' => Auth::id()
+            ]);
+
+            return redirect()->route('guru.riwayat.index')
+                ->with('success', 'Catatan berhasil dihapus');
+        } catch (\Exception $e) {
+            Log::error('Error deleting catatan', [
+                'error' => $e->getMessage(),
+                'catatan_id' => $id
+            ]);
+
+            return back()->with('error', 'Gagal menghapus catatan: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Daftar Guru BK
      */
     public function daftarGuru(Request $request)
@@ -744,6 +1027,161 @@ public function editJadwal($id)
             ->withQueryString();
 
         return view('guru.daftar-guru', compact('daftarGuru'));
+    }
+
+    /**
+     * Detail Guru BK
+     */
+    public function detailGuru($id)
+    {
+        try {
+            $guru = User::where('id', $id)
+                ->whereIn('role', ['guru_bk', 'guru'])
+                ->firstOrFail();
+
+            return view('guru.detail-guru', compact('guru'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('guru.guru')
+                ->with('error', 'Guru tidak ditemukan');
+        }
+    }
+
+    /**
+     * PROFIL GURU BK - EDIT PROFIL SENDIRI
+     * Guru BK dapat mengedit profil mereka sendiri
+     */
+    public function editProfile()
+    {
+        try {
+            $user = Auth::user();
+            
+            // Ambil data counselor yang terkait
+            $counselor = Counselor::where('user_id', $user->id)->first();
+            
+            if (!$counselor) {
+                abort(404, 'Data guru BK tidak ditemukan');
+            }
+            
+            return view('guru.profile-edit', compact('user', 'counselor'));
+        } catch (\Exception $e) {
+            Log::error('Error loading guru profile edit form', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+            
+            return back()->with('error', 'Gagal memuat form edit profil');
+        }
+    }
+    
+    /**
+     * UPDATE PROFIL GURU BK
+     * Update data guru BK dengan sinkronisasi otomatis ke User dan Counselor table
+     */
+    public function updateProfile(Request $request)
+    {
+        try {
+            $user = User::findOrFail(Auth::id());
+            
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'phone' => 'required|string|unique:users,phone,' . $user->id,
+                'nip' => 'nullable|string',
+                'specialization' => 'nullable|string',
+                'office_hours' => 'nullable|string',
+                'password' => 'nullable|min:8|confirmed',
+            ]);
+            
+            // Update user data
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+            ];
+            
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
+            
+            // Update User - ini akan trigger observer untuk sinkronisasi ke Counselor
+            $user->update($updateData);
+            
+            // Update Counselor record
+            $counselor = Counselor::where('user_id', $user->id)->first();
+            
+            if ($counselor) {
+                $counselor->update([
+                    'nama_lengkap' => $validated['name'],
+                    'nip' => $validated['nip'] ?? $counselor->nip,
+                    'no_hp' => $validated['phone'],
+                    'specialization' => $validated['specialization'] ?? $counselor->specialization,
+                    'office_hours' => $validated['office_hours'] ?? $counselor->office_hours,
+                ]);
+            }
+            
+            Log::info('Guru BK profile updated by self', [
+                'user_id' => $user->id,
+                'updated_fields' => array_keys($validated)
+            ]);
+            
+            return redirect()->route('profile')
+                ->with('success', 'Profil Anda berhasil diperbarui');
+                
+        } catch (\Exception $e) {
+            Log::error('Error updating guru profile', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+            
+            return back()->withInput()
+                ->with('error', 'Gagal mengupdate profil: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Simpan Jadwal Konseling untuk Siswa Tertentu
+     */
+    public function simpanJadwalForSiswa(Request $request, $id)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'mulai' => 'required',
+            'selesai' => 'nullable',
+            'jenis_bimbingan' => 'required',
+            'keluhan' => 'nullable|string',
+        ]);
+
+        try {
+            // Format waktu: "mulai - selesai"
+            $waktu = $request->mulai;
+            if ($request->selesai) {
+                $waktu .= ' - ' . $request->selesai;
+            }
+
+            DB::table('janji_konselings')->insert([
+                'user_id' => $id,
+                'tanggal' => $request->tanggal,
+                'waktu' => $waktu,
+                'jenis_bimbingan' => $request->jenis_bimbingan,
+                'keluhan' => $request->keluhan ?? '',
+                'guru_bk' => Auth::user()->name,
+                'status' => 'dikonfirmasi',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return redirect()->route('guru.siswa.riwayat', $id)
+                ->with('success', 'Jadwal konseling berhasil ditambahkan');
+        } catch (\Exception $e) {
+            Log::error('Error saving jadwal for siswa', [
+                'error' => $e->getMessage(),
+                'siswa_id' => $id,
+                'guru_id' => Auth::id()
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Gagal menyimpan jadwal: ' . $e->getMessage());
+        }
     }
 
 }

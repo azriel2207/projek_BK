@@ -97,7 +97,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $item->class ?? 'Belum ditentukan' }}</div>
+                            <div class="text-sm text-gray-900">{{ $item->kelas ?? 'Belum ditentukan' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $item->email }}</div>
@@ -116,14 +116,14 @@
                                     <i class="fas fa-eye"></i>
                                     <span>Lihat</span>
                                 </a>
-                                <button class="text-green-600 hover:text-green-900 transition duration-150 flex items-center space-x-1">
+                                <a href="{{ route('guru.siswa.edit', $item->id) }}" class="text-purple-600 hover:text-purple-900 transition duration-150 flex items-center space-x-1">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit</span>
+                                </a>
+                                <a href="{{ route('guru.siswa.riwayat', $item->id) }}" class="text-green-600 hover:text-green-900 transition duration-150 flex items-center space-x-1">
                                     <i class="fas fa-history"></i>
                                     <span>Riwayat</span>
-                                </button>
-                                <button class="text-purple-600 hover:text-purple-900 transition duration-150 flex items-center space-x-1">
-                                    <i class="fas fa-comment"></i>
-                                    <span>Konseling</span>
-                                </button>
+                                </a>
                             </div>
                         </td>
                     </tr>

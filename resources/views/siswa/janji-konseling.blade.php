@@ -132,7 +132,7 @@
                             <form action="{{ route('siswa.janji-konseling.destroy', $janji->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="bg-red-100 text-red-800 px-3 py-2 rounded-lg text-sm hover:bg-red-200 transition flex items-center" onclick="return confirm('Apakah Anda yakin ingin membatalkan janji ini?')">
+                                <button type="submit" class="bg-red-100 text-red-800 px-3 py-2 rounded-lg text-sm hover:bg-red-200 transition flex items-center" onclick="return confirmCancel('janji konseling'); return false;">
                                     <i class="fas fa-times mr-1"></i>Batal
                                 </button>
                             </form>
@@ -184,7 +184,7 @@
                                     <form action="{{ route('siswa.janji-konseling.destroy', $janji->id) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('Yakin ingin membatalkan?')">
+                                        <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirmCancel('janji'); return false;">
                                             <i class="fas fa-trash mr-1"></i>Batal
                                         </button>
                                     </form>

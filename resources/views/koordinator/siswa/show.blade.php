@@ -81,7 +81,7 @@
                 @if($siswa->role === 'siswa')
                 <a href="{{ route('koordinator.siswa.upgrade-form', $siswa->id) }}" 
                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition"
-                   onclick="return confirm('Upgrade {{ $siswa->nama_lengkap ?? $siswa->name }} menjadi Guru BK?')">
+                   onclick="confirmUpgradeStudent('{{ addslashes($siswa->nama_lengkap ?? $siswa->name) }}'); return false;">
                     <i class="fas fa-user-graduate mr-2"></i>Upgrade ke Guru BK
                 </a>
                 @endif
@@ -91,7 +91,7 @@
                     @method('DELETE')
                     <button type="submit" 
                             class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition"
-                            onclick="return confirm('Hapus siswa {{ $siswa->nama_lengkap ?? $siswa->name }}?')">
+                            onclick="confirmDelete('{{ addslashes($siswa->nama_lengkap ?? $siswa->name) }}'); return false;">
                         <i class="fas fa-trash mr-2"></i>Hapus
                     </button>
                 </form>

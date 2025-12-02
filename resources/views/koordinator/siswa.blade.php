@@ -92,7 +92,7 @@
                                 <a href="{{ route('koordinator.siswa.upgrade-form', $siswa->user->id) }}" 
                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition" 
                                    title="Upgrade ke Guru BK"
-                                   onclick="return confirm('Upgrade {{ $siswa->nama_lengkap ?? $siswa->user->name }} menjadi Guru BK?')">
+                                   onclick="confirmUpgradeStudent('{{ addslashes($siswa->nama_lengkap ?? $siswa->user->name) }}'); return false;">
                                     Upgrade
                                 </a>
                                 @endif
@@ -104,7 +104,7 @@
                                     <button type="submit" 
                                             class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition"
                                             title="Hapus Siswa"
-                                            onclick="return confirm('Hapus siswa {{ $siswa->nama_lengkap ?? $siswa->user->name }}?')">
+                                            onclick="confirmDelete('{{ addslashes($siswa->nama_lengkap ?? $siswa->user->name) }}'); return false;">
                                         Hapus
                                     </button>
                                 </form>

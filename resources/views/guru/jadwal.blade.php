@@ -166,7 +166,7 @@
         <form action="{{ route('guru.jadwal.hapus', $item->id) }}" 
               method="POST" 
               class="inline"
-              onsubmit="return confirm('Apakah Anda yakin ingin menghapus jadwal ini?')">
+              onsubmit="return confirmDelete('jadwal')">
             @csrf
             @method('DELETE')
             <button type="submit" 
@@ -190,7 +190,7 @@
             <button type="submit" 
                     class="text-green-600 hover:text-green-900 transition" 
                     title="Mark Selesai"
-                    onclick="return confirm('Tandai konseling ini sebagai selesai?')">
+                    onclick="return confirmComplete(); return false;">
                 <i class="fas fa-check-double"></i>
             </button>
         </form>

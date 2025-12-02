@@ -101,37 +101,10 @@
                 <!-- Fitur 3 -->
                 <div class="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-2xl text-center card-hover border border-white border-opacity-20">
                     <div class="bg-white bg-opacity-20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-users text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Bimbingan Sosial</h3>
-                    <p class="text-gray-200 leading-relaxed">Membantu siswa memahami dan menyesuaikan diri dengan lingkungan sosialnya</p>
-                </div>
-
-                <!-- Fitur 4 -->
-                <div class="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-2xl text-center card-hover border border-white border-opacity-20">
-                    <div class="bg-white bg-opacity-20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i class="fas fa-briefcase text-white text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold text-white mb-4">Bimbingan Karir</h3>
                     <p class="text-gray-200 leading-relaxed">Membantu siswa merencanakan dan mengembangkan karir masa depannya</p>
-                </div>
-
-                <!-- Fitur 5 -->
-                <div class="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-2xl text-center card-hover border border-white border-opacity-20">
-                    <div class="bg-white bg-opacity-20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-chart-line text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Assesment & Evaluasi</h3>
-                    <p class="text-gray-200 leading-relaxed">Melakukan pengukuran dan penilaian terhadap perkembangan siswa</p>
-                </div>
-
-                <!-- Fitur 6 -->
-                <div class="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-2xl text-center card-hover border border-white border-opacity-20">
-                    <div class="bg-white bg-opacity-20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-file-alt text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Laporan Perkembangan</h3>
-                    <p class="text-gray-200 leading-relaxed">Dokumentasi dan pelaporan perkembangan siswa secara berkala</p>
                 </div>
             </div>
         </div>

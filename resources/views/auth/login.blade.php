@@ -198,15 +198,15 @@
                     <div class="text-xs text-blue-700 space-y-1">
                         <div class="flex items-center justify-between p-2 bg-white rounded">
                             <span>Koordinator BK:</span>
-                            <span class="font-mono">bk@gmail.com / 123456</span>
+                            <span class="font-mono">bk@gmail.com / 12345678</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-white rounded">
                             <span>Guru BK:</span>
-                            <span class="font-mono">gurubk@gmail.com / 123456</span>
+                            <span class="font-mono">gurubk@gmail.com / 12345678</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-white rounded">
                             <span>Siswa:</span>
-                            <span class="font-mono">siswa@gmail.com / 123456</span>
+                            <span class="font-mono">siswa@gmail.com / 12345678</span>
                         </div>
                     </div>
                 </div>

@@ -174,4 +174,69 @@
                     
                 </div>
             </div>
+
+<script>
+    // Handle periode changes
+    document.getElementById('periode-select').addEventListener('change', function() {
+        const periode = this.value;
+        window.location.href = `{{ route('koordinator.laporan') }}?periode=${periode}`;
+    });
+
+    // Generate Laporan Bulanan PDF
+    function generateLaporanBulanan() {
+        try {
+            // Get current periode from select or default
+            const periodeSelect = document.getElementById('periode-select');
+            const periode = periodeSelect ? periodeSelect.value : 'bulan_ini';
+            
+            // Show loading message
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            button.disabled = true;
+
+            // Make POST request to export PDF
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("koordinator.laporan.export") }}';
+            form.style.display = 'none';
+
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (csrfToken) {
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                tokenInput.value = csrfToken.getAttribute('content');
+                form.appendChild(tokenInput);
+            }
+
+            // Add periode input
+            const periodeInput = document.createElement('input');
+            periodeInput.type = 'hidden';
+            periodeInput.name = 'periode';
+            periodeInput.value = periode;
+            form.appendChild(periodeInput);
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+
+            // Reset button after a delay
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error generating laporan:', error);
+            alert('Terjadi kesalahan saat membuat laporan PDF. Silakan coba lagi.');
+            const button = event.target.closest('button');
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-file-pdf text-blue-600 text-2xl mb-2"></i><p class="text-sm font-medium text-blue-800">Laporan Bulanan</p><p class="text-xs text-blue-600 mt-1">PDF Report</p>';
+            }
+        }
+    }
+</script>
 @endsection

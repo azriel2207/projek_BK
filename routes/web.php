@@ -231,11 +231,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/siswa/{id}/konseling', [GuruController::class, 'simpanJadwalForSiswa'])->name('siswa.konseling.store');
         Route::get('/siswa/{id}/kelas', [GuruController::class, 'editKelas'])->name('siswa.kelas.edit');
         Route::put('/siswa/{id}/kelas', [GuruController::class, 'updateKelas'])->name('siswa.kelas.update');
+        Route::get('/siswa/{id}/edit', [GuruController::class, 'editSiswa'])->name('siswa.edit');
+        Route::put('/siswa/{id}', [GuruController::class, 'updateSiswa'])->name('siswa.update');
         
         // MANAJEMEN GURU BK
         Route::get('/guru', [GuruController::class, 'daftarGuru'])->name('guru');
+        Route::get('/guru/{id}', [GuruController::class, 'detailGuru'])->name('guru.detail');
         
 
+        // PROFIL GURU BK
+        Route::get('/profile/edit', [GuruController::class, 'editProfile'])->name('profile.edit');
+        Route::put('/profile', [GuruController::class, 'updateProfile'])->name('profile.update');
         
         // ========== ROUTES UNTUK CATATAN KONSELING ==========
         Route::prefix('riwayat')->name('riwayat.')->group(function () {

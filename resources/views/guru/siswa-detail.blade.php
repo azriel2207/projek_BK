@@ -72,6 +72,12 @@
                             <span>Buat Jadwal Konseling</span>
                         </a>
                         
+                        <a href="{{ route('guru.siswa.edit', $siswa->id) }}" 
+                           class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg inline-flex items-center justify-center gap-2 transition">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Edit Profil Siswa</span>
+                        </a>
+                        
                         <a href="{{ route('guru.siswa.kelas.edit', $siswa->id) }}" 
                            class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center justify-center gap-2 transition">
                             <i class="fas fa-edit"></i>
@@ -222,6 +228,7 @@
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

@@ -96,6 +96,27 @@ class AuthController extends Controller
             'role' => $validated['role'],
         ]);
 
+        // Create student record if role is siswa
+        if ($user->role === 'siswa') {
+            try {
+                \App\Models\Student::create([
+                    'user_id' => $user->id,
+                    'nama_lengkap' => $user->name,
+                    'nis' => \App\Services\StudentService::generateNIS(),
+                    'tgl_lahir' => null,
+                    'alamat' => null,
+                    'no_hp' => null,
+                    'kelas' => null,
+                ]);
+                Log::info('Student record created for new siswa user', ['user_id' => $user->id]);
+            } catch (\Exception $e) {
+                Log::error('Error creating student record during registration', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
         // Create verification code
         $verificationCode = EmailVerificationCode::getOrCreateForUser($user);
 
@@ -104,7 +125,7 @@ class AuthController extends Controller
             $user->notify(new SendVerificationCodeEmail($verificationCode));
             $successMessage = 'Registrasi berhasil! Kode verifikasi telah dikirim ke ' . $user->email . '. Silakan cek email Anda dalam beberapa detik.';
         } catch (\Exception $e) {
-            \Log::error('Error sending verification code: ' . $e->getMessage());
+            Log::error('Error sending verification code: ' . $e->getMessage());
             $successMessage = 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.';
         }
 
@@ -161,6 +182,10 @@ class AuthController extends Controller
     public function verifyCode(Request $request)
     {
         $user = Auth::user();
+        
+        if (!$user instanceof \App\Models\User) {
+            $user = User::find($user->id);
+        }
 
         if (!$user || $user->email_verified_at) {
             return redirect()->route('login');
@@ -222,13 +247,13 @@ class AuthController extends Controller
         return redirect()->route('dashboard.redirect')
             ->with('success', 'Email berhasil diverifikasi! Selamat datang.');
     }
-
-    /**
-     * Resend verification code
-     */
     public function resendVerificationCode(Request $request)
     {
         $user = Auth::user();
+        
+        if (!$user instanceof \App\Models\User) {
+            $user = User::find($user->id);
+        }
 
         if (!$user || $user->email_verified_at) {
             return redirect()->route('login');
