@@ -17,6 +17,19 @@
             transform: translateY(-5px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
+        #forgotPasswordForm .max-w-md {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
@@ -158,9 +171,10 @@
             </div>
         </div>
 
-        <!-- Login Section -->
+        <!-- Login & Forgot Password Section -->
         <div id="login" class="py-16">
-            <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Login Form -->
+            <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" id="loginCard">
                 <div class="bg-blue-600 py-6 px-8">
                     <h2 class="text-2xl font-bold text-white text-center">
                         <i class="fas fa-lock mr-2"></i>Login Sistem BK
@@ -189,7 +203,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('login') }}">
+                    <form method="POST" action="{{ route('login') }}" id="loginForm">
                         @csrf
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
@@ -208,43 +222,89 @@
                             <input type="password" name="password" id="password" required 
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                    placeholder="masukkan password">
+                            <!-- Lupa Password Link -->
+                            <div class="mt-2 text-right">
+                                <button type="button" onclick="showForgotPasswordForm()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                                    <i class="fas fa-key mr-1"></i>Lupa password?
+                                </button>
+                            </div>
                         </div>
                         
                         <button type="submit" 
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 mb-4">
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105">
                             <i class="fas fa-sign-in-alt mr-2"></i>Masuk ke Sistem
                         </button>
                     </form>
+                </div>
+            </div>
 
-                    <!-- Link to Register -->
-                    <div class="text-center mt-4">
-                        <p class="text-gray-600 text-sm">
-                            Belum punya akun? 
-                            <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
-                                Daftar di sini
-                            </a>
-                        </p>
+            <!-- Forgot Password Form (Hidden by default) -->
+            <div id="forgotPasswordForm" style="display: none;" class="py-16">
+                <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="bg-blue-600 py-6 px-8">
+                        <h2 class="text-2xl font-bold text-white text-center">
+                            <i class="fas fa-key mr-2"></i>Lupa Password?
+                        </h2>
                     </div>
+                    
+                    <div class="p-8">
+                        <p class="text-gray-600 text-center text-sm mb-6">
+                            Masukkan email Anda dan kami akan mengirimkan kode reset password
+                        </p>
 
+                        <form method="POST" action="{{ route('password.send-code') }}" id="forgotPasswordFormElement">
+                            @csrf
+                            
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="forgotPasswordEmail">
+                                    <i class="fas fa-envelope mr-2 text-blue-600"></i>Email
+                                </label>
+                                <input type="email" name="email" id="forgotPasswordEmail" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                       placeholder="masukkan email anda">
+                            </div>
+
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                <p class="text-sm text-blue-800">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Kami akan mengirimkan kode verifikasi ke email Anda. Kode ini berlaku selama 15 menit.
+                                </p>
+                            </div>
+
+                            <button type="button" id="forgotPasswordSubmit"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 mb-4">
+                                <i class="fas fa-paper-plane mr-2"></i>Kirim Kode Reset
+                            </button>
+                        </form>
+
+                        <div class="text-center">
+                            <button type="button" onclick="showLoginForm()" class="text-gray-600 hover:text-gray-800 text-sm font-semibold">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Login
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-white bg-opacity-10 backdrop-blur-sm py-8 border-t border-white border-opacity-20">
-        <div class="container mx-auto px-4 text-center">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <div class="flex items-center justify-center md:justify-start">
-                        <i class="fas fa-hands-helping text-white text-2xl mr-3"></i>
-                        <span class="text-xl font-bold text-white">Sistem BK Sekolah</span>
+    <footer class="bg-white bg-opacity-10 backdrop-blur-sm py-12 border-t border-white border-opacity-20 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Brand Section -->
+                <div class="flex flex-col items-center md:items-start">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-hands-helping text-white text-3xl mr-3"></i>
+                        <span class="text-2xl font-bold text-white">Sistem BK Sekolah</span>
                     </div>
-                    <p class="text-gray-300 mt-2 text-sm">Platform Layanan Bimbingan Konseling Terintegrasi</p>
+                    <p class="text-gray-300 text-center md:text-left">Platform Layanan Bimbingan Konseling Terintegrasi</p>
                 </div>
-                <div class="text-gray-300">
-                    <p>&copy; 2024 Sistem Bimbingan Konseling Sekolah</p>
-                    <p class="text-sm mt-1">Mendukung Pendidikan Karakter Bangsa</p>
+
+                <!-- Copyright Section -->
+                <div class="flex flex-col items-center md:items-end text-gray-300 text-center md:text-right">
+                    <p class="text-sm">&copy; 2024 Sistem Bimbingan Konseling Sekolah</p>
+                    <p class="text-xs mt-2 opacity-75">Mendukung Pendidikan Karakter Bangsa</p>
                 </div>
             </div>
         </div>
@@ -272,16 +332,38 @@
             });
         });
 
-        // Auto-hide flash messages (hanya untuk notification, bukan modal)
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                const flashMessages = document.querySelectorAll('body > .bg-red-100, body > .bg-green-100');
-                flashMessages.forEach(function(message) {
-                    message.style.transition = 'opacity 0.5s';
-                    message.style.opacity = '0';
-                    setTimeout(() => message.remove(), 500);
-                });
-            }, 5000);
+        // Forgot Password Modal Functions
+        function showForgotPasswordForm() {
+            const loginCard = document.getElementById('loginCard').closest('div');
+            if (loginCard) {
+                loginCard.style.display = 'none';
+            }
+            document.getElementById('forgotPasswordForm').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('forgotPasswordForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function showLoginForm() {
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            const loginCard = document.getElementById('loginCard').closest('div');
+            if (loginCard) {
+                loginCard.style.display = 'block';
+            }
+            setTimeout(() => {
+                document.getElementById('loginCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        // Handle forgot password form submission
+        document.getElementById('forgotPasswordSubmit')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('forgotPasswordEmail').value;
+            if (emailInput) {
+                document.getElementById('forgotPasswordFormElement').submit();
+            } else {
+                alert('Silakan masukkan email Anda');
+            }
         });
     </script>
 </body>

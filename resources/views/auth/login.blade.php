@@ -152,21 +152,25 @@
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
                             </p>
                         @enderror
+                        <!-- Lupa Password Link -->
+                        <div class="mt-2 text-right">
+                            <a href="{{ route('password.forgot') }}" class="text-sm text-blue-600 hover:text-blue-800 font-semibold">
+                                Lupa password?
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Remember Me -->
-                    <div class="flex items-center justify-between mb-6">
-                        <div class="flex items-center">
-                            <input 
-                                type="checkbox" 
-                                name="remember" 
-                                id="remember"
-                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            >
-                            <label for="remember" class="ml-2 text-sm text-gray-600">
-                                Ingat saya
-                            </label>
-                        </div>
+                    <div class="flex items-center mb-6">
+                        <input 
+                            type="checkbox" 
+                            name="remember" 
+                            id="remember"
+                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        >
+                        <label for="remember" class="ml-2 text-sm text-gray-600">
+                            Ingat saya
+                        </label>
                     </div>
 
                     <!-- Submit Button -->

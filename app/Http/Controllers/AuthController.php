@@ -6,16 +6,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Models\EmailVerificationCode;
+use App\Models\PasswordResetCode;
 use App\Jobs\SendVerificationEmail;
 use App\Notifications\SendVerificationCodeEmail;
+use App\Mail\PasswordResetCodeMail;
 
 class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        return redirect('/');
     }
 
     public function login(Request $request)
@@ -332,5 +335,187 @@ class AuthController extends Controller
         ]);
 
         return back()->with('success', 'Profile berhasil diupdate!');
+    }
+
+    /**
+     * Show forgot password form
+     */
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    /**
+     * Send password reset code to email
+     */
+    public function sendPasswordResetCode(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.exists' => 'Email tidak terdaftar dalam sistem.',
+        ]);
+
+        // Find user by email
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email tidak ditemukan.']);
+        }
+
+        // Delete old reset codes
+        PasswordResetCode::where('user_id', $user->id)->delete();
+
+        // Generate new code
+        $code = PasswordResetCode::generateCode();
+
+        // Create password reset code record
+        $resetCode = PasswordResetCode::create([
+            'user_id' => $user->id,
+            'code' => $code,
+            'expires_at' => now()->addMinutes(15),
+        ]);
+
+        // Send email
+        try {
+            Mail::send(new PasswordResetCodeMail($user, $code));
+            
+            Log::info('Password reset code sent', [
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+
+            return redirect()->route('password.verify-code')
+                ->with('success', 'Kode reset password telah dikirim ke email Anda. Silakan cek email Anda.')
+                ->with('email', $user->email);
+        } catch (\Exception $e) {
+            Log::error('Error sending password reset code: ' . $e->getMessage());
+            $resetCode->delete();
+            return back()->withErrors(['email' => 'Gagal mengirim kode reset password. Silakan coba lagi.']);
+        }
+    }
+
+    /**
+     * Show verify password reset code form
+     */
+    public function showVerifyPasswordResetForm()
+    {
+        $email = session('email');
+        return view('auth.verify-password-reset', compact('email'));
+    }
+
+    /**
+     * Verify password reset code
+     */
+    public function verifyPasswordResetCode(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'code' => 'required|string|size:6',
+        ], [
+            'email.exists' => 'Email tidak ditemukan.',
+            'code.size' => 'Kode harus 6 digit.',
+        ]);
+
+        // Find user
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email tidak ditemukan.']);
+        }
+
+        // Find reset code
+        $resetCode = PasswordResetCode::where('user_id', $user->id)
+            ->where('code', $request->code)
+            ->first();
+
+        if (!$resetCode) {
+            return back()->withErrors(['code' => 'Kode reset password tidak valid.']);
+        }
+
+        // Check if code is valid
+        if (!$resetCode->isValid()) {
+            if ($resetCode->isExpired()) {
+                $resetCode->delete();
+                return back()->withErrors(['code' => 'Kode reset password telah kadaluarsa. Silakan minta kode baru.']);
+            }
+
+            if ($resetCode->attempts >= 3) {
+                $resetCode->delete();
+                return back()->withErrors(['code' => 'Terlalu banyak percobaan salah. Silakan minta kode baru.']);
+            }
+        }
+
+        // Store in session for use in reset password form
+        $request->session()->put([
+            'password_reset_user_id' => $user->id,
+            'password_reset_code' => $resetCode->id,
+            'password_reset_email' => $user->email,
+        ]);
+
+        return redirect()->route('password.reset-form')
+            ->with('success', 'Kode terverifikasi. Silakan masukkan password baru Anda.');
+    }
+
+    /**
+     * Show reset password form
+     */
+    public function showResetPasswordForm(Request $request)
+    {
+        if (!$request->session()->has('password_reset_user_id')) {
+            return redirect()->route('password.forgot')
+                ->withErrors(['code' => 'Sesi reset password tidak valid. Silakan ulangi proses.']);
+        }
+
+        $email = $request->session()->get('password_reset_email');
+        return view('auth.reset-password', compact('email'));
+    }
+
+    /**
+     * Update password
+     */
+    public function updatePassword(Request $request)
+    {
+        if (!$request->session()->has('password_reset_user_id')) {
+            return redirect('/login')
+                ->withErrors(['code' => 'Sesi reset password tidak valid.']);
+        }
+
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.min' => 'Password harus minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak sesuai.',
+        ]);
+
+        $userId = $request->session()->get('password_reset_user_id');
+        $resetCodeId = $request->session()->get('password_reset_code');
+
+        $user = User::find($userId);
+        $resetCode = PasswordResetCode::find($resetCodeId);
+
+        if (!$user || !$resetCode) {
+            return redirect('/login')
+                ->withErrors(['code' => 'Data reset password tidak valid.']);
+        }
+
+        // Update password
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Delete reset code
+        $resetCode->delete();
+
+        // Clear all session data
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        Log::info('Password reset successfully', [
+            'user_id' => $user->id,
+            'email' => $user->email
+        ]);
+
+        return redirect('/login')
+            ->with('success', 'Password berhasil direset. Silakan login dengan password baru Anda.');
     }
 }
