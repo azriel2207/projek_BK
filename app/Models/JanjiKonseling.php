@@ -21,14 +21,29 @@ class JanjiKonseling extends Model
         'keluhan',
         'jenis_bimbingan',
         'guru_bk',
-        'catatan_konselor'
+        'catatan_konselor',
+        'keterangan',
+        'is_archived',
+        'archived_at'
     ];
 
     protected $casts = [
         'tanggal' => 'date',
+        'is_archived' => 'boolean',
+        'archived_at' => 'datetime'
     ];
 
     // Scope untuk statistik
+    public function scopeNotArchived($query)
+    {
+        return $query->where('is_archived', false);
+    }
+
+    public function scopeArchived($query)
+    {
+        return $query->where('is_archived', true);
+    }
+
     public function scopeBulanIni($query)
     {
         return $query->whereMonth('tanggal', now()->month)

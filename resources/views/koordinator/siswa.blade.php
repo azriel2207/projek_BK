@@ -87,16 +87,6 @@
                                     Edit
                                 </a>
 
-                                <!-- Tombol Upgrade (hanya untuk role siswa) -->
-                                @if($siswa->user->role === 'siswa')
-                                <a href="{{ route('koordinator.siswa.upgrade-form', $siswa->user->id) }}" 
-                                   class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition" 
-                                   title="Upgrade ke Guru BK"
-                                   onclick="confirmUpgradeStudent('{{ addslashes($siswa->nama_lengkap ?? $siswa->user->name) }}'); return false;">
-                                    Upgrade
-                                </a>
-                                @endif
-
                                 <!-- Tombol Hapus -->
                                 <form action="{{ route('koordinator.siswa.destroy', $siswa->id) }}" method="POST" class="inline">
                                     @csrf

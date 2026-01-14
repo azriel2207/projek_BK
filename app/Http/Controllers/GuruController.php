@@ -236,28 +236,51 @@ public function editJadwal($id)
         $jadwal = DB::table('janji_konselings')->where('id', $id)->first();
 
         if (!$jadwal) {
-            abort(404, 'Jadwal tidak ditemukan');
+            return redirect()->route('guru.jadwal')->with('error', 'Jadwal tidak ditemukan');
         }
 
-        DB::table('janji_konselings')->where('id', $id)->delete();
+        // Prevent deletion of completed or archived sessions
+        if ($jadwal->status === 'selesai') {
+            return redirect()->route('guru.jadwal')
+                ->with('error', 'Tidak dapat menghapus jadwal yang sudah selesai. Jadwal telah diarsipkan dan tidak dapat diubah.');
+        }
 
-        return redirect()->route('guru.jadwal')->with('success', 'Jadwal berhasil dihapus');
+        if ($jadwal->is_archived) {
+            return redirect()->route('guru.jadwal')
+                ->with('error', 'Tidak dapat menghapus jadwal yang sudah diarsipkan');
+        }
+
+        // Only allow deletion of sessions that are not completed
+        if (!in_array($jadwal->status, ['menunggu', 'dikonfirmasi', 'dibatalkan'])) {
+            return redirect()->route('guru.jadwal')
+                ->with('error', 'Status jadwal tidak memungkinkan penghapusan');
+        }
+
+        DB::table('janji_konselings')->where('id', $id)->update([
+            'status' => 'dibatalkan',
+            'is_archived' => false
+        ]);
+
+        return redirect()->route('guru.jadwal')->with('success', 'Jadwal berhasil dibatalkan');
     }
 
     // FORM TAMBAH CATATAN
     public function tambahCatatanForm($id)
     {
-        $jadwal = DB::table('janji_konselings')
+        $janji = DB::table('janji_konselings')
             ->join('users', 'janji_konselings.user_id', '=', 'users.id')
             ->select('janji_konselings.*', 'users.name as nama_siswa')
             ->where('janji_konselings.id', $id)
             ->first();
 
-        if (!$jadwal) {
-            abort(404, 'Jadwal tidak ditemukan');
+        if (!$janji) {
+            abort(404, 'Janji konseling tidak ditemukan');
         }
 
-        return view('guru.riwayat-tambah', compact('jadwal'));
+        // Load relasi untuk akses user data lengkap
+        $janji = \App\Models\JanjiKonseling::find($id);
+
+        return view('guru.riwayat.tambah', compact('janji'));
     }
 
     // Kelola Permintaan
@@ -584,24 +607,32 @@ public function editJadwal($id)
     // Catatan Konseling
     public function daftarCatatan()
     {
-        // Ambil data dari janji_konselings yang status selesai (riwayat konseling)
-        $catatan = DB::table('janji_konselings')
-            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+        // Ambil ID catatan terbaru untuk setiap janji_id
+        $latestCatatanIds = DB::table('catatan')
+            ->where('guru_bk', Auth::user()->name)
+            ->groupBy('janji_id')
+            ->selectRaw('MAX(id) as id')
+            ->pluck('id');
+
+        // Ambil data catatan terbaru dengan joins
+        $catatanFiltered = DB::table('catatan')
+            ->join('users', 'catatan.user_id', '=', 'users.id')
+            ->join('janji_konselings', 'catatan.janji_id', '=', 'janji_konselings.id')
             ->select(
-                'janji_konselings.id',
-                'janji_konselings.tanggal',
+                'catatan.id',
+                'catatan.tanggal',
+                'catatan.created_at',
+                'catatan.user_id',
+                'catatan.janji_id',
                 'janji_konselings.jenis_bimbingan',
                 'janji_konselings.status',
-                'janji_konselings.updated_at',
-                 'janji_konselings.user_id',
                 'users.name as nama_siswa'
             )
-            ->where('janji_konselings.status', 'selesai')
-            ->where('janji_konselings.guru_bk', Auth::user()->name)
-            ->orderBy('janji_konselings.tanggal', 'desc')
+            ->whereIn('catatan.id', $latestCatatanIds)
+            ->orderBy('catatan.tanggal', 'desc')
             ->paginate(20);
 
-        return view('guru.riwayat.index', compact('catatan'));
+        return view('guru.riwayat.index', compact('catatanFiltered'));
     }
 
     // public function buatCatatan()
@@ -841,34 +872,45 @@ public function editJadwal($id)
     public function simpanCatatan(Request $request)
     {
         $request->validate([
-            'user_id' => 'nullable|exists:users,id',
-            'janji_id' => 'nullable|exists:janji_konselings,id',
-            'tanggal' => 'required|date',
-            'isi' => 'required|string|min:10',
+            'janji_id' => 'required|exists:janji_konselings,id',
+            'isi_catatan' => 'required|string|min:10',
+            'rekomendasi' => 'nullable|string',
         ]);
 
         try {
+            // Get janji data to get user_id
+            $janji = DB::table('janji_konselings')->where('id', $request->janji_id)->first();
+            
+            if (!$janji) {
+                return back()->with('error', 'Janji konseling tidak ditemukan.');
+            }
+
+            // Combine isi_catatan and rekomendasi into one field
+            $isi_lengkap = $request->isi_catatan;
+            if ($request->rekomendasi) {
+                $isi_lengkap .= "\n\n--- REKOMENDASI ---\n" . $request->rekomendasi;
+            }
+
+            // Insert catatan
             DB::table('catatan')->insert([
-                'user_id' => $request->user_id ?? null,
-                'janji_id' => $request->janji_id ?? null,
-                'tanggal' => $request->tanggal,
-                'isi' => $request->isi,
+                'user_id' => $janji->user_id,
+                'janji_id' => $request->janji_id,
+                'tanggal' => now()->format('Y-m-d'),
+                'isi' => $isi_lengkap,
                 'guru_bk' => Auth::user()->name,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // Set status janji menjadi 'selesai' jika ada janji_id
-            if ($request->janji_id) {
-                DB::table('janji_konselings')
-                    ->where('id', $request->janji_id)
-                    ->update([
-                        'status' => 'selesai',
-                        'updated_at' => now()
-                    ]);
-            }
+            // Update status janji menjadi 'selesai'
+            DB::table('janji_konselings')
+                ->where('id', $request->janji_id)
+                ->update([
+                    'status' => 'selesai',
+                    'updated_at' => now()
+                ]);
 
-            return redirect()->route('guru.riwayat.index')->with('success', 'Catatan berhasil disimpan.');
+            return redirect()->route('guru.riwayat.index')->with('success', 'Catatan konseling berhasil disimpan!');
         } catch (\Exception $e) {
             Log::error('Error saving catatan', [
                 'error' => $e->getMessage(),
@@ -916,21 +958,18 @@ public function editJadwal($id)
                 // Map janji fields jika ditemukan
                 if ($janji) {
                     $result->waktu = $janji->waktu ?? null;
-                    $result->jenis_bimbingan = $this->mapJenisBimbinganLabel($janji->jenis_bimbingan ?? null);
+                    $result->jenis_bimbingan = $janji->jenis_bimbingan ?? null;
                     $result->keluhan = $janji->keluhan ?? null;
                     $result->status = $janji->status ?? 'selesai';
                 } else {
                     // Jika tidak ada janji, isi dengan fallback
                     $result->waktu = null;
-                    $result->jenis_bimbingan = 'Umum';
-                    $result->keluhan = $catatan->isi ?? null;
+                    $result->jenis_bimbingan = null;
+                    $result->keluhan = null;
                     $result->status = 'selesai';
                 }
 
-                // Gunakan isi catatan sebagai catatan_konselor
-                $result->catatan_konselor = $catatan->isi ?? null;
-
-                return view('guru.riwayat-detail', ['catatan' => $result, 'janji' => $janji ?? null]);
+                return view('guru.riwayat.detail', ['catatan' => $result]);
             }
 
             // Jika tidak ditemukan di tabel catatan, cari di tabel janji_konselings

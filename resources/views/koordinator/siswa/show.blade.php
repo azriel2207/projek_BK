@@ -77,14 +77,6 @@
                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition">
                     <i class="fas fa-edit mr-2"></i>Edit
                 </a>
-                
-                @if($siswa->role === 'siswa')
-                <a href="{{ route('koordinator.siswa.upgrade-form', $siswa->id) }}" 
-                   class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition"
-                   onclick="confirmUpgradeStudent('{{ addslashes($siswa->nama_lengkap ?? $siswa->name) }}'); return false;">
-                    <i class="fas fa-user-graduate mr-2"></i>Upgrade ke Guru BK
-                </a>
-                @endif
 
                 <form action="{{ route('koordinator.siswa.destroy', $siswa->id) }}" method="POST" class="inline">
                     @csrf

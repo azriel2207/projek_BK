@@ -171,8 +171,10 @@ class SiswaController extends Controller
         $user = Auth::user();
         
         $detail = DB::table('janji_konselings')
-            ->where('id', $id)
-            ->where('user_id', $user->id)
+            ->leftJoin('catatan', 'janji_konselings.id', '=', 'catatan.janji_id')
+            ->where('janji_konselings.id', $id)
+            ->where('janji_konselings.user_id', $user->id)
+            ->select('janji_konselings.*', 'catatan.isi as catatan_konselor')
             ->first();
 
         if (!$detail) {

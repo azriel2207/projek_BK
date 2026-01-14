@@ -290,7 +290,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <script>
         let currentModalId = null;

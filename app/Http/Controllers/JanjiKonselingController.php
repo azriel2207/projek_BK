@@ -42,7 +42,11 @@ class JanjiKonselingController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        \Log::info('=== JANJI KONSELING STORE REQUEST ===');
+        \Log::info('Request input:', $request->all());
+        \Log::info('Auth user ID: ' . Auth::id());
+        
+        $validated = $request->validate([
             'tanggal' => 'required|date|after_or_equal:today',
             'waktu' => 'required',
             'keluhan' => 'required|string|min:10',
@@ -50,7 +54,27 @@ class JanjiKonselingController extends Controller
             'guru_id' => 'nullable|exists:users,id'
         ]);
 
-        // Get guru name if guru_id provided, otherwise use input guru_bk if exists
+        \Log::info('Validation passed. Data:', $validated);
+
+        $userId = Auth::id();
+        
+        // Check untuk prevent duplicate submission dalam 3 detik
+        // Ini hanya untuk mencegah rapid double-click pada submit button
+        $recentJanji = JanjiKonseling::where('user_id', $userId)
+            ->where('tanggal', $request->tanggal)
+            ->where('waktu', $request->waktu)
+            ->where('jenis_bimbingan', $request->jenis_bimbingan)
+            ->where('status', 'menunggu')
+            ->where('created_at', '>=', now()->subSeconds(3))
+            ->first();
+        
+        if ($recentJanji) {
+            \Log::warning('Duplicate janji detected for user ' . $userId);
+            return redirect()->route('siswa.janji-konseling')
+                ->with('warning', 'Janji dengan data yang sama baru saja dibuat. Mohon tunggu beberapa saat...');
+        }
+
+        // Get guru name if guru_id provided
         $guruId = $request->guru_id;
         $guruName = 'Guru BK';
         
@@ -59,19 +83,33 @@ class JanjiKonselingController extends Controller
             $guruName = $guru->name ?? 'Guru BK';
         }
 
-        JanjiKonseling::create([
-            'user_id' => Auth::id(),
-            'tanggal' => $request->tanggal,
-            'waktu' => $request->waktu,
-            'keluhan' => $request->keluhan,
-            'jenis_bimbingan' => $request->jenis_bimbingan,
-            'guru_id' => $guruId,
-            'guru_bk' => $guruName,
-            'status' => 'menunggu'
-        ]);
+        try {
+            $janji = JanjiKonseling::create([
+                'user_id' => $userId,
+                'tanggal' => $request->tanggal,
+                'waktu' => $request->waktu,
+                'keluhan' => $request->keluhan,
+                'jenis_bimbingan' => $request->jenis_bimbingan,
+                'guru_id' => $guruId,
+                'guru_bk' => $guruName,
+                'status' => 'menunggu',
+                'is_archived' => false
+            ]);
 
-        return redirect()->route('siswa.janji-konseling')
-            ->with('success', 'Janji konseling berhasil dibuat. Menunggu konfirmasi dari guru BK.');
+            \Log::info('Janji created successfully. ID: ' . $janji->id);
+            \Log::info('=== END ===');
+
+            return redirect()->route('siswa.janji-konseling')
+                ->with('success', 'Janji konseling berhasil dibuat. Menunggu konfirmasi dari guru BK.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to create janji: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            \Log::info('=== END (ERROR) ===');
+            
+            return redirect()->back()
+                ->with('error', 'Gagal membuat janji konseling: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function edit($id)
@@ -123,10 +161,52 @@ class JanjiKonselingController extends Controller
 
     public function destroy($id)
     {
-        $janji = JanjiKonseling::where('user_id', Auth::id())->findOrFail($id);
+        $user = Auth::user();
+        $janji = JanjiKonseling::where('user_id', $user->id)->findOrFail($id);
+
+        // Prevent cancellation of completed or archived sessions
+        if ($janji->status === 'selesai') {
+            return redirect()->route('siswa.janji-konseling')
+                ->with('error', 'Tidak dapat membatalkan janji yang sudah selesai. Janji telah diarsipkan dan tidak dapat diubah.');
+        }
+
+        if ($janji->status === 'dibatalkan') {
+            return redirect()->route('siswa.janji-konseling')
+                ->with('warning', 'Janji ini sudah dibatalkan sebelumnya');
+        }
+
+        // Only allow cancellation of 'menunggu' and 'dikonfirmasi' status
+        if (!in_array($janji->status, ['menunggu', 'dikonfirmasi'])) {
+            return redirect()->route('siswa.janji-konseling')
+                ->with('error', 'Status janji tidak memungkinkan pembatalan');
+        }
+
         $janji->update(['status' => 'dibatalkan']);
 
         return redirect()->route('siswa.janji-konseling')
             ->with('success', 'Janji konseling berhasil dibatalkan');
+    }
+
+    /**
+     * Archive completed counseling session
+     * Called after session is marked as 'selesai'
+     */
+    public function archive($id)
+    {
+        $user = Auth::user();
+        $janji = JanjiKonseling::where('user_id', $user->id)->findOrFail($id);
+
+        if ($janji->status !== 'selesai') {
+            return redirect()->back()
+                ->with('error', 'Hanya janji yang sudah selesai yang dapat diarsipkan');
+        }
+
+        $janji->update([
+            'is_archived' => true,
+            'archived_at' => now()
+        ]);
+
+        return redirect()->route('siswa.riwayat-konseling')
+            ->with('success', 'Janji konseling berhasil diarsipkan');
     }
 }

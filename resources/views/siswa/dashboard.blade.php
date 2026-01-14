@@ -269,7 +269,7 @@
             </div>
 
             <!-- Widget Catatan dari Guru BK -->
-            <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="bg-white rounded-xl shadow-md p-6 mt-8">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-sticky-note mr-2 text-yellow-600"></i>Catatan dari Guru BK
@@ -382,83 +382,4 @@
             });
         });
     </script>
-
-        const menuToggle = document.getElementById('menu-toggle');
-        if (menuToggle) {
-            menuToggle.addEventListener('click', function() {
-                const sidebar = document.querySelector('.sidebar');
-                if (sidebar) sidebar.classList.toggle('active');
-            });
-        }
-
-        function editJanji(id) {
-            // Redirect ke form edit janji
-            window.location.href = `/siswa/janji-konseling/${String(id)}/edit`;
-        }
-
-        function batalJanji(id) {
-            if (confirm('Apakah Anda yakin ingin membatalkan janji ini?')) {
-                // Delete via POST method
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/siswa/janji-konseling/${String(id)}`;
-                
-                const methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                methodInput.value = 'DELETE';
-                form.appendChild(methodInput);
-                
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_token';
-                csrfInput.value = '{{ csrf_token() }}';
-                form.appendChild(csrfInput);
-                
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-
-        function lihatDetail(id) {
-            window.location.href = `/siswa/riwayat-konseling/${String(id)}`;
-        }
-
-        // Event listeners for button handlers
-        document.addEventListener('DOMContentLoaded', function() {
-            // Apply styles to progress bars
-            const progressBars = document.querySelectorAll('.progress-bar');
-            progressBars.forEach(bar => {
-                const width = bar.dataset.width;
-                const color = bar.dataset.color;
-                bar.style.width = width + '%';
-                bar.style.backgroundColor = color;
-            });
-
-            // Edit janji buttons
-            const editButtons = document.querySelectorAll('.edit-janji-btn');
-            editButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editJanji(this.dataset.id);
-                });
-            });
-
-            // Batal janji buttons
-            const batalButtons = document.querySelectorAll('.batal-janji-btn');
-            batalButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    batalJanji(this.dataset.id);
-                });
-            });
-
-            // Lihat detail buttons
-            const detailButtons = document.querySelectorAll('.lihat-detail-btn');
-            detailButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    lihatDetail(this.dataset.id);
-                });
-            });
-        });
-    </script>
-    </div>
 @endsection

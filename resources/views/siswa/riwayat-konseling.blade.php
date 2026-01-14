@@ -12,7 +12,6 @@
                         <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <option value="">Semua Status</option>
                             <option value="dikonfirmasi" @if(request('status') == 'dikonfirmasi') selected @endif>Dikonfirmasi</option>
-                            <option value="selesai" @if(request('status') == 'selesai') selected @endif>Selesai</option>
                             <option value="dibatalkan" @if(request('status') == 'dibatalkan') selected @endif>Dibatalkan</option>
                         </select>
                         <input type="month" name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" value="{{ request('bulan') }}">

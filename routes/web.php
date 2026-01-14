@@ -286,6 +286,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/janji-konseling/{id}/edit', [JanjiKonselingController::class, 'edit'])->name('janji-konseling.edit');
         Route::put('/janji-konseling/{id}', [JanjiKonselingController::class, 'update'])->name('janji-konseling.update');
         Route::delete('/janji-konseling/{id}', [JanjiKonselingController::class, 'destroy'])->name('janji-konseling.destroy');
+        Route::post('/janji-konseling/{id}/archive', [JanjiKonselingController::class, 'archive'])->name('janji-konseling.archive');
         Route::get('/riwayat-konseling', [SiswaController::class, 'riwayatKonseling'])->name('riwayat-konseling');
         Route::get('/riwayat-konseling/{id}', [SiswaController::class, 'detailRiwayatKonseling'])->name('riwayat-konseling-detail');
         Route::get('/bimbingan-belajar', [SiswaController::class, 'bimbinganBelajar'])->name('bimbingan-belajar');

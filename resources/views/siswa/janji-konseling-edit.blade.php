@@ -209,8 +209,6 @@
                     <li>• Minimal 10 karakter untuk deskripsi keluhan</li>
                 </ul>
             </div>
-        </main>
-    </div>
 
     <script>
         // Mobile menu toggle
@@ -218,5 +216,4 @@
             document.querySelector('.sidebar').classList.toggle('active');
         });
     </script>
-</body>
-</html>
+@endsection

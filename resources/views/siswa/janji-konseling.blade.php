@@ -3,6 +3,28 @@
 @section('header_title', 'Janji Konseling')
 
 @section('page-content')
+            <!-- Flash Messages -->
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+                    <i class="fas fa-check-circle mr-3"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-3"></i>
+                    <span>{{ session('warning') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+                    <i class="fas fa-times-circle mr-3"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
             <!-- Buat Janji Baru -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <div class="flex justify-between items-center mb-4">
@@ -14,7 +36,7 @@
 
                 <!-- Form Janji Konseling -->
                 <div id="formJanji" class="hidden bg-purple-50 p-6 rounded-lg border border-purple-200">
-                    <form method="POST" action="{{ route('siswa.janji-konseling.store') }}">
+                    <form id="formJanjiCreate" method="POST" action="{{ route('siswa.janji-konseling.store') }}">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
@@ -38,7 +60,7 @@
                                     <option value="">Pilih Guru BK (Opsional - akan dipilih oleh koordinator)</option>
                                     @if(isset($gurus) && $gurus->count() > 0)
                                         @foreach($gurus as $guru)
-                                            <option value="{{ $guru->id }}" @old('guru_id') == $guru['id'] ? 'selected' : '' @endold >
+                                            <option value="{{ $guru->id }}" {{ old('guru_id') == $guru->id ? 'selected' : '' }}>
                                                 {{ $guru->name }}
                                             </option>
                                         @endforeach
@@ -64,12 +86,12 @@
                                 </label>
                                 <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('waktu') border-red-500 @enderror" required>
                                     <option value="">Pilih Waktu</option>
-                                    <option value="08:00 - 09:00" @old('waktu') == '08:00 - 09:00' ? 'selected' : '' @endold>08:00 - 09:00</option>
-                                    <option value="09:00 - 10:00" @old('waktu') == '09:00 - 10:00' ? 'selected' : '' @endold>09:00 - 10:00</option>
-                                    <option value="10:00 - 11:00" @old('waktu') == '10:00 - 11:00' ? 'selected' : '' @endold>10:00 - 11:00</option>
-                                    <option value="13:00 - 14:00" @old('waktu') == '13:00 - 14:00' ? 'selected' : '' @endold>13:00 - 14:00</option>
-                                    <option value="14:00 - 15:00" @old('waktu') == '14:00 - 15:00' ? 'selected' : '' @endold>14:00 - 15:00</option>
-                                    <option value="15:00 - 16:00" @old('waktu') == '15:00 - 16:00' ? 'selected' : '' @endold>15:00 - 16:00</option>
+                                    <option value="08:00 - 09:00" {{ old('waktu') == '08:00 - 09:00' ? 'selected' : '' }}>08:00 - 09:00</option>
+                                    <option value="09:00 - 10:00" {{ old('waktu') == '09:00 - 10:00' ? 'selected' : '' }}>09:00 - 10:00</option>
+                                    <option value="10:00 - 11:00" {{ old('waktu') == '10:00 - 11:00' ? 'selected' : '' }}>10:00 - 11:00</option>
+                                    <option value="13:00 - 14:00" {{ old('waktu') == '13:00 - 14:00' ? 'selected' : '' }}>13:00 - 14:00</option>
+                                    <option value="14:00 - 15:00" {{ old('waktu') == '14:00 - 15:00' ? 'selected' : '' }}>14:00 - 15:00</option>
+                                    <option value="15:00 - 16:00" {{ old('waktu') == '15:00 - 16:00' ? 'selected' : '' }}>15:00 - 16:00</option>
                                 </select>
                                 @error('waktu')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
@@ -201,10 +223,57 @@
                 </div>
                 @endif
             </div>
-        </main>
-    </div>
 
     <script>
+        // Flag untuk prevent double submit
+        let isSubmitting = false;
+
+        // Tangkap form khusus untuk create janji
+        const formJanjiCreate = document.getElementById('formJanjiCreate');
+        
+        if (formJanjiCreate) {
+            formJanjiCreate.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                
+                if (isSubmitting) {
+                    e.preventDefault();
+                    console.log('Form submission prevented - already submitting');
+                    return false;
+                }
+                
+                isSubmitting = true;
+                
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+                }
+                
+                console.log('Form submitted, waiting for response...');
+                
+                // Ketika form berhasil submit, server akan redirect
+                // Kita track dengan localStorage untuk auto-refresh
+                localStorage.setItem('janji_form_just_submitted', 'true');
+                
+                // Set timeout untuk reset flag (jika response lambat)
+                setTimeout(() => {
+                    isSubmitting = false;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-calendar-check mr-2"></i>Buat Janji';
+                    }
+                }, 5000);
+            });
+        }
+
+        // Auto-refresh halaman setelah form submit (untuk menampilkan data terbaru)
+        if (localStorage.getItem('janji_form_just_submitted') === 'true') {
+            localStorage.removeItem('janji_form_just_submitted');
+            // Tunggu 500ms, baru refresh
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+
         // Toggle form janji baru
         document.getElementById('toggleForm').addEventListener('click', function() {
             const form = document.getElementById('formJanji');
@@ -213,6 +282,11 @@
 
         document.getElementById('batalForm').addEventListener('click', function() {
             document.getElementById('formJanji').classList.add('hidden');
+            // Reset form jika cancel
+            if (formJanjiCreate) {
+                formJanjiCreate.reset();
+            }
+            isSubmitting = false;
         });
 
         // Mobile menu toggle

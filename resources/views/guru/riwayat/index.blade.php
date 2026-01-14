@@ -55,7 +55,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($catatan as $item)
+                    @forelse($catatanFiltered as $item)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {{ $item->nama_siswa }}
@@ -73,11 +73,16 @@
                                 {{ ucfirst($item->status) }}
                             </span>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm space-x-2 flex">
+                        <td class="px-4 py-4 whitespace-nowrap text-sm space-x-2 flex flex-wrap gap-2">
                             <a href="{{ route('guru.riwayat.detail', $item->id) }}" 
-                               class="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center gap-1">
+                               class="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center gap-1 px-3 py-1 bg-blue-50 rounded">
                                 <i class="fas fa-eye"></i>
                                 <span>Lihat</span>
+                            </a>
+                            <a href="{{ route('guru.riwayat.tambah', $item->id) }}" 
+                               class="text-green-600 hover:text-green-900 font-medium inline-flex items-center gap-1 px-3 py-1 bg-green-50 rounded">
+                                <i class="fas fa-plus"></i>
+                                <span>Catatan</span>
                             </a>
                         </td>
                     </tr>
@@ -92,9 +97,9 @@
             </table>
         </div>
 
-        @if($catatan->hasPages())
+        @if($catatanFiltered->hasPages())
         <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-            {{ $catatan->links() }}
+            {{ $catatanFiltered->links() }}
         </div>
         @endif
     </div>

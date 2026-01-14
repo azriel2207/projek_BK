@@ -1,5 +1,14 @@
 @extends('layouts.master')
 
+@section('styles')
+<style>
+    /* Override sidebar color for siswa to purple - matching the gradient header */
+    .sidebar {
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%) !important;
+    }
+</style>
+@endsection
+
 @section('sidebar')
     <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
         <i class="fas fa-tachometer-alt mr-3"></i>Dashboard

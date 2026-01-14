@@ -240,8 +240,6 @@
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
 
     <script>
         // Mobile menu toggle

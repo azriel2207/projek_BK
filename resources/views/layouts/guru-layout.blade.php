@@ -16,9 +16,6 @@
     <a href="{{ route('guru.riwayat.index') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
         <i class="fas fa-file-medical mr-3"></i>Riwayat Konseling
     </a>
-    <a href="{{ route('guru.riwayat.buat') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
-        <i class="fas fa-sticky-note mr-3"></i>Catatan Konseling
-    </a>
     <a href="{{ route('guru.laporan') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
         <i class="fas fa-chart-line mr-3"></i>Laporan & Statistik
     </a>

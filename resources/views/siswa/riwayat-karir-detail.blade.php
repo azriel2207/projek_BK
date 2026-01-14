@@ -187,13 +187,10 @@
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
 
     <script>
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('active');
         });
     </script>
-</body>
-</html>
+@endsection
