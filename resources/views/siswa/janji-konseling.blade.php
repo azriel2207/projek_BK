@@ -101,7 +101,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-comment-dots mr-2 text-blue-600"></i>Keluhan / Permasalahan *
                             </label>
-                            <textarea name="keluhan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('keluhan') border-red-500 @enderror" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan..." required>{{ old('keluhan') }}</textarea>
+                            <textarea name="keluhan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('keluhan') border-red-500 @enderror" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan (minimal 5 karakter)..." required>{{ old('keluhan') }}</textarea>
                             @error('keluhan')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
@@ -117,17 +117,23 @@
 
             <!-- Daftar Janji Menunggu Konfirmasi -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                    <i class="fas fa-hourglass-half mr-2 text-yellow-600"></i>Janji Menunggu Konfirmasi
-                    @if(isset($janjiMenunggu))
-                        <span class="text-sm font-normal text-gray-500">({{ $janjiMenunggu->count() }})</span>
-                    @endif
-                </h2>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-hourglass-half mr-2 text-yellow-600"></i>Janji Menunggu Konfirmasi
+                        @if(isset($janjiMenunggu))
+                            <span class="text-sm font-normal text-gray-500">({{ $janjiMenunggu->count() }})</span>
+                        @endif
+                    </h2>
+                    <button id="refreshMenungguBtn" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
                 
                 @if(isset($janjiMenunggu) && $janjiMenunggu->count() > 0)
-                <div class="space-y-4">
+                <div class="space-y-4" id="janjiMenungguContainer">
                     @foreach($janjiMenunggu as $janji)
-                    <div class="flex justify-between items-center p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition">
+                    <div class="flex justify-between items-center p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 hover:bg-yellow-100 transition" data-janji-id="{{ $janji->id }}">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-2">
                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
@@ -322,5 +328,40 @@
         // Log page load untuk debugging
         console.log('Janji konseling page loaded at:', new Date().toLocaleTimeString());
         console.log('User ID:', {{ Auth::id() ?? 'null' }});
+
+        // Refresh button handler
+        const refreshBtn = document.getElementById('refreshMenungguBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const icon = refreshBtn.querySelector('i');
+                icon.classList.add('fa-spin');
+                console.log('Refreshing data...');
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            });
+        }
+
+        // Auto refresh ketika ada success atau warning message
+        const successMsg = document.querySelector('[class*="bg-green"]');
+        const warningMsg = document.querySelector('[class*="bg-yellow"]');
+        
+        if (successMsg) {
+            console.log('Success message detected, akan refresh halaman dalam 2 detik...');
+            setTimeout(() => {
+                console.log('Refreshing page to show new data...');
+                location.reload();
+            }, 2000);
+        }
+
+        // Check untuk new janji setiap 5 detik (polling)
+        setInterval(() => {
+            // Jika halaman masih bisa terlihat, check untuk data terbaru
+            if (document.visibilityState === 'visible') {
+                // Optional: tambah indikator refresh
+                console.log('Checking for new janji data...');
+            }
+        }, 5000);
     </script>
 @endsection

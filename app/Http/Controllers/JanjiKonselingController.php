@@ -68,7 +68,7 @@ class JanjiKonselingController extends Controller
         $validated = $request->validate([
             'tanggal' => 'required|date|after_or_equal:today',
             'waktu' => 'required',
-            'keluhan' => 'required|string|min:10',
+            'keluhan' => 'required|string|min:5',
             'jenis_bimbingan' => 'required|in:pribadi,belajar,karir,sosial',
             'guru_id' => 'nullable|exists:users,id'
         ]);
@@ -172,7 +172,7 @@ class JanjiKonselingController extends Controller
         $request->validate([
             'tanggal' => 'required|date|after_or_equal:today',
             'waktu' => 'required',
-            'keluhan' => 'required|string|min:10',
+            'keluhan' => 'required|string|min:5',
             'jenis_bimbingan' => 'required|in:pribadi,belajar,karir,sosial',
             'guru_id' => 'nullable|exists:users,id'
         ]);
