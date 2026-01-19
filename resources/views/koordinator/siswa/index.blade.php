@@ -64,14 +64,14 @@
         @php
             $totalKonseling = DB::table('janji_konselings')->count();
         @endphp
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
             <div class="flex justify-between items-center">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Konseling</p>
                     <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalKonseling }}</p>
                 </div>
-                <div class="bg-purple-100 p-4 rounded-lg">
-                    <i class="fas fa-comments text-purple-600 text-2xl"></i>
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <i class="fas fa-comments text-blue-600 text-2xl"></i>
                 </div>
             </div>
         </div>

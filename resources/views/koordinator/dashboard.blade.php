@@ -5,7 +5,7 @@
 @section('page-content')
 <div class="container mx-auto p-6">
             <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-sm p-6 mb-6 text-white">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-sm p-6 mb-6 text-white">
                 <div class="flex justify-between items-center">
                     <div>
                         <h1 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h1>
@@ -56,19 +56,19 @@
                 </div>
                 
                 <!-- Konseling Bulan Ini -->
-                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="stat-card bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm">Konseling Bulan Ini</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">
                                 {{ $stats['konseling_bulan_ini'] ?? 0 }}
                             </p>
-                            <p class="text-purple-600 text-sm mt-2">
+                            <p class="text-blue-600 text-sm mt-2">
                                 <i class="fas fa-comments"></i> Sesi
                             </p>
                         </div>
-                        <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="fas fa-calendar-alt text-purple-600 text-2xl"></i>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-calendar-alt text-blue-600 text-2xl"></i>
                         </div>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
                                     $colorMap = [
                                         'blue' => '#2563eb',
                                         'green' => '#16a34a',
-                                        'purple' => '#7c3aed',
+                                        'blue' => '#2563eb',
                                         'orange' => '#f97316',
                                         'gray' => '#6b7280'
                                     ];

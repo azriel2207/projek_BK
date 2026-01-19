@@ -39,7 +39,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-gray-500 text-sm">Rata-rata per Guru</p>
@@ -50,8 +50,8 @@
                             @endphp
                             <p class="text-2xl font-bold text-gray-800">{{ $rataRata }}</p>
                         </div>
-                        <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
                         </div>
                     </div>
                 </div>

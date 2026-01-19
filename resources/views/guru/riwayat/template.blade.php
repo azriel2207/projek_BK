@@ -18,10 +18,10 @@
             </a>
         </div>
         
-        <div class="bg-white rounded-lg shadow-md p-6 border-2 border-purple-200">
+        <div class="bg-white rounded-lg shadow-md p-6 border-2 border-blue-200">
             <h3 class="text-lg font-semibold text-gray-900 mb-3">💫 Personal</h3>
             <p class="text-gray-600 mb-4">Template untuk konseling masalah pribadi dan perkembangan diri</p>
-            <a href="{{ route('guru.riwayat.buat') }}" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm transition duration-200">
+            <a href="{{ route('guru.riwayat.buat') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition duration-200">
                 Gunakan Template
             </a>
         </div>

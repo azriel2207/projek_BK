@@ -72,17 +72,17 @@
             </div>
         </div>
         
-        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:shadow-lg transition">
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Selesai Bulan Ini</p>
                     <p class="text-3xl font-bold text-gray-800 mt-2">{{ $stats['selesai_bulan_ini'] ?? 0 }}</p>
-                    <p class="text-purple-600 text-xs mt-2 flex items-center">
+                    <p class="text-blue-600 text-xs mt-2 flex items-center">
                         <i class="fas fa-check-circle mr-1"></i> Konseling selesai
                     </p>
                 </div>
-                <div class="bg-purple-100 p-3 rounded-lg">
-                    <i class="fas fa-tasks text-purple-600 text-xl"></i>
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-tasks text-blue-600 text-xl"></i>
                 </div>
             </div>
         </div>
@@ -200,18 +200,18 @@
     </div>
 
     <!-- Riwayat Konseling Summary -->
-    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6 border-l-4 border-blue-500">
         <div class="flex justify-between items-center">
             <div>
                 <p class="text-sm text-gray-600 mb-2 font-medium">Konseling Selesai Bulan Ini</p>
-                <p class="text-3xl font-bold text-purple-600">{{ isset($stats['selesai_bulan_ini']) ? $stats['selesai_bulan_ini'] : 0 }}</p>
+                <p class="text-3xl font-bold text-blue-600">{{ isset($stats['selesai_bulan_ini']) ? $stats['selesai_bulan_ini'] : 0 }}</p>
             </div>
-            <div class="text-5xl text-purple-200">
+            <div class="text-5xl text-blue-200">
                 <i class="fas fa-check-circle"></i>
             </div>
         </div>
-        <div class="mt-4 pt-4 border-t border-purple-200">
-            <a href="{{ route('guru.riwayat.index') }}" class="text-purple-600 hover:text-purple-800 font-medium text-sm inline-flex items-center">
+        <div class="mt-4 pt-4 border-t border-blue-200">
+            <a href="{{ route('guru.riwayat.index') }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm inline-flex items-center">
                 <i class="fas fa-arrow-right mr-1"></i>Lihat Riwayat Lengkap
             </a>
         </div>
@@ -264,8 +264,8 @@
                 </div>
 
                 <!-- Time -->
-                <div class="p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-l-4 border-purple-600 shadow-sm hover:shadow-md transition">
-                    <label class="text-xs font-bold text-purple-700 uppercase tracking-wider flex items-center">
+                <div class="p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-l-4 border-blue-600 shadow-sm hover:shadow-md transition">
+                    <label class="text-xs font-bold text-blue-700 uppercase tracking-wider flex items-center">
                         <i class="fas fa-clock mr-2"></i>Waktu Konseling
                     </label>
                     <p id="modal-waktu" class="text-gray-800 font-semibold mt-2"></p>

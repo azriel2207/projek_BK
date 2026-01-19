@@ -4,7 +4,7 @@
 
 @section('page-content')
 <div class="container mx-auto px-4 py-8">
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-700 text-white">
+    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-blue-700 text-white">
         <div class="p-4">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-hands-helping text-2xl"></i>
@@ -13,27 +13,27 @@
         </div>
         
         <nav class="mt-8">
-            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
             </a>
-            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
             </a>
-            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
             </a>
-            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 bg-purple-600 border-l-4 border-yellow-400">
+            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 bg-blue-600 border-l-4 border-yellow-400">
                 <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
             </a>
-            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-user-cog mr-3"></i>Profile Settings
             </a>
         </nav>
         
-        <div class="absolute bottom-0 w-full p-4 border-t border-purple-700">
+        <div class="absolute bottom-0 w-full p-4 border-t border-blue-700">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-700">{{ Auth::user()->name }}</span>
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white">
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
                         <i class="fas fa-user-graduate"></i>
                     </div>
                 </div>
@@ -140,7 +140,7 @@
 
                         @if($detail->catatan_konselor)
                         <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <i class="fas fa-notebook text-purple-500"></i>
+                            <i class="fas fa-notebook text-blue-500"></i>
                             Hasil Konsultasi
                         </h3>
 

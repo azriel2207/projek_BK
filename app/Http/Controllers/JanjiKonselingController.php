@@ -14,11 +14,19 @@ class JanjiKonselingController extends Controller
         try {
             $user = Auth::user();
             
+            \Log::info('=== JANJI KONSELING INDEX ===');
+            \Log::info('User ID: ' . $user->id);
+            
             // Janji menunggu konfirmasi - sorted DESC (newest first)
             $janjiMenunggu = JanjiKonseling::where('user_id', $user->id)
                 ->where('status', 'menunggu')
                 ->orderBy('created_at', 'desc')
                 ->get();
+
+            \Log::info('Janji menunggu count: ' . $janjiMenunggu->count());
+            foreach ($janjiMenunggu as $j) {
+                \Log::info('  - ID: ' . $j->id . ', Status: ' . $j->status . ', Tanggal: ' . $j->tanggal);
+            }
 
             // Janji yang sudah dikonfirmasi - sorted DESC (newest first)
             $janjiKonfirmasi = JanjiKonseling::where('user_id', $user->id)
@@ -27,15 +35,21 @@ class JanjiKonselingController extends Controller
                 ->orderBy('tanggal', 'desc')
                 ->get();
 
+            \Log::info('Janji konfirmasi count: ' . $janjiKonfirmasi->count());
+
             // Ambil list guru BK dari tabel users dengan role guru_bk/guru
             $gurus = DB::table('users')
                 ->whereIn('role', ['guru_bk', 'guru'])
                 ->select('id', 'name')
                 ->get();
 
+            \Log::info('=== END INDEX ===');
+
             return view('siswa.janji-konseling', compact('janjiMenunggu', 'janjiKonfirmasi', 'gurus'));
             
         } catch (\Exception $e) {
+            \Log::error('Error in janji index: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
@@ -45,6 +59,11 @@ class JanjiKonselingController extends Controller
         \Log::info('=== JANJI KONSELING STORE REQUEST ===');
         \Log::info('Request input:', $request->all());
         \Log::info('Auth user ID: ' . Auth::id());
+        \Log::info('Auth user:', [
+            'id' => Auth::id(),
+            'email' => Auth::user()?->email,
+            'role' => Auth::user()?->role
+        ]);
         
         $validated = $request->validate([
             'tanggal' => 'required|date|after_or_equal:today',
@@ -57,6 +76,13 @@ class JanjiKonselingController extends Controller
         \Log::info('Validation passed. Data:', $validated);
 
         $userId = Auth::id();
+        
+        if (!$userId) {
+            \Log::error('Auth user ID is null!');
+            return redirect()->back()
+                ->with('error', 'User tidak terautentikasi dengan baik. Silakan login kembali.')
+                ->withInput();
+        }
         
         // Check untuk prevent duplicate submission dalam 3 detik
         // Ini hanya untuk mencegah rapid double-click pada submit button
@@ -96,7 +122,21 @@ class JanjiKonselingController extends Controller
                 'is_archived' => false
             ]);
 
-            \Log::info('Janji created successfully. ID: ' . $janji->id);
+            \Log::info('Janji created successfully', [
+                'id' => $janji->id,
+                'user_id' => $janji->user_id,
+                'status' => $janji->status,
+                'created_at' => $janji->created_at
+            ]);
+
+            // Verify data was saved correctly
+            $verify = JanjiKonseling::find($janji->id);
+            \Log::info('Verification - Janji exists in database:', [
+                'found' => $verify ? true : false,
+                'user_id' => $verify?->user_id,
+                'status' => $verify?->status
+            ]);
+
             \Log::info('=== END ===');
 
             return redirect()->route('siswa.janji-konseling')

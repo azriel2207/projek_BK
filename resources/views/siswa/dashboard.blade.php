@@ -3,11 +3,11 @@
 @section('page-content')
     <div class="container mx-auto px-4 py-8">
         <!-- Welcome Section -->
-        <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-md p-6 mb-6 text-white">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-md p-6 mb-6 text-white">
                 <div class="flex justify-between items-center">
                     <div>
                         <h1 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h1>
-                        <p class="text-purple-100">Kelola jadwal konseling dan lihat perkembangan bimbingan Anda</p>
+                        <p class="text-blue-100">Kelola jadwal konseling dan lihat perkembangan bimbingan Anda</p>
                     </div>
                     <div class="text-4xl">
                         <i class="fas fa-user-graduate"></i>
@@ -55,17 +55,17 @@
                     </div>
                 </div>
                 
-                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 text-sm">Total Konseling</p>
                             <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['total_konseling'] ?? 0 }}</p>
-                            <p class="text-purple-600 text-sm mt-2">
+                            <p class="text-blue-600 text-sm mt-2">
                                 <i class="fas fa-history"></i> Selesai
                             </p>
                         </div>
-                        <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="fas fa-file-alt text-purple-600 text-2xl"></i>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-file-alt text-blue-600 text-2xl"></i>
                         </div>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
                 <!-- Statistik Bimbingan -->
                 <div class="bg-white rounded-xl shadow-md p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-chart-pie mr-2 text-purple-600"></i>Konseling Per Jenis
+                        <i class="fas fa-chart-pie mr-2 text-blue-600"></i>Konseling Per Jenis
                     </h3>
                     
                     <div class="space-y-4">
@@ -213,7 +213,7 @@
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                        <i class="fas fa-history mr-2 text-purple-600"></i>Riwayat Konseling Terbaru
+                        <i class="fas fa-history mr-2 text-blue-600"></i>Riwayat Konseling Terbaru
                     </h3>
                     <a href="{{ route('siswa.riwayat-konseling') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                         Lihat Semua <i class="fas fa-arrow-right ml-1"></i>

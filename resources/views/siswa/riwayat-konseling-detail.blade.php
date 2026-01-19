@@ -4,171 +4,98 @@
 
 @section('page-content')
 <div class="max-w-6xl mx-auto px-4 py-8">
-    <!-- Back Button -->
+
+    {{-- Tombol Kembali --}}
     <div class="mb-6">
-        <a href="{{ route('siswa.riwayat-konseling') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
+        <a href="{{ route('siswa.riwayat-konseling') }}" 
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali ke Daftar</span>
         </a>
     </div>
 
-    <!-- Detail Card -->
-    <div class="bg-white rounded-xl shadow-sm p-8 mb-6">
-        <!-- Title -->
-        <h1 class="text-3xl font-bold text-gray-900 mb-8">Detail Riwayat Konseling</h1>
-        
+    {{-- Card Detail --}}
+    <div class="bg-white rounded-xl shadow-sm p-8">
+        {{-- Judul Halaman --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Detail Riwayat Konseling</h1>
+            <p class="text-gray-600 mt-2">Informasi lengkap riwayat konseling Anda</p>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column - Informasi Konseling -->
+
+            <!-- Kolom Kiri - Informasi Konseling -->
             <div class="lg:col-span-1">
-                <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                    <i class="fas fa-info-circle text-blue-500"></i>
-                    Informasi Konseling
-                </h3>
-
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">Jenis Bimbingan</label>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                            @if($detail->jenis_bimbingan == 'belajar') bg-blue-100 text-blue-800
-                            @elseif($detail->jenis_bimbingan == 'karir') bg-green-100 text-green-800
-                            @elseif($detail->jenis_bimbingan == 'pribadi') bg-purple-100 text-purple-800
-                            @else bg-yellow-100 text-yellow-800
-                            @endif">
-                            {{ ucfirst($detail->jenis_bimbingan ?? 'Umum') }}
-                        </span>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">Status</label>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                            @if($detail->status == 'selesai') bg-green-100 text-green-800
-                            @elseif($detail->status == 'dikonfirmasi') bg-blue-100 text-blue-800
-                            @elseif($detail->status == 'menunggu') bg-yellow-100 text-yellow-800
-                            @else bg-red-100 text-red-800
-                            @endif">
-                            {{ ucfirst($detail->status) }}
-                        </span>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">Tanggal Konseling</label>
-                        <p class="text-gray-900 font-medium">{{ \Carbon\Carbon::parse($detail->tanggal)->format('d M Y') }}</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">Waktu</label>
-                        <p class="text-gray-900 font-medium">{{ $detail->waktu ?? '-' }}</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">Lokasi</label>
-                        <p class="text-gray-900 font-medium">{{ $detail->lokasi ?? '-' }}</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">Guru BK</label>
-                        <p class="text-gray-900 font-medium">{{ $detail->guru_bk ?? '-' }}</p>
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                        Informasi Konseling
+                    </h3>
+                    <div class="space-y-3 bg-gray-50 rounded-lg p-4">
+                        <p><strong class="text-gray-700">Jenis Bimbingan:</strong><br/> 
+                            <span class="inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium
+                                @if($detail->jenis_bimbingan == 'belajar') bg-blue-100 text-blue-800
+                                @elseif($detail->jenis_bimbingan == 'karir') bg-green-100 text-green-800
+                                @elseif($detail->jenis_bimbingan == 'pribadi') bg-blue-100 text-blue-800
+                                @else bg-yellow-100 text-yellow-800
+                                @endif">
+                                {{ ucfirst($detail->jenis_bimbingan ?? 'Umum') }}
+                            </span>
+                        </p>
+                        <p><strong class="text-gray-700">Status:</strong><br/>
+                            <span class="inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium
+                                @if($detail->status == 'selesai') bg-green-100 text-green-800
+                                @elseif($detail->status == 'dikonfirmasi') bg-blue-100 text-blue-800
+                                @elseif($detail->status == 'menunggu') bg-yellow-100 text-yellow-800
+                                @else bg-red-100 text-red-800
+                                @endif">
+                                {{ ucfirst($detail->status) }}
+                            </span>
+                        </p>
+                        <p><strong class="text-gray-700">Tanggal Konseling:</strong><br/> <span class="text-gray-900">{{ \Carbon\Carbon::parse($detail->tanggal)->format('d M Y') }}</span></p>
+                        <p><strong class="text-gray-700">Waktu:</strong><br/> <span class="text-gray-900">{{ $detail->waktu ?? '-' }}</span></p>
+                        <p><strong class="text-gray-700">Guru BK:</strong><br/> <span class="text-gray-900">{{ $detail->guru_bk ?? '-' }}</span></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column - Keluhan & Catatan -->
+            <!-- Kolom Kanan - Keluhan & Catatan -->
             <div class="lg:col-span-2">
-                <!-- Keluhan -->
                 <div class="mb-8">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-clipboard-list text-green-500"></i>
+                        <i class="fas fa-clipboard-list text-orange-500"></i>
                         Keluhan / Permasalahan
                     </h3>
-                    <div class="bg-green-50 rounded-lg p-6 border border-green-200">
-                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                            {{ $detail->keluhan ?? 'Tidak ada deskripsi keluhan' }}
-                        </p>
+                    <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">{{ $detail->keluhan ?? 'Tidak ada deskripsi keluhan' }}</p>
                     </div>
                 </div>
 
-                <!-- Catatan Konselor -->
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-notebook text-purple-500"></i>
+                        <i class="fas fa-notebook text-blue-500"></i>
                         Catatan Konselor
                     </h3>
-
                     @if($detail->catatan_konselor && !empty(trim($detail->catatan_konselor)))
-                    <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
-                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                            {{ $detail->catatan_konselor }}
-                        </p>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-sm">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal">{{ $detail->catatan_konselor }}</p>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-blue-200 text-xs text-gray-600 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span>Catatan dari Guru BK</span>
+                        </div>
                     </div>
                     @else
-                    <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
-                        <p class="text-gray-600 italic">
-                            <i class="fas fa-info-circle mr-2"></i>
+                    <div class="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
+                        <p class="text-blue-700 italic flex items-center gap-2">
+                            <i class="fas fa-info-circle"></i>
                             Catatan akan ditampilkan setelah guru BK memberikan catatan konseling.
                         </p>
                     </div>
                     @endif
                 </div>
-
-                <!-- Keterangan Tambahan (jika ada) -->
-                @if($detail->keterangan ?? null)
-                <div class="mt-8">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-sticky-note text-yellow-500"></i>
-                        Keterangan Tambahan
-                    </h3>
-                    <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
-                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                            {{ $detail->keterangan }}
-                        </p>
-                    </div>
-                </div>
-                @endif
             </div>
-        </div>
-    </div>
-
-    <!-- Timeline -->
-    <div class="bg-white rounded-xl shadow-sm p-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <i class="fas fa-history text-orange-500"></i>
-            Timeline Konseling
-        </h3>
-
-        <div class="space-y-4">
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                    <p class="font-medium text-gray-900">Janji Konseling Dibuat</p>
-                    <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($detail->created_at)->format('d M Y H:i') }}</p>
-                </div>
-            </div>
-
-            @if($detail->status == 'dikonfirmasi')
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-3 h-3 bg-blue-500 rounded-full mt-2"></div>
-                <div>
-                    <p class="font-medium text-gray-900">Janji Dikonfirmasi</p>
-                    <p class="text-sm text-gray-500">Guru BK telah mengkonfirmasi janji konseling</p>
-                </div>
-            </div>
-            @elseif($detail->status == 'selesai')
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                    <p class="font-medium text-gray-900">Konseling Selesai</p>
-                    <p class="text-sm text-gray-500">Sesi konseling telah selesai dan catatan tersimpan</p>
-                </div>
-            </div>
-            @elseif($detail->status == 'dibatalkan')
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-3 h-3 bg-red-500 rounded-full mt-2"></div>
-                <div>
-                    <p class="font-medium text-gray-900">Janji Dibatalkan</p>
-                    <p class="text-sm text-gray-500">Janji konseling telah dibatalkan</p>
-                </div>
-            </div>
-            @endif
         </div>
     </div>
 </div>

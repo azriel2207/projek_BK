@@ -174,7 +174,7 @@
         <div>
             <div class="bg-white rounded-lg shadow-lg overflow-hidden sticky top-6">
                 <!-- Header -->
-                <div class="bg-gradient-to-r from-purple-600 to-purple-800 px-6 py-4">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4">
                     <h3 class="text-lg font-bold text-white flex items-center">
                         <i class="fas fa-lightbulb mr-2"></i>Informasi Upgrade
                     </h3>
@@ -184,27 +184,27 @@
                     <!-- Upgrade Process -->
                     <div>
                         <h4 class="font-bold text-gray-900 mb-3 flex items-center">
-                            <i class="fas fa-list-ol text-purple-600 mr-2"></i>Proses Upgrade
+                            <i class="fas fa-list-ol text-blue-600 mr-2"></i>Proses Upgrade
                         </h4>
                         <ol class="space-y-2 text-sm text-gray-700 pl-4">
                             <li class="flex items-start">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-600 font-bold mr-2 flex-shrink-0">1</span>
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 font-bold mr-2 flex-shrink-0">1</span>
                                 <span>Verifikasi data user</span>
                             </li>
                             <li class="flex items-start">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-600 font-bold mr-2 flex-shrink-0">2</span>
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 font-bold mr-2 flex-shrink-0">2</span>
                                 <span>Input data guru BK (NIP, spesialisasi, jam kerja)</span>
                             </li>
                             <li class="flex items-start">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-600 font-bold mr-2 flex-shrink-0">3</span>
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 font-bold mr-2 flex-shrink-0">3</span>
                                 <span>Hapus data siswa terkait</span>
                             </li>
                             <li class="flex items-start">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-600 font-bold mr-2 flex-shrink-0">4</span>
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 font-bold mr-2 flex-shrink-0">4</span>
                                 <span>Update role menjadi 'guru_bk'</span>
                             </li>
                             <li class="flex items-start">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-600 font-bold mr-2 flex-shrink-0">5</span>
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 font-bold mr-2 flex-shrink-0">5</span>
                                 <span>Buat record guru BK baru</span>
                             </li>
                         </ol>
@@ -215,7 +215,7 @@
                     <!-- New Access Rights -->
                     <div>
                         <h4 class="font-bold text-gray-900 mb-3 flex items-center">
-                            <i class="fas fa-unlock text-purple-600 mr-2"></i>Hak Akses Baru
+                            <i class="fas fa-unlock text-blue-600 mr-2"></i>Hak Akses Baru
                         </h4>
                         <ul class="space-y-2 text-sm text-gray-700">
                             <li class="flex items-start">

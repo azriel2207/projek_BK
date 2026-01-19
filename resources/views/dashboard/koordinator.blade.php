@@ -111,14 +111,14 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-600">Guru BK</p>
                             <p class="text-2xl font-bold text-gray-800">12</p>
                         </div>
-                        <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="fas fa-user-tie text-purple-600 text-xl"></i>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-user-tie text-blue-600 text-xl"></i>
                         </div>
                     </div>
                 </div>

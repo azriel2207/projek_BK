@@ -9,13 +9,13 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <h2 class="text-lg font-semibold text-gray-800">Riwayat Sesi Konseling</h2>
                     <form method="GET" action="{{ route('siswa.riwayat-konseling') }}" class="flex flex-wrap gap-3">
-                        <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Semua Status</option>
                             <option value="dikonfirmasi" @if(request('status') == 'dikonfirmasi') selected @endif>Dikonfirmasi</option>
                             <option value="dibatalkan" @if(request('status') == 'dibatalkan') selected @endif>Dibatalkan</option>
                         </select>
-                        <input type="month" name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" value="{{ request('bulan') }}">
-                        <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                        <input type="month" name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ request('bulan') }}">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                             <i class="fas fa-filter mr-2"></i>Filter
                         </button>
                         @if(request('status') || request('bulan'))
@@ -90,7 +90,7 @@
                     <i class="fas fa-history text-gray-400 text-5xl mb-4"></i>
                     <h3 class="text-lg font-semibold text-gray-600 mb-2">Belum Ada Riwayat Konseling</h3>
                     <p class="text-gray-500 mb-6">Anda belum memiliki riwayat sesi konseling.</p>
-                    <a href="{{ route('siswa.janji-konseling') }}" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-medium">
+                    <a href="{{ route('siswa.janji-konseling') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
                         <i class="fas fa-calendar-plus mr-2"></i>Buat Janji Konseling
                     </a>
                 </div>
@@ -102,7 +102,7 @@
                     <p class="text-gray-600 text-sm">Menampilkan {{ count($riwayat) }} dari {{ count($riwayat) }} riwayat</p>
                     <div class="flex space-x-2">
                         <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">Sebelumnya</button>
-                        <button class="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700">1</button>
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">1</button>
                         <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">Selanjutnya</button>
                     </div>
                 </div>

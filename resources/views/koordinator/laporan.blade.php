@@ -59,8 +59,8 @@
                                 <i class="fas fa-arrow-up"></i> {{ $statistik['perubahan_kepuasan'] }}% meningkat
                             </p>
                         </div>
-                        <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="fas fa-star text-purple-600 text-xl"></i>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-star text-blue-600 text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                                     'personal' => ['bg' => 'blue', 'label' => 'Bimbingan Pribadi'],
                                     'belajar' => ['bg' => 'green', 'label' => 'Bimbingan Belajar'],
                                     'akademik' => ['bg' => 'green', 'label' => 'Bimbingan Akademik'],
-                                    'karir' => ['bg' => 'purple', 'label' => 'Bimbingan Karir'],
+                                    'karir' => ['bg' => 'blue', 'label' => 'Bimbingan Karir'],
                                     'sosial' => ['bg' => 'orange', 'label' => 'Bimbingan Sosial']
                                 ];
                                 $color = $colors[$jenisLower] ?? ['bg' => 'gray', 'label' => ucfirst($jenis->jenis_bimbingan)];

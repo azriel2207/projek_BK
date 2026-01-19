@@ -295,6 +295,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Routes untuk Catatan dari Guru BK
         Route::get('/catatan', [SiswaController::class, 'daftarCatatan'])->name('catatan.index');
         Route::get('/catatan/{id}', [SiswaController::class, 'detailCatatan'])->name('catatan.detail');
+        Route::get('/debug-janji', function() {
+            return view('siswa.debug-janji');
+        })->name('debug-janji');
     });
 
     // =================================================================

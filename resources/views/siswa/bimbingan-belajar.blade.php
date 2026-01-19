@@ -5,7 +5,7 @@
 @section('page-content')
 <div class="container mx-auto px-4 py-8">
     <!-- Header Section -->
-    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-sm p-6 mb-6 text-white">
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-sm p-6 mb-6 text-white">
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-2xl font-bold mb-2">Konsultasi Belajar 🎓</h1>

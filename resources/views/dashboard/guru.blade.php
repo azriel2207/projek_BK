@@ -113,14 +113,14 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-600">Kasus Aktif</p>
                             <p class="text-2xl font-bold text-gray-800">15</p>
                         </div>
-                        <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="fas fa-tasks text-purple-600 text-xl"></i>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-tasks text-blue-600 text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -172,8 +172,8 @@
                             <i class="fas fa-file-signature text-green-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Catatan</p>
                         </a>
-                        <a href="#" class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition">
-                            <i class="fas fa-chart-bar text-purple-600 text-2xl mb-2"></i>
+                        <a href="#" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
+                            <i class="fas fa-chart-bar text-blue-600 text-2xl mb-2"></i>
                             <p class="text-sm font-medium">Progress</p>
                         </a>
                         <a href="#" class="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg text-center transition">

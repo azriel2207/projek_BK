@@ -32,42 +32,76 @@
         </div>
     @endif
 
-    <!-- Catatan List -->
+    <!-- Catatan List - Card Grid Layout -->
     @if($catatan->count() > 0)
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guru BK</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($catatan as $item)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->guru_bk }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">
-                                <p class="truncate max-w-xs">{{ $item->isi }}</p>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('siswa.catatan.detail', $item->id) }}" 
-                                   class="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1">
-                                    <i class="fas fa-eye text-sm"></i>
-                                    <span>Lihat</span>
-                                </a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach($catatan as $item)
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-l-purple-500">
+                    <!-- Card Header -->
+                    <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-purple-200">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wider">Guru BK</h3>
+                                <p class="text-lg font-bold text-purple-700 mt-1">{{ $item->guru_bk }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-block bg-purple-200 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="px-6 py-4 space-y-4">
+                        <!-- Catatan Section -->
+                        <div>
+                            <h4 class="text-xs font-medium text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                <i class="fas fa-notebook text-blue-500"></i>
+                                Catatan
+                            </h4>
+                            <p class="text-sm text-gray-700 leading-relaxed line-clamp-2 bg-blue-50 p-3 rounded">
+                                @php
+                                    $parts = explode('--- REKOMENDASI ---', $item->isi ?? '');
+                                    echo Str::limit(trim($parts[0]), 120, '...');
+                                @endphp
+                            </p>
+                        </div>
+
+                        <!-- Rekomendasi Section -->
+                        <div>
+                            <h4 class="text-xs font-medium text-yellow-600 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                <i class="fas fa-lightbulb text-yellow-500"></i>
+                                Rekomendasi
+                            </h4>
+                            <p class="text-sm text-gray-700 leading-relaxed line-clamp-2 bg-yellow-50 p-3 rounded">
+                                @php
+                                    if(count($parts) > 1) {
+                                        echo Str::limit(trim($parts[1]), 120, '...');
+                                    } else {
+                                        echo '<span class="text-gray-500 italic">Tidak ada rekomendasi khusus</span>';
+                                    }
+                                @endphp
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="bg-gray-50 px-6 py-3 flex justify-end border-t border-gray-200">
+                        <a href="{{ route('siswa.catatan.detail', $item->id) }}" 
+                           class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-eye"></i>
+                            <span>Lihat Detail</span>
+                        </a>
+                    </div>
+                </div>
+            @endforeach
         </div>
 
         <!-- Pagination -->
         @if($catatan->hasPages())
-        <div class="mt-6">
+        <div class="mt-10">
             {{ $catatan->links() }}
         </div>
         @endif

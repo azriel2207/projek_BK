@@ -48,7 +48,7 @@
                             <span class="inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium
                                 @if($catatan->jenis_bimbingan == 'belajar') bg-blue-100 text-blue-800
                                 @elseif($catatan->jenis_bimbingan == 'karir') bg-green-100 text-green-800
-                                @elseif($catatan->jenis_bimbingan == 'pribadi') bg-purple-100 text-purple-800
+                                @elseif($catatan->jenis_bimbingan == 'pribadi') bg-blue-100 text-blue-800
                                 @else bg-yellow-100 text-yellow-800
                                 @endif">
                                 {{ ucfirst($catatan->jenis_bimbingan ?? 'Umum') }}
@@ -77,11 +77,44 @@
 
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-notebook text-purple-500"></i>
+                        <i class="fas fa-notebook text-blue-500"></i>
                         Isi Catatan
                     </h3>
-                    <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
-                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">{{ $catatan->isi ?? '-' }}</p>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-sm mb-8">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal">
+                                @php
+                                    // Pisahkan catatan dan rekomendasi
+                                    $parts = explode('--- REKOMENDASI ---', $catatan->isi ?? '');
+                                    echo trim($parts[0]);
+                                @endphp
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-blue-200 text-xs text-gray-600 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span class="relative-time-wrapper">
+                                Catatan dibuat pada <span class="relative-time" data-timestamp="{{ \Carbon\Carbon::parse($catatan->created_at)->toIso8601String() }}">{{ \Carbon\Carbon::parse($catatan->created_at)->format('d M Y H:i') }}</span> oleh {{ $catatan->guru_bk ?? 'Guru BK' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Rekomendasi Section -->
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-lightbulb text-yellow-500"></i>
+                        Rekomendasi
+                    </h3>
+                    <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-6 border-2 border-yellow-200 shadow-sm">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal">
+                                @php
+                                    if(count($parts) > 1) {
+                                        echo trim($parts[1]);
+                                    } else {
+                                        echo 'Tidak ada rekomendasi khusus';
+                                    }
+                                @endphp
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

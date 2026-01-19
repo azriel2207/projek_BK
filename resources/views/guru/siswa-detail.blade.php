@@ -73,7 +73,7 @@
                         </a>
                         
                         <a href="{{ route('guru.siswa.edit', $siswa->id) }}" 
-                           class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg inline-flex items-center justify-center gap-2 transition">
+                           class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg inline-flex items-center justify-center gap-2 transition">
                             <i class="fas fa-user-edit"></i>
                             <span>Edit Profil Siswa</span>
                         </a>
@@ -98,7 +98,7 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-history text-purple-500"></i>
+                            <i class="fas fa-history text-blue-500"></i>
                             Riwayat Konseling Terbaru
                         </h2>
                         <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
@@ -115,7 +115,7 @@
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
                                             @if($konseling->jenis_bimbingan == 'Akademik') bg-blue-100 text-blue-800
                                             @elseif($konseling->jenis_bimbingan == 'Karir') bg-green-100 text-green-800
-                                            @elseif($konseling->jenis_bimbingan == 'Personal') bg-purple-100 text-purple-800
+                                            @elseif($konseling->jenis_bimbingan == 'Personal') bg-blue-100 text-blue-800
                                             @else bg-yellow-100 text-yellow-800
                                             @endif">
                                             {{ $konseling->jenis_bimbingan }}

@@ -4,7 +4,7 @@
 
 @section('page-content')
 <div class="container mx-auto px-4 py-8">
-    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-purple-700 text-white">
+    <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-blue-700 text-white">
         <div class="p-4">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-hands-helping text-2xl"></i>
@@ -13,27 +13,27 @@
         </div>
         
         <nav class="mt-8">
-            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.dashboard') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
             </a>
-            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 bg-purple-600 border-l-4 border-yellow-400">
+            <a href="{{ route('siswa.janji-konseling') }}" class="block py-3 px-6 bg-blue-600 border-l-4 border-yellow-400">
                 <i class="fas fa-calendar-check mr-3"></i>Janji Konseling
             </a>
-            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.riwayat-konseling') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-file-alt mr-3"></i>Riwayat Konseling
             </a>
-            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.bimbingan-belajar') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-graduation-cap mr-3"></i>Bimbingan Belajar
             </a>
-            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('siswa.bimbingan-karir') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-briefcase mr-3"></i>Bimbingan Karir
             </a>
-            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-purple-600 transition">
+            <a href="{{ route('profile') }}" class="block py-3 px-6 hover:bg-blue-600 transition">
                 <i class="fas fa-user-cog mr-3"></i>Profile Settings
             </a>
         </nav>
         
-        <div class="absolute bottom-0 w-full p-4 border-t border-purple-700">
+        <div class="absolute bottom-0 w-full p-4 border-t border-blue-700">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="flex items-center space-x-3 text-red-300 hover:text-red-100 transition w-full">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-700">{{ Auth::user()->name }}</span>
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white">
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
                         <i class="fas fa-user-graduate"></i>
                     </div>
                 </div>
@@ -106,9 +106,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-graduation-cap mr-2 text-purple-600"></i>Jenis Bimbingan *
+                                <i class="fas fa-graduation-cap mr-2 text-blue-600"></i>Jenis Bimbingan *
                             </label>
-                            <select name="jenis_bimbingan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('jenis_bimbingan') border-red-500 @enderror" required>
+                            <select name="jenis_bimbingan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('jenis_bimbingan') border-red-500 @enderror" required>
                                 <option value="">Pilih Jenis Bimbingan</option>
                                 <option value="pribadi" @if($janji->jenis_bimbingan == 'pribadi') selected @endif>Bimbingan Pribadi</option>
                                 <option value="belajar" @if($janji->jenis_bimbingan == 'belajar') selected @endif>Bimbingan Belajar</option>
@@ -119,9 +119,9 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-user-tie mr-2 text-purple-600"></i>Guru BK
+                                <i class="fas fa-user-tie mr-2 text-blue-600"></i>Guru BK
                             </label>
-                            <select name="guru_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('guru_id') border-red-500 @enderror">
+                            <select name="guru_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('guru_id') border-red-500 @enderror">
                                 <option value="">Pilih Guru BK (Opsional)</option>
                                 @if(isset($gurus) && $gurus->count() > 0)
                                     @foreach($gurus as $guru)
@@ -138,16 +138,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-calendar-day mr-2 text-purple-600"></i>Tanggal Konseling *
+                                <i class="fas fa-calendar-day mr-2 text-blue-600"></i>Tanggal Konseling *
                             </label>
-                            <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('tanggal') border-red-500 @enderror" value="{{ $janji->tanggal->format('Y-m-d') }}" required>
+                            <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('tanggal') border-red-500 @enderror" value="{{ $janji->tanggal->format('Y-m-d') }}" required>
                             @error('tanggal')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-clock mr-2 text-purple-600"></i>Waktu *
+                                <i class="fas fa-clock mr-2 text-blue-600"></i>Waktu *
                             </label>
-                            <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('waktu') border-red-500 @enderror" required>
+                            <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('waktu') border-red-500 @enderror" required>
                                 <option value="">Pilih Waktu</option>
                                 <option value="08:00 - 09:00" @if($janji->waktu == '08:00 - 09:00') selected @endif>08:00 - 09:00</option>
                                 <option value="09:00 - 10:00" @if($janji->waktu == '09:00 - 10:00') selected @endif>09:00 - 10:00</option>
@@ -162,9 +162,9 @@
 
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-comment-dots mr-2 text-purple-600"></i>Keluhan / Permasalahan *
+                            <i class="fas fa-comment-dots mr-2 text-blue-600"></i>Keluhan / Permasalahan *
                         </label>
-                        <textarea name="keluhan" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('keluhan') border-red-500 @enderror" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan..." required>{{ $janji->keluhan }}</textarea>
+                        <textarea name="keluhan" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('keluhan') border-red-500 @enderror" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan..." required>{{ $janji->keluhan }}</textarea>
                         @error('keluhan')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
 
@@ -191,7 +191,7 @@
                         <a href="{{ route('siswa.janji-konseling') }}" class="px-6 py-3 text-gray-600 hover:text-gray-800 transition font-medium border border-gray-300 rounded-lg hover:bg-gray-50">
                             <i class="fas fa-times mr-2"></i>Batal
                         </a>
-                        <button type="submit" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition font-medium flex items-center">
+                        <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium flex items-center">
                             <i class="fas fa-save mr-2"></i>Simpan Perubahan
                         </button>
                     </div>

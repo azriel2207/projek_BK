@@ -57,7 +57,7 @@
             </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
             <div class="flex justify-between items-center">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Rata-rata Konseling/Guru</p>
@@ -66,8 +66,8 @@
                     @endphp
                     <p class="text-3xl font-bold text-gray-800 mt-2">{{ $rataRata }}</p>
                 </div>
-                <div class="bg-purple-100 p-4 rounded-lg">
-                    <i class="fas fa-chart-line text-purple-600 text-2xl"></i>
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
                 </div>
             </div>
         </div>
@@ -155,7 +155,7 @@
                         </td>
                         <td class="px-6 py-4 border-b border-gray-300">
                             <div class="flex items-center">
-                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
                                     {{ $siswaDibimbing }}
                                 </span>
                             </div>

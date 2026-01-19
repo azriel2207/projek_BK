@@ -56,13 +56,13 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($catatanFiltered as $item)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 @if(is_null($item->catatan_id)) bg-yellow-50 @endif">
                         <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {{ $item->nama_siswa }}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                {{ $item->jenis_bimbingan }}
+                                {{ ucfirst($item->jenis_bimbingan ?? 'N/A') }}
                             </span>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -70,20 +70,33 @@
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm">
                             <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                {{ ucfirst($item->status) }}
+                                {{ ucfirst($item->status ?? 'selesai') }}
                             </span>
+                            @if(is_null($item->catatan_id))
+                                <span class="ml-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                                    Belum ada catatan
+                                </span>
+                            @endif
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm space-x-2 flex flex-wrap gap-2">
-                            <a href="{{ route('guru.riwayat.detail', $item->id) }}" 
-                               class="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center gap-1 px-3 py-1 bg-blue-50 rounded">
-                                <i class="fas fa-eye"></i>
-                                <span>Lihat</span>
-                            </a>
-                            <a href="{{ route('guru.riwayat.tambah', $item->id) }}" 
-                               class="text-green-600 hover:text-green-900 font-medium inline-flex items-center gap-1 px-3 py-1 bg-green-50 rounded">
-                                <i class="fas fa-plus"></i>
-                                <span>Catatan</span>
-                            </a>
+                            @if(!is_null($item->catatan_id))
+                                <a href="{{ route('guru.riwayat.detail', $item->catatan_id) }}" 
+                                   class="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center gap-1 px-3 py-1 bg-blue-50 rounded">
+                                    <i class="fas fa-eye"></i>
+                                    <span>Lihat</span>
+                                </a>
+                                <a href="{{ route('guru.riwayat.edit', $item->catatan_id) }}" 
+                                   class="text-orange-600 hover:text-orange-900 font-medium inline-flex items-center gap-1 px-3 py-1 bg-orange-50 rounded">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit</span>
+                                </a>
+                            @else
+                                <a href="{{ route('guru.riwayat.tambah', $item->janji_id) }}" 
+                                   class="text-green-600 hover:text-green-900 font-medium inline-flex items-center gap-1 px-3 py-1 bg-green-50 rounded">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Tambah Catatan</span>
+                                </a>
+                            @endif
                         </td>
                     </tr>
                     @empty

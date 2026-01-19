@@ -298,12 +298,34 @@ public function editJadwal($id)
 
     public function konfirmasiJanji($id)
     {
+        \Log::info('=== KONFIRMASI JANJI ===', [
+            'janji_id' => $id,
+            'guru_name' => Auth::user()->name
+        ]);
+
+        $janji = DB::table('janji_konselings')->where('id', $id)->first();
+        
+        if (!$janji) {
+            \Log::error('Janji not found', ['id' => $id]);
+            return redirect()->back()->with('error', 'Janji konseling tidak ditemukan');
+        }
+
+        // Update status to dikonfirmasi and ensure guru_bk is set
         DB::table('janji_konselings')
             ->where('id', $id)
             ->update([
                 'status' => 'dikonfirmasi',
+                'guru_bk' => $janji->guru_bk ?? Auth::user()->name, // Preserve atau update guru_bk
                 'updated_at' => now()
             ]);
+
+        \Log::info('Janji confirmed', [
+            'janji_id' => $id,
+            'user_id' => $janji->user_id,
+            'guru_bk' => $janji->guru_bk ?? Auth::user()->name
+        ]);
+
+        \Log::info('=== END ===');
 
         return redirect()->back()->with('success', 'Janji konseling berhasil dikonfirmasi');
     }
@@ -331,13 +353,36 @@ public function editJadwal($id)
             'catatan' => 'nullable|string|min:10'
         ]);
 
+        \Log::info('=== SELESAI JANJI ===', [
+            'janji_id' => $id,
+            'guru_name' => Auth::user()->name,
+            'has_catatan' => !empty($request->catatan)
+        ]);
+
+        $janji = DB::table('janji_konselings')->where('id', $id)->first();
+        
+        if (!$janji) {
+            \Log::error('Janji not found', ['id' => $id]);
+            return redirect()->back()->with('error', 'Janji konseling tidak ditemukan');
+        }
+
+        // Update janji status to 'selesai' and ensure guru_bk is set
         DB::table('janji_konselings')
             ->where('id', $id)
             ->update([
                 'status' => 'selesai',
                 'catatan_konselor' => $request->catatan ?? '',
+                'guru_bk' => $janji->guru_bk ?? Auth::user()->name, // Preserve atau update guru_bk
                 'updated_at' => now()
             ]);
+
+        \Log::info('Janji marked as selesai', [
+            'janji_id' => $id,
+            'user_id' => $janji->user_id,
+            'guru_bk' => $janji->guru_bk ?? Auth::user()->name
+        ]);
+
+        \Log::info('=== END ===');
 
         return redirect()->back()->with('success', 'Konseling berhasil ditandai selesai');
     }
@@ -604,34 +649,38 @@ public function editJadwal($id)
         }
     }
 
-    // Catatan Konseling
+    // Catatan Konseling - IMPROVED: Show all selesai janji, not just those with catatan
     public function daftarCatatan()
     {
-        // Ambil ID catatan terbaru untuk setiap janji_id
-        $latestCatatanIds = DB::table('catatan')
-            ->where('guru_bk', Auth::user()->name)
-            ->groupBy('janji_id')
-            ->selectRaw('MAX(id) as id')
-            ->pluck('id');
-
-        // Ambil data catatan terbaru dengan joins
-        $catatanFiltered = DB::table('catatan')
-            ->join('users', 'catatan.user_id', '=', 'users.id')
-            ->join('janji_konselings', 'catatan.janji_id', '=', 'janji_konselings.id')
+        \Log::info('=== GURU RIWAYAT KONSELING ===');
+        \Log::info('Guru name: ' . Auth::user()->name);
+        
+        // Query: Get all janji with status 'selesai', with latest catatan if exists
+        $catatanFiltered = DB::table('janji_konselings as j')
+            ->join('users', 'j.user_id', '=', 'users.id')
+            ->leftJoin('catatan as c', function ($join) {
+                $join->on('j.id', '=', 'c.janji_id')
+                     ->whereRaw('c.id = (SELECT MAX(id) FROM catatan WHERE janji_id = j.id)');
+            })
             ->select(
-                'catatan.id',
-                'catatan.tanggal',
-                'catatan.created_at',
-                'catatan.user_id',
-                'catatan.janji_id',
-                'janji_konselings.jenis_bimbingan',
-                'janji_konselings.status',
+                'j.id as janji_id',
+                'c.id as catatan_id',
+                'j.tanggal',
+                'c.tanggal as catatan_tanggal',
+                'c.created_at as catatan_created_at',
+                'j.user_id',
+                'j.jenis_bimbingan',
+                'j.status',
                 'users.name as nama_siswa'
             )
-            ->whereIn('catatan.id', $latestCatatanIds)
-            ->orderBy('catatan.tanggal', 'desc')
+            ->where('j.status', 'selesai')
+            ->where('j.guru_bk', Auth::user()->name)
+            ->orderBy('j.tanggal', 'desc')
+            ->orderBy('j.updated_at', 'desc')
             ->paginate(20);
 
+        \Log::info('Janji selesai count: ' . $catatanFiltered->total());
+        
         return view('guru.riwayat.index', compact('catatanFiltered'));
     }
 
@@ -823,7 +872,7 @@ public function editJadwal($id)
     }
 
 
-    // RIWAYAT SISWA LENGKAP
+    // RIWAYAT SISWA LENGKAP - IMPROVED: Show all janji tidak hanya yang punya catatan
     public function riwayatSiswa($id)
     {
         $siswa = User::where('id', $id)->where('role', 'siswa')->first();
@@ -832,12 +881,38 @@ public function editJadwal($id)
             abort(404, 'Siswa tidak ditemukan');
         }
 
-        $riwayatKonseling = DB::table('janji_konselings')
-            ->where('user_id', $id)
-            ->where('guru_bk', Auth::user()->name)
-            ->orderBy('tanggal', 'desc')
-            ->orderBy('waktu', 'desc')
+        \Log::info('=== RIWAYAT SISWA ===', [
+            'siswa_id' => $id,
+            'siswa_name' => $siswa->name,
+            'guru_name' => Auth::user()->name
+        ]);
+
+        // Show all janji for this siswa, with optional catatan
+        $riwayatKonseling = DB::table('janji_konselings as j')
+            ->leftJoin('catatan as c', function ($join) {
+                $join->on('j.id', '=', 'c.janji_id')
+                     ->whereRaw('c.id = (SELECT MAX(id) FROM catatan WHERE janji_id = j.id)');
+            })
+            ->select(
+                'j.id as janji_id',
+                'c.id as catatan_id',
+                'j.tanggal',
+                'j.waktu',
+                'j.jenis_bimbingan',
+                'j.keluhan',
+                'j.status',
+                'j.guru_bk',
+                'c.tanggal as catatan_tanggal',
+                'c.created_at as catatan_created_at'
+            )
+            ->where('j.user_id', $id)
+            ->where('j.guru_bk', Auth::user()->name)
+            ->whereIn('j.status', ['dikonfirmasi', 'selesai'])
+            ->orderBy('j.tanggal', 'desc')
+            ->orderBy('j.updated_at', 'desc')
             ->paginate(20);
+
+        \Log::info('Riwayat siswa count: ' . $riwayatKonseling->total());
 
         return view('guru.siswa-riwayat', compact('siswa', 'riwayatKonseling'));
     }
@@ -1032,7 +1107,7 @@ public function editJadwal($id)
                 abort(404, 'Catatan tidak ditemukan');
             }
 
-            return view('guru.riwayat-edit', compact('catatan'));
+            return view('guru.riwayat.edit', compact('catatan'));
         } catch (\Exception $e) {
             Log::error('Error loading catatan for edit', [
                 'error' => $e->getMessage(),
@@ -1050,7 +1125,8 @@ public function editJadwal($id)
     {
         try {
             $request->validate([
-                'isi' => 'required|string|min:10',
+                'isi_catatan' => 'required|string|min:10',
+                'rekomendasi' => 'nullable|string',
                 'tanggal' => 'required|date'
             ]);
 
@@ -1064,10 +1140,16 @@ public function editJadwal($id)
                 abort(404, 'Catatan tidak ditemukan');
             }
 
+            // Gabung isi_catatan dan rekomendasi dengan separator
+            $isiCombined = $request->isi_catatan;
+            if ($request->rekomendasi) {
+                $isiCombined .= "\n--- REKOMENDASI ---\n" . $request->rekomendasi;
+            }
+
             DB::table('catatan')
                 ->where('id', $id)
                 ->update([
-                    'isi' => $request->isi,
+                    'isi' => $isiCombined,
                     'tanggal' => $request->tanggal,
                     'updated_at' => now()
                 ]);

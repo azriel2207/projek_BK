@@ -73,8 +73,8 @@
 
         <div class="bg-white rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
-                <div class="bg-purple-100 p-3 rounded-lg">
-                    <i class="fas fa-calendar-alt text-purple-600 text-2xl"></i>
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-calendar-alt text-blue-600 text-2xl"></i>
                 </div>
                 <span class="text-sm text-gray-500">Bulan Ini</span>
             </div>
@@ -145,14 +145,14 @@
                     <i class="fas fa-calendar-day text-green-600 text-3xl"></i>
                 </div>
 
-                <div class="flex justify-between items-center p-4 bg-purple-50 rounded-lg">
+                <div class="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
                     <div>
                         <p class="text-sm text-gray-600">Total Siswa Terlayani</p>
-                        <p class="text-2xl font-bold text-purple-600">
+                        <p class="text-2xl font-bold text-blue-600">
                             {{ DB::table('janji_konselings')->distinct('user_id')->count('user_id') }}
                         </p>
                     </div>
-                    <i class="fas fa-users text-purple-600 text-3xl"></i>
+                    <i class="fas fa-users text-blue-600 text-3xl"></i>
                 </div>
             </div>
         </div>

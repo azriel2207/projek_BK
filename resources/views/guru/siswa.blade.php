@@ -116,7 +116,7 @@
                                     <i class="fas fa-eye"></i>
                                     <span>Lihat</span>
                                 </a>
-                                <a href="{{ route('guru.siswa.edit', $item->id) }}" class="text-purple-600 hover:text-purple-900 transition duration-150 flex items-center space-x-1">
+                                <a href="{{ route('guru.siswa.edit', $item->id) }}" class="text-blue-600 hover:text-blue-900 transition duration-150 flex items-center space-x-1">
                                     <i class="fas fa-edit"></i>
                                     <span>Edit</span>
                                 </a>
@@ -180,7 +180,7 @@
         
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
                     <i class="fas fa-chart-line text-xl"></i>
                 </div>
                 <div>

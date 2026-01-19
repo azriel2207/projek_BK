@@ -360,6 +360,50 @@
                     closeSidebarPanel();
                 }
             });
+
+            // Real-time timestamp updates
+            function updateRelativeTime() {
+                const timeElements = document.querySelectorAll('.relative-time');
+                timeElements.forEach(el => {
+                    const timestamp = el.getAttribute('data-timestamp');
+                    if (!timestamp) return;
+                    
+                    const createdDate = new Date(timestamp);
+                    const now = new Date();
+                    const diffMs = now - createdDate;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+                    
+                    let displayText = '';
+                    
+                    if (diffMins < 1) {
+                        displayText = 'baru saja';
+                    } else if (diffMins < 60) {
+                        displayText = diffMins + ' menit yang lalu';
+                    } else if (diffHours < 24) {
+                        displayText = diffHours + ' jam yang lalu';
+                    } else if (diffDays < 7) {
+                        displayText = diffDays + ' hari yang lalu';
+                    } else {
+                        // Show exact date for older timestamps
+                        displayText = createdDate.toLocaleDateString('id-ID', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                    
+                    el.textContent = displayText;
+                    el.title = createdDate.toLocaleString('id-ID');
+                });
+            }
+            
+            // Update timestamps immediately and then every 30 seconds
+            updateRelativeTime();
+            setInterval(updateRelativeTime, 30000);
         });
     </script>
 

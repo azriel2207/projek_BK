@@ -29,21 +29,21 @@
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-semibold text-gray-800">Buat Janji Konseling Baru</h2>
-                    <button id="toggleForm" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                    <button id="toggleForm" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center">
                         <i class="fas fa-plus mr-2"></i>Janji Baru
                     </button>
                 </div>
 
                 <!-- Form Janji Konseling -->
-                <div id="formJanji" class="hidden bg-purple-50 p-6 rounded-lg border border-purple-200">
+                <div id="formJanji" class="hidden bg-blue-50 p-6 rounded-lg border border-blue-200">
                     <form id="formJanjiCreate" method="POST" action="{{ route('siswa.janji-konseling.store') }}">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-graduation-cap mr-2 text-purple-600"></i>Jenis Bimbingan *
+                                    <i class="fas fa-graduation-cap mr-2 text-blue-600"></i>Jenis Bimbingan *
                                 </label>
-                                <select name="jenis_bimbingan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('jenis_bimbingan') border-red-500 @enderror" required>
+                                <select name="jenis_bimbingan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('jenis_bimbingan') border-red-500 @enderror" required>
                                     <option value="">Pilih Jenis Bimbingan</option>
                                     <option value="pribadi"  {{ old('jenis_bimbingan') == 'pribadi' ? 'selected' : '' }}>Bimbingan Pribadi</option>
                                     <option value="belajar"  {{ old('jenis_bimbingan') == 'belajar' ? 'selected' : '' }}>Bimbingan Belajar</option>
@@ -54,9 +54,9 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-user-tie mr-2 text-purple-600"></i>Guru BK
+                                    <i class="fas fa-user-tie mr-2 text-blue-600"></i>Guru BK
                                 </label>
-                                <select name="guru_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('guru_id') border-red-500 @enderror">
+                                <select name="guru_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('guru_id') border-red-500 @enderror">
                                     <option value="">Pilih Guru BK (Opsional - akan dipilih oleh koordinator)</option>
                                     @if(isset($gurus) && $gurus->count() > 0)
                                         @foreach($gurus as $guru)
@@ -75,16 +75,16 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-calendar-day mr-2 text-purple-600"></i>Tanggal Konseling *
+                                    <i class="fas fa-calendar-day mr-2 text-blue-600"></i>Tanggal Konseling *
                                 </label>
-                                <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('tanggal') border-red-500 @enderror" value="{{ old('tanggal') }}" required>
+                                <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('tanggal') border-red-500 @enderror" value="{{ old('tanggal') }}" required>
                                 @error('tanggal')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-clock mr-2 text-purple-600"></i>Waktu *
+                                    <i class="fas fa-clock mr-2 text-blue-600"></i>Waktu *
                                 </label>
-                                <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('waktu') border-red-500 @enderror" required>
+                                <select name="waktu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('waktu') border-red-500 @enderror" required>
                                     <option value="">Pilih Waktu</option>
                                     <option value="08:00 - 09:00" {{ old('waktu') == '08:00 - 09:00' ? 'selected' : '' }}>08:00 - 09:00</option>
                                     <option value="09:00 - 10:00" {{ old('waktu') == '09:00 - 10:00' ? 'selected' : '' }}>09:00 - 10:00</option>
@@ -99,15 +99,15 @@
 
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-comment-dots mr-2 text-purple-600"></i>Keluhan / Permasalahan *
+                                <i class="fas fa-comment-dots mr-2 text-blue-600"></i>Keluhan / Permasalahan *
                             </label>
-                            <textarea name="keluhan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition @error('keluhan') border-red-500 @enderror" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan..." required>{{ old('keluhan') }}</textarea>
+                            <textarea name="keluhan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('keluhan') border-red-500 @enderror" placeholder="Jelaskan permasalahan yang ingin dikonsultasikan..." required>{{ old('keluhan') }}</textarea>
                             @error('keluhan')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div class="flex justify-end space-x-3">
                             <button type="button" id="batalForm" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition font-medium">Batal</button>
-                            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition font-medium flex items-center">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium flex items-center">
                                 <i class="fas fa-calendar-check mr-2"></i>Buat Janji
                             </button>
                         </div>
@@ -119,6 +119,9 @@
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">
                     <i class="fas fa-hourglass-half mr-2 text-yellow-600"></i>Janji Menunggu Konfirmasi
+                    @if(isset($janjiMenunggu))
+                        <span class="text-sm font-normal text-gray-500">({{ $janjiMenunggu->count() }})</span>
+                    @endif
                 </h2>
                 
                 @if(isset($janjiMenunggu) && $janjiMenunggu->count() > 0)
@@ -128,22 +131,31 @@
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-2">
                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                                    {{ ucfirst($janji->jenis_bimbingan) }}
+                                    {{ match($janji->jenis_bimbingan) {
+                                        'pribadi' => 'Bimbingan Pribadi',
+                                        'belajar' => 'Bimbingan Belajar',
+                                        'karir' => 'Bimbingan Karir',
+                                        'sosial' => 'Bimbingan Sosial',
+                                        default => ucfirst($janji->jenis_bimbingan)
+                                    } }}
                                 </span>
-                                <span class="text-sm text-gray-600">Guru BK</span>
+                                <span class="text-sm text-gray-600">{{ $janji->guru_bk ?? 'Guru BK' }}</span>
                                 <span class="bg-yellow-600 text-white px-2 py-1 rounded-full text-xs font-medium">
-                                    Menunggu Konfirmasi
+                                    {{ ucfirst($janji->status) }}
                                 </span>
                             </div>
                             <p class="text-gray-700 mb-2 text-sm">{{ Str::limit($janji->keluhan, 150) }}</p>
                             <div class="flex items-center space-x-4 text-sm text-gray-600">
                                 <span class="flex items-center">
                                     <i class="fas fa-calendar mr-2"></i>
-                                    {{ \Carbon\Carbon::parse($janji->tanggal)->format('d-m-Y') }}
+                                    {{ \Carbon\Carbon::parse($janji->tanggal)->format('d M Y') }}
                                 </span>
                                 <span class="flex items-center">
                                     <i class="fas fa-clock mr-2"></i>
                                     {{ $janji->waktu }}
+                                </span>
+                                <span class="text-xs text-gray-400">
+                                    ID: {{ $janji->id }}
                                 </span>
                             </div>
                         </div>
@@ -227,6 +239,7 @@
     <script>
         // Flag untuk prevent double submit
         let isSubmitting = false;
+        let formSubmitTime = null;
 
         // Tangkap form khusus untuk create janji
         const formJanjiCreate = document.getElementById('formJanjiCreate');
@@ -242,56 +255,72 @@
                 }
                 
                 isSubmitting = true;
+                formSubmitTime = new Date().getTime();
                 
                 if (submitBtn) {
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
                 }
                 
-                console.log('Form submitted, waiting for response...');
+                console.log('Form submitted at:', new Date().toLocaleTimeString());
+                // Form akan di-submit normally (tanpa preventDefault)
+                // Server akan handle redirect dengan success message
                 
-                // Ketika form berhasil submit, server akan redirect
-                // Kita track dengan localStorage untuk auto-refresh
-                localStorage.setItem('janji_form_just_submitted', 'true');
-                
-                // Set timeout untuk reset flag (jika response lambat)
+                // Set timeout untuk reset flag jika response lambat
                 setTimeout(() => {
-                    isSubmitting = false;
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="fas fa-calendar-check mr-2"></i>Buat Janji';
+                    if (isSubmitting) {
+                        console.log('Form submission timeout after 10s');
+                        isSubmitting = false;
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-calendar-check mr-2"></i>Buat Janji';
+                        }
                     }
-                }, 5000);
+                }, 10000);
             });
         }
 
-        // Auto-refresh halaman setelah form submit (untuk menampilkan data terbaru)
-        if (localStorage.getItem('janji_form_just_submitted') === 'true') {
-            localStorage.removeItem('janji_form_just_submitted');
-            // Tunggu 500ms, baru refresh
-            setTimeout(() => {
-                location.reload();
-            }, 500);
+        // Toggle form janji baru
+        const toggleFormBtn = document.getElementById('toggleForm');
+        if (toggleFormBtn) {
+            toggleFormBtn.addEventListener('click', function() {
+                const form = document.getElementById('formJanji');
+                form.classList.toggle('hidden');
+                
+                // Scroll ke form
+                if (!form.classList.contains('hidden')) {
+                    setTimeout(() => {
+                        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            });
         }
 
-        // Toggle form janji baru
-        document.getElementById('toggleForm').addEventListener('click', function() {
-            const form = document.getElementById('formJanji');
-            form.classList.toggle('hidden');
-        });
-
-        document.getElementById('batalForm').addEventListener('click', function() {
-            document.getElementById('formJanji').classList.add('hidden');
-            // Reset form jika cancel
-            if (formJanjiCreate) {
-                formJanjiCreate.reset();
-            }
-            isSubmitting = false;
-        });
+        const batalFormBtn = document.getElementById('batalForm');
+        if (batalFormBtn) {
+            batalFormBtn.addEventListener('click', function() {
+                document.getElementById('formJanji').classList.add('hidden');
+                // Reset form jika cancel
+                if (formJanjiCreate) {
+                    formJanjiCreate.reset();
+                }
+                isSubmitting = false;
+            });
+        }
 
         // Mobile menu toggle
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        });
+        const menuToggle = document.getElementById('menu-toggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) {
+                    sidebar.classList.toggle('active');
+                }
+            });
+        }
+
+        // Log page load untuk debugging
+        console.log('Janji konseling page loaded at:', new Date().toLocaleTimeString());
+        console.log('User ID:', {{ Auth::id() ?? 'null' }});
     </script>
 @endsection
