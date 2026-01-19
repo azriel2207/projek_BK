@@ -221,6 +221,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/jadwal/simpan', [GuruController::class, 'simpanJadwal'])->name('jadwal.simpan');
         Route::get('/jadwal/{id}/detail', [GuruController::class, 'detailJadwal'])->name('jadwal.detail');
         Route::get('/jadwal/{id}/edit', [GuruController::class, 'editJadwal'])->name('jadwal.edit');
+        Route::get('/jadwal/{id}/selesai', [GuruController::class, 'selesaiJadwal'])->name('jadwal.selesai');
         Route::put('/jadwal/{id}/update', [GuruController::class, 'updateJadwal'])->name('jadwal.update');
         Route::delete('/jadwal/{id}/hapus', [GuruController::class, 'hapusJadwal'])->name('jadwal.hapus');
         
@@ -228,6 +229,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/permintaan', [GuruController::class, 'semuaPermintaan'])->name('permintaan');
         Route::post('/permintaan/{id}/konfirmasi', [GuruController::class, 'konfirmasiJanji'])->name('permintaan.konfirmasi');
         Route::put('/permintaan/{id}/tolak', [GuruController::class, 'tolakJanji'])->name('permintaan.tolak');
+        
+        // INPUT CATATAN KONSELING
+        Route::get('/catatan/{id}/input', [GuruController::class, 'inputCatatan'])->name('catatan.input');
+        Route::post('/catatan/{id}/save', [GuruController::class, 'saveCatatan'])->name('catatan.save');
         Route::put('/permintaan/{id}/reschedule', [GuruController::class, 'reschedule'])->name('permintaan.reschedule');
         Route::post('/permintaan/{id}/selesai', [GuruController::class, 'selesaiJanji'])->name('permintaan.selesai');
         

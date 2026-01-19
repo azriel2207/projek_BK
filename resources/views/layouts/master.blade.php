@@ -51,6 +51,18 @@
             z-index: 51;
         }
         
+        /* Active sidebar link styling */
+        .sidebar a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #fff;
+            padding-left: calc(1.5rem - 4px);
+            font-weight: 600;
+        }
+        
+        .sidebar a.active:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
         .sidebar { 
             transition: transform 0.3s ease, margin-left 0.3s ease;
         }

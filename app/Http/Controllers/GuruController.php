@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Student;
 use App\Models\Counselor;
+use App\Models\JanjiKonseling;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
@@ -190,6 +191,25 @@ public function editJadwal($id)
 
     return view('guru.jadwal-edit', compact('jadwal', 'siswaList', 'selectedSiswa'));
 }
+
+    // TANDAI JADWAL SELESAI
+    public function selesaiJadwal($id)
+    {
+        $jadwal = DB::table('janji_konselings')
+            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+            ->where('janji_konselings.id', $id)
+            ->select('janji_konselings.*', 'users.name')
+            ->first();
+
+        if (!$jadwal) {
+            abort(404, 'Jadwal konseling tidak ditemukan');
+        }
+
+        // Load user relationship untuk view
+        $jadwal->user = User::find($jadwal->user_id);
+
+        return view('guru.jadwal-selesai', compact('jadwal'));
+    }
     // UPDATE JADWAL
     public function updateJadwal(Request $request, $id)
     {
@@ -327,7 +347,102 @@ public function editJadwal($id)
 
         \Log::info('=== END ===');
 
-        return redirect()->back()->with('success', 'Janji konseling berhasil dikonfirmasi');
+        // Redirect to input catatan form instead of back
+        return redirect()->route('guru.catatan.input', $id)->with('success', 'Janji konseling berhasil dikonfirmasi. Silakan input catatan hasil konseling.');
+    }
+
+    /**
+     * Show form untuk input catatan konseling
+     */
+    public function inputCatatan($id)
+    {
+        // Get janji dengan user relationship
+        $janji = DB::table('janji_konselings')
+            ->join('users', 'janji_konselings.user_id', '=', 'users.id')
+            ->where('janji_konselings.id', $id)
+            ->select('janji_konselings.*', 'users.name')
+            ->first();
+        
+        if (!$janji) {
+            return redirect()->route('guru.dashboard')->with('error', 'Janji konseling tidak ditemukan');
+        }
+
+        // Check if status is dikonfirmasi (only allow input on confirmed appointments)
+        if ($janji->status !== 'dikonfirmasi') {
+            return redirect()->route('guru.dashboard')->with('error', 'Hanya bisa input catatan untuk janji yang sudah dikonfirmasi');
+        }
+
+        return view('guru.input-catatan', ['janji' => $janji]);
+    }
+
+    /**
+     * Save catatan dan rekomendasi untuk janji konseling
+     */
+    public function saveCatatan(Request $request, $id)
+    {
+        // Validate input
+        $request->validate([
+            'isi_catatan' => 'required|string|min:10',
+            'rekomendasi' => 'required|string|min:10'
+        ], [
+            'isi_catatan.required' => 'Catatan hasil konseling harus diisi',
+            'isi_catatan.min' => 'Catatan minimal 10 karakter',
+            'rekomendasi.required' => 'Rekomendasi harus diisi',
+            'rekomendasi.min' => 'Rekomendasi minimal 10 karakter'
+        ]);
+
+        // Get janji
+        $janji = JanjiKonseling::findOrFail($id);
+        
+        // Check status
+        if ($janji->status !== 'dikonfirmasi') {
+            return back()->with('error', 'Hanya bisa input catatan untuk janji yang sudah dikonfirmasi');
+        }
+
+        try {
+            // Combine catatan dan rekomendasi with separator
+            $catatanLengkap = $request->isi_catatan . "\n--- REKOMENDASI ---\n" . $request->rekomendasi;
+
+            // Cek apakah catatan sudah ada
+            $existingCatatan = DB::table('catatan')
+                ->where('janji_id', $id)
+                ->first();
+
+            if ($existingCatatan) {
+                // Update existing catatan
+                DB::table('catatan')
+                    ->where('janji_id', $id)
+                    ->update([
+                        'isi' => $catatanLengkap,
+                        'guru_bk' => Auth::user()->name,
+                        'tanggal' => now(),
+                        'updated_at' => now()
+                    ]);
+            } else {
+                // Create new catatan
+                DB::table('catatan')->insert([
+                    'user_id' => $janji->user_id,
+                    'janji_id' => $id,
+                    'isi' => $catatanLengkap,
+                    'guru_bk' => Auth::user()->name,
+                    'tanggal' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            \Log::info('Catatan saved successfully', [
+                'janji_id' => $id,
+                'user_id' => $janji->user_id,
+                'guru_bk' => Auth::user()->name
+            ]);
+
+            return redirect()->route('guru.jadwal.selesai', $id)
+                ->with('success', 'Catatan berhasil disimpan. Sekarang Anda dapat menandai konseling sebagai selesai.');
+        } catch (\Exception $e) {
+            \Log::error('Error saving catatan', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Gagal menyimpan catatan: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function tolakJanji(Request $request, $id)
@@ -1213,6 +1328,11 @@ public function editJadwal($id)
     public function daftarGuru(Request $request)
     {
         try {
+            // Hanya koordinator BK yang bisa mengakses fitur ini
+            if (Auth::user()->role !== 'koordinator_bk' && Auth::user()->role !== 'koordinator') {
+                abort(403, 'Anda tidak memiliki akses ke fitur ini. Hanya koordinator BK yang dapat mengelola daftar guru.');
+            }
+
             $query = DB::table('users')
                 ->whereIn('role', ['guru_bk', 'guru'])
                 ->where('id', '!=', Auth::id()) // Exclude current user

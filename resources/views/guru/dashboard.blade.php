@@ -353,8 +353,23 @@
 
         function konfirmasiDariModal() {
             if(currentModalId) {
+                // Langsung submit form tanpa dialog konfirmasi
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/guru/permintaan/${currentModalId}/konfirmasi`;
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = '{{ csrf_token() }}';
+                form.appendChild(csrfInput);
+                
+                // Close modal sebelum submit
                 closeDetailModal();
-                konfirmasiJanji(currentModalId);
+                
+                // Submit form untuk redirect ke halaman input catatan
+                document.body.appendChild(form);
+                form.submit();
             }
         }
 

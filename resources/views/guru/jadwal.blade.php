@@ -155,12 +155,18 @@
             <i class="fas fa-eye"></i>
         </a>
         
-        <!-- Edit -->
-        <a href="{{ route('guru.jadwal.edit', $item->id) }}" 
-           class="text-green-600 hover:text-green-900 transition" 
-           title="Edit">
-            <i class="fas fa-edit"></i>
-        </a>
+        <!-- Tandai Selesai (hanya untuk jadwal yang belum selesai) -->
+        @if($item->status !== 'selesai' && $item->status !== 'dibatalkan')
+            <a href="{{ route('guru.jadwal.selesai', $item->id) }}" 
+               class="text-green-600 hover:text-green-900 transition" 
+               title="Tandai Selesai">
+                <i class="fas fa-check-circle"></i>
+            </a>
+        @else
+            <span class="text-gray-400 cursor-not-allowed" title="Jadwal sudah selesai atau dibatalkan">
+                <i class="fas fa-check-circle"></i>
+            </span>
+        @endif
         
         <!-- Hapus -->
         <form action="{{ route('guru.jadwal.hapus', $item->id) }}" 

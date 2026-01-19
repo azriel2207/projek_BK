@@ -36,16 +36,16 @@
     @if($catatan->count() > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($catatan as $item)
-                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-l-purple-500">
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-l-4 border-l-blue-500">
                     <!-- Card Header -->
-                    <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-purple-200">
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wider">Guru BK</h3>
-                                <p class="text-lg font-bold text-purple-700 mt-1">{{ $item->guru_bk }}</p>
+                                <p class="text-lg font-bold text-blue-700 mt-1">{{ $item->guru_bk }}</p>
                             </div>
                             <div class="text-right">
-                                <span class="inline-block bg-purple-200 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                <span class="inline-block bg-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
                                     <i class="fas fa-calendar-alt mr-1"></i>
                                     {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
                                 </span>
@@ -90,7 +90,7 @@
                     <!-- Card Footer -->
                     <div class="bg-gray-50 px-6 py-3 flex justify-end border-t border-gray-200">
                         <a href="{{ route('siswa.catatan.detail', $item->id) }}" 
-                           class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-eye"></i>
                             <span>Lihat Detail</span>
                         </a>
