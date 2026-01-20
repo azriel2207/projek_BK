@@ -38,36 +38,6 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-gray-500 text-sm">Rata-rata Waktu</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ $statistik['rata_rata_waktu'] }}m</p>
-                            <p class="text-green-600 text-sm mt-1">
-                                <i class="fas fa-arrow-up"></i> {{ abs($statistik['perubahan_waktu']) }}m lebih cepat
-                            </p>
-                        </div>
-                        <div class="bg-green-100 p-3 rounded-lg">
-                            <i class="fas fa-clock text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-gray-500 text-sm">Tingkat Kepuasan</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ $statistik['tingkat_kepuasan'] }}%</p>
-                            <p class="text-green-600 text-sm mt-1">
-                                <i class="fas fa-arrow-up"></i> {{ $statistik['perubahan_kepuasan'] }}% meningkat
-                            </p>
-                        </div>
-                        <div class="bg-blue-100 p-3 rounded-lg">
-                            <i class="fas fa-star text-blue-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <div class="flex justify-between items-center">
-                        <div>
                             <p class="text-gray-500 text-sm">Kasus Selesai</p>
                             <p class="text-2xl font-bold text-gray-800" data-kasus-selesai>{{ $statistik['kasus_selesai'] }}</p>
                             <p class="text-green-600 text-sm mt-1">
@@ -168,7 +138,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <button onclick="generateLaporanBulanan()" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition border-2 border-dashed border-blue-200 cursor-pointer">
                         <i class="fas fa-file-pdf text-blue-600 text-2xl mb-2"></i>
-                        <p class="text-sm font-medium text-blue-800">Laporan Bulanan</p>
+                        <p class="text-sm font-medium text-blue-800">Laporan Bulanan  </p>
                         <p class="text-xs text-blue-600 mt-1">PDF Report</p>
                     </button>
                     

@@ -190,12 +190,6 @@
                     </div>
                 @endif
             </div>
-
-            <div class="mt-4 pt-4 border-t border-gray-200">
-                <a href="{{ route('guru.jadwal.tambah') }}" class="block w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm text-center font-medium">
-                    <i class="fas fa-calendar-plus mr-1"></i>Tambah Jadwal
-                </a>
-            </div>
         </div>
     </div>
 

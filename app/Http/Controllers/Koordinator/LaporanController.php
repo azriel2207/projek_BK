@@ -124,9 +124,9 @@ class LaporanController extends Controller
                     ->whereMonth('tanggal', $bulan)
                     ->where('status', 'selesai')
                     ->count(),
-                'konseling_berlangsung' => JanjiKonseling::whereYear('tanggal', $tahun)
+                'konseling_dibatalkan' => JanjiKonseling::whereYear('tanggal', $tahun)
                     ->whereMonth('tanggal', $bulan)
-                    ->whereIn('status', ['menunggu', 'dikonfirmasi'])
+                    ->where('status', 'dibatalkan')
                     ->count(),
                     
                 // Data per jenis bimbingan

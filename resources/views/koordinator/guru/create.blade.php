@@ -27,29 +27,29 @@
             <div class="grid grid-cols-2 gap-4">
                 <!-- Nama -->
                 <div class="col-span-2">
-                    <label for="name" class="block text-gray-700 font-bold mb-2">Nama Lengkap *</label>
+                    <label for="name" class="block text-gray-700 font-bold mb-2">Nama Lengkap</label>
                     <input type="text" name="name" id="name" class="w-full px-4 py-2 border @error('name') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('name') }}" required>
                     @error('name')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- Email -->
                 <div>
-                    <label for="email" class="block text-gray-700 font-bold mb-2">Email *</label>
+                    <label for="email" class="block text-gray-700 font-bold mb-2">Email</label>
                     <input type="email" name="email" id="email" class="w-full px-4 py-2 border @error('email') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('email') }}" required>
                     @error('email')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- Telepon -->
                 <div>
-                    <label for="phone" class="block text-gray-700 font-bold mb-2">Telepon *</label>
-                    <input type="tel" name="phone" id="phone" class="w-full px-4 py-2 border @error('phone') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('phone') }}" required>
+                    <label for="phone" class="block text-gray-700 font-bold mb-2">Telepon</label>
+                    <input type="text" name="phone" id="phone" class="w-full px-4 py-2 border @error('phone') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('phone') }}" required inputmode="numeric" pattern="[0-9]*" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
                     @error('phone')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- NIP -->
                 <div>
-                    <label for="nip" class="block text-gray-700 font-bold mb-2">NIP *</label>
-                    <input type="text" name="nip" id="nip" class="w-full px-4 py-2 border @error('nip') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('nip') }}" required>
+                    <label for="nip" class="block text-gray-700 font-bold mb-2">NIP</label>
+                    <input type="text" name="nip" id="nip" class="w-full px-4 py-2 border @error('nip') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ old('nip') }}" required inputmode="numeric" pattern="[0-9]*" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
                     @error('nip')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
@@ -67,14 +67,14 @@
 
                 <!-- Password -->
                 <div>
-                    <label for="password" class="block text-gray-700 font-bold mb-2">Password *</label>
+                    <label for="password" class="block text-gray-700 font-bold mb-2">Password</label>
                     <input type="password" name="password" id="password" class="w-full px-4 py-2 border @error('password') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                     @error('password')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
                 </div>
 
                 <!-- Konfirmasi Password -->
                 <div>
-                    <label for="password_confirmation" class="block text-gray-700 font-bold mb-2">Konfirmasi Password *</label>
+                    <label for="password_confirmation" class="block text-gray-700 font-bold mb-2">Konfirmasi Password</label>
                     <input type="password" name="password_confirmation" id="password_confirmation" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
             </div>
