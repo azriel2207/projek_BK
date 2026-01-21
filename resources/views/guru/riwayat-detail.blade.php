@@ -83,7 +83,7 @@
                     <h2 class="text-2xl font-semibold text-gray-900 mb-6">Isi Catatan</h2>
                     
                     <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 min-h-96">
-                        <p class="text-gray-800 leading-relaxed whitespace-pre-wrap font-base">{{ $catatan->isi_catatan ?? $catatan->catatan_konselor }}</p>
+                        <p class="text-gray-800 leading-relaxed whitespace-pre-wrap font-base text-left">{{ $catatan->isi_catatan ?? $catatan->catatan_konselor }}</p>
                     </div>
 
                     <div class="mt-6 pt-6 border-t border-gray-200">

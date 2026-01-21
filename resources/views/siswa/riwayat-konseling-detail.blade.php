@@ -67,21 +67,30 @@
                         Keluhan / Permasalahan
                     </h3>
                     <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
-                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">{{ $detail->keluhan ?? 'Tidak ada deskripsi keluhan' }}</p>
+                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed !text-left">{{ $detail->keluhan ?? 'Tidak ada deskripsi keluhan' }}</p>
                     </div>
                 </div>
 
-                <div>
+                <!-- Isi Catatan -->
+                <div class="mb-8">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <i class="fas fa-notebook text-blue-500"></i>
-                        Catatan Konselor
+                        Isi Catatan
                     </h3>
                     @if($detail->catatan_konselor && !empty(trim($detail->catatan_konselor)))
-                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-sm">
-                        <div class="prose prose-sm max-w-none">
-                            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal">{{ $detail->catatan_konselor }}</p>
-                        </div>
-                        <div class="mt-6 pt-6 border-t border-blue-200 text-xs text-gray-600 flex items-center gap-2">
+                    <div class="bg-blue-50 rounded-lg p-6 border-2 border-blue-200 shadow-sm">
+                        <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal !text-left">
+                            @php
+                                $text = $detail->catatan_konselor;
+                                if (strpos($text, '--- REKOMENDASI ---') !== false) {
+                                    $parts = explode('--- REKOMENDASI ---', $text);
+                                    echo trim($parts[0]);
+                                } else {
+                                    echo $text;
+                                }
+                            @endphp
+                        </p>
+                        <div class="mt-4 pt-4 border-t border-blue-200 text-xs text-gray-600 flex items-center gap-2">
                             <i class="fas fa-info-circle text-blue-500"></i>
                             <span>Catatan dari Guru BK</span>
                         </div>
@@ -91,6 +100,50 @@
                         <p class="text-blue-700 italic flex items-center gap-2">
                             <i class="fas fa-info-circle"></i>
                             Catatan akan ditampilkan setelah guru BK memberikan catatan konseling.
+                        </p>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Rekomendasi -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-lightbulb text-yellow-500"></i>
+                        Rekomendasi
+                    </h3>
+                    @if($detail->catatan_konselor && !empty(trim($detail->catatan_konselor)))
+                        @php
+                            $text = $detail->catatan_konselor;
+                            $hasRekomendasi = strpos($text, '--- REKOMENDASI ---') !== false;
+                            if ($hasRekomendasi) {
+                                $parts = explode('--- REKOMENDASI ---', $text);
+                                $rekomendasi = trim($parts[1]);
+                            } else {
+                                $rekomendasi = '';
+                            }
+                        @endphp
+                        
+                        @if(!empty($rekomendasi))
+                        <div class="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200 shadow-sm">
+                            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal !text-left">{{ $rekomendasi }}</p>
+                            <div class="mt-4 pt-4 border-t border-yellow-200 text-xs text-gray-600 flex items-center gap-2">
+                                <i class="fas fa-lightbulb text-yellow-500"></i>
+                                <span>Rekomendasi dari Guru BK</span>
+                            </div>
+                        </div>
+                        @else
+                        <div class="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                            <p class="text-yellow-700 italic flex items-center gap-2">
+                                <i class="fas fa-info-circle"></i>
+                                Belum ada rekomendasi dari Guru BK.
+                            </p>
+                        </div>
+                        @endif
+                    @else
+                    <div class="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                        <p class="text-yellow-700 italic flex items-center gap-2">
+                            <i class="fas fa-info-circle"></i>
+                            Rekomendasi akan ditampilkan setelah guru BK memberikan catatan konseling.
                         </p>
                     </div>
                     @endif

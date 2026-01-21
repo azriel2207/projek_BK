@@ -88,15 +88,13 @@
                         Isi Catatan
                     </h3>
                     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-sm mb-8">
-                        <div class="prose prose-sm max-w-none">
-                            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal">
-                                @php
-                                    // Pisahkan catatan dan rekomendasi
-                                    $parts = explode('--- REKOMENDASI ---', $catatan->isi ?? '');
-                                    echo trim($parts[0]);
-                                @endphp
-                            </p>
-                        </div>
+                        <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal !text-left">
+                            @php
+                                // Pisahkan catatan dan rekomendasi
+                                $parts = explode('--- REKOMENDASI ---', $catatan->isi ?? '');
+                                echo trim($parts[0]);
+                            @endphp
+                        </p>
                         <div class="mt-6 pt-6 border-t border-blue-200 text-xs text-gray-600 flex items-center gap-2">
                             <i class="fas fa-info-circle text-blue-500"></i>
                             <span class="relative-time-wrapper">
@@ -111,17 +109,15 @@
                         Rekomendasi
                     </h3>
                     <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-6 border-2 border-yellow-200 shadow-sm">
-                        <div class="prose prose-sm max-w-none">
-                            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal">
-                                @php
-                                    if(count($parts) > 1) {
-                                        echo trim($parts[1]);
-                                    } else {
-                                        echo 'Tidak ada rekomendasi khusus';
-                                    }
-                                @endphp
-                            </p>
-                        </div>
+                        <p class="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-normal !text-left">
+                            @php
+                                if(count($parts) > 1) {
+                                    echo trim($parts[1]);
+                                } else {
+                                    echo 'Tidak ada rekomendasi khusus';
+                                }
+                            @endphp
+                        </p>
                     </div>
                 </div>
                 </div>
