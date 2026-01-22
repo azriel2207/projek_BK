@@ -83,9 +83,9 @@
                 <a href="#login" class="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition font-semibold shadow-lg">
                     <i class="fas fa-door-open mr-2"></i>Masuk Sistem
                 </a>
-                <a href="{{ route('register') }}" class="border border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition font-semibold">
+                <button type="button" onclick="showRegistrationForm()" class="border border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition font-semibold">
                     <i class="fas fa-user-plus mr-2"></i>Daftar Akun
-                </a>
+                </button>
             </div>
         </div>
 
@@ -285,6 +285,109 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Registration Form (Hidden by default) -->
+            <div id="registrationForm" style="display: none;" class="py-16">
+                <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="bg-blue-600 py-6 px-8">
+                        <h2 class="text-2xl font-bold text-white text-center">
+                            <i class="fas fa-user-plus mr-2"></i>Daftar Akun Baru
+                        </h2>
+                    </div>
+                    
+                    <div class="p-8">
+                        <p class="text-gray-600 text-center text-sm mb-6">
+                            Buat akun baru untuk mengakses sistem
+                        </p>
+
+                        @if($errors->any())
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('register') }}" id="registrationFormElement">
+                            @csrf
+                            
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                                    <i class="fas fa-user mr-2 text-blue-600"></i>Nama Lengkap
+                                </label>
+                                <input type="text" name="name" id="name" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                       placeholder="masukkan nama lengkap"
+                                       value="{{ old('name') }}">
+                                @error('name')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="reg-email">
+                                    <i class="fas fa-envelope mr-2 text-blue-600"></i>Email
+                                </label>
+                                <input type="email" name="email" id="reg-email" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                       placeholder="masukkan email anda"
+                                       value="{{ old('email') }}">
+                                @error('email')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="reg-password">
+                                    <i class="fas fa-key mr-2 text-blue-600"></i>Password
+                                </label>
+                                <div class="relative">
+                                    <input type="password" name="password" id="reg-password" required 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                           placeholder="minimal 8 karakter">
+                                    <button type="button" onclick="togglePasswordVisibility('reg-password', 'reg-password-icon')" 
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-eye" id="reg-password-icon"></i>
+                                    </button>
+                                </div>
+                                @error('password')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="reg-password-confirm">
+                                    <i class="fas fa-key mr-2 text-blue-600"></i>Konfirmasi Password
+                                </label>
+                                <div class="relative">
+                                    <input type="password" name="password_confirmation" id="reg-password-confirm" required 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                           placeholder="ulangi password">
+                                    <button type="button" onclick="togglePasswordVisibility('reg-password-confirm', 'reg-password-confirm-icon')" 
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-eye" id="reg-password-confirm-icon"></i>
+                                    </button>
+                                </div>
+                                @error('password_confirmation')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <input type="hidden" name="role" value="siswa">
+
+                            <button type="submit" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 mb-4">
+                                <i class="fas fa-user-check mr-2"></i>Daftar Akun
+                            </button>
+                        </form>
+
+                        <div class="text-center">
+                            <button type="button" onclick="showLoginForm()" class="text-gray-600 hover:text-gray-800 text-sm font-semibold">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -338,6 +441,7 @@
             if (loginCard) {
                 loginCard.style.display = 'none';
             }
+            document.getElementById('registrationForm').style.display = 'none';
             document.getElementById('forgotPasswordForm').style.display = 'block';
             setTimeout(() => {
                 document.getElementById('forgotPasswordForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -346,6 +450,7 @@
 
         function showLoginForm() {
             document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'none';
             const loginCard = document.getElementById('loginCard').closest('div');
             if (loginCard) {
                 loginCard.style.display = 'block';
@@ -353,6 +458,34 @@
             setTimeout(() => {
                 document.getElementById('loginCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
+        }
+
+        function showRegistrationForm() {
+            const loginCard = document.getElementById('loginCard').closest('div');
+            if (loginCard) {
+                loginCard.style.display = 'none';
+            }
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('registrationForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        // Toggle Password Visibility
+        function togglePasswordVisibility(fieldId, iconId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(iconId);
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
 
         // Handle forgot password form submission
