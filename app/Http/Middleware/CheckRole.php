@@ -39,7 +39,8 @@ class CheckRole
             'koordinator' => ['koordinator_bk', 'koordinator'],
             'guru_bk' => ['guru_bk', 'guru'],
             'guru' => ['guru_bk', 'guru'],
-            'siswa' => ['siswa']
+            'siswa' => ['siswa'],
+            'wali_kelas' => ['wali_kelas']
         ];
 
         // Dapatkan semua role yang valid untuk user

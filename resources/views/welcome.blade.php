@@ -216,6 +216,16 @@
                         </div>
                         
                         <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="nis">
+                                <i class="fas fa-id-card mr-2 text-blue-600"></i>NIS (untuk siswa)
+                            </label>
+                            <input type="text" name="nis" id="nis" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                   placeholder="masukkan NIS Anda (jika siswa)"
+                                   value="{{ old('nis') }}">
+                        </div>
+                        
+                        <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
                                 <i class="fas fa-key mr-2 text-blue-600"></i>Password
                             </label>
@@ -354,7 +364,7 @@
                                 @enderror
                             </div>
 
-                            <div class="mb-6">
+                            <div class="mb-4">
                                 <label class="block text-gray-700 text-sm font-bold mb-2" for="reg-password-confirm">
                                     <i class="fas fa-key mr-2 text-blue-600"></i>Konfirmasi Password
                                 </label>
@@ -368,6 +378,32 @@
                                     </button>
                                 </div>
                                 @error('password_confirmation')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="reg-nis">
+                                    <i class="fas fa-id-card mr-2 text-blue-600"></i>Nomor Induk Siswa (NIS)
+                                </label>
+                                <input type="text" name="nis" id="reg-nis" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                       placeholder="masukkan NIS Anda"
+                                       value="{{ old('nis') }}">
+                                @error('nis')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="reg-kelas">
+                                    <i class="fas fa-book mr-2 text-blue-600"></i>Kelas
+                                </label>
+                                <input type="text" name="kelas" id="reg-kelas" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                       placeholder="contoh: X-A, XI-B"
+                                       value="{{ old('kelas') }}">
+                                @error('kelas')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>

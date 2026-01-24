@@ -10,6 +10,9 @@
     <a href="{{ route('koordinator.siswa.index') }}" class="block py-3 px-6 hover:bg-blue-600 transition {{ Route::currentRouteName() === 'koordinator.siswa.index' ? 'active' : '' }}">
         <i class="fas fa-users mr-3"></i>Data Siswa
     </a>
+    <a href="{{ route('koordinator.wali-kelas.index') }}" class="block py-3 px-6 hover:bg-blue-600 transition {{ Route::currentRouteName() === 'koordinator.wali-kelas.index' ? 'active' : '' }}">
+        <i class="fas fa-chalkboard-user mr-3"></i>Kelola Wali Kelas
+    </a>
     <a href="{{ route('koordinator.laporan') }}" class="block py-3 px-6 hover:bg-blue-600 transition {{ Route::currentRouteName() === 'koordinator.laporan' ? 'active' : '' }}">
         <i class="fas fa-chart-bar mr-3"></i>Laporan
     </a>

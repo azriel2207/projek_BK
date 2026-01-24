@@ -62,6 +62,27 @@
                     @enderror
                 </div>
 
+                <!-- NIS (untuk siswa) -->
+                <div class="mb-4">
+                    <label for="nis" class="block text-sm font-medium text-gray-700 mb-2">
+                        NIS (Nomor Induk Siswa) - <span class="text-gray-500">Opsional</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nis" 
+                        name="nis" 
+                        value="{{ old('nis') }}"
+                        placeholder="Nomor induk siswa Anda (jika tahu)"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition @error('nis') border-red-500 @enderror"
+                    >
+                    @error('nis')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                    <p class="text-gray-500 text-xs mt-1">
+                        NIS akan diminta saat login pertama kali untuk verifikasi
+                    </p>
+                </div>
+
                 <!-- Hidden Role - Default Siswa -->
                 <input type="hidden" name="role" value="siswa">
 

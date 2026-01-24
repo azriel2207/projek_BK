@@ -25,47 +25,87 @@ class AuthController extends Controller
     {
        $request->validate([
         'email' => 'required|email',
-        'password' => 'required|min:8'
+        'password' => 'required|min:6',
+        'nis' => 'nullable|string'
     ]);
 
     $credentials = $request->only('email', 'password');
+    $nis = $request->input('nis');
+    
+    Log::info('ATTEMPTING LOGIN', [
+        'email' => $credentials['email'],
+        'nis' => $nis,
+        'timestamp' => now()
+    ]);
 
     if (Auth::attempt($credentials, $request->filled('remember'))) {
         $request->session()->regenerate();
         
         $user = Auth::user();
+        Log::info('AUTH ATTEMPT SUCCESSFUL', ['user_id' => $user->id, 'email' => $user->email]);
+        
         // Ensure $user is an instance of App\Models\User
         if (!$user instanceof \App\Models\User) {
             $user = User::find($user->id);
+            Log::info('USER REFRESHED FROM DB', ['user_id' => $user->id, 'role' => $user->role]);
         }
         
-        // Log untuk debug
         Log::info('Login success', [
             'email' => $user->email,
             'role' => $user->role,
             'user_id' => $user->id
         ]);
         
-        // Cek apakah email sudah terverifikasi
-        if (!$user->hasVerifiedEmail()) {
-            // Redirect ke halaman verifikasi email
-            return redirect()->route('verification.code');
+        // Jika siswa, verifikasi NIS
+        if ($user->role === 'siswa') {
+            if (!$nis) {
+                Auth::logout();
+                return back()->withErrors([
+                    'nis' => 'NIS harus diisi untuk siswa',
+                ])->withInput($request->only('email'));
+            }
+            
+            // Check apakah NIS cocok dengan student record
+            $student = \App\Models\Student::where('user_id', $user->id)
+                ->where('nis', $nis)
+                ->first();
+            
+            if (!$student) {
+                Auth::logout();
+                return back()->withErrors([
+                    'nis' => 'NIS tidak cocok dengan data siswa',
+                ])->withInput($request->only('email'));
+            }
+            
+            Log::info('NIS Verified for siswa', [
+                'user_id' => $user->id,
+                'nis' => $nis,
+                'student_id' => $student->id
+            ]);
         }
         
         // Redirect berdasarkan role
         switch($user->role) {
             case 'koordinator_bk':
             case 'koordinator':
+                Log::info('SWITCH MATCHED: koordinator_bk, redirecting to koordinator.dashboard');
                 return redirect()->route('koordinator.dashboard');
                 
             case 'guru_bk':
             case 'guru':
+                Log::info('SWITCH MATCHED: guru_bk, redirecting to guru.dashboard');
                 return redirect()->route('guru.dashboard');
                 
             case 'siswa':
+                Log::info('SWITCH MATCHED: siswa, redirecting to siswa.dashboard');
                 return redirect()->route('siswa.dashboard');
+
+            case 'wali_kelas':
+                Log::info('SWITCH MATCHED: wali_kelas, redirecting to wali_kelas.dashboard');
+                return redirect()->route('wali_kelas.dashboard');
                 
             default:
+                Log::error('SWITCH DEFAULT CASE', ['role' => $user->role, 'role_hex' => bin2hex($user->role)]);
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -76,6 +116,11 @@ class AuthController extends Controller
         }
     }
 
+    Log::warning('LOGIN FAILED - AUTH ATTEMPT RETURNED FALSE', [
+        'email' => $credentials['email'],
+        'timestamp' => now()
+    ]);
+    
     // Login gagal
     return back()->withErrors([
         'email' => 'Email atau password salah.',
@@ -94,6 +139,8 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
+            'nis' => 'required_if:role,siswa|string|max:20|unique:students,nis',
+            'kelas' => 'required_if:role,siswa|string|max:50',
             'role' => 'required|in:siswa,guru_bk',
         ]);
 
@@ -103,6 +150,8 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'class' => $validated['kelas'] ?? null,
+            'email_verified_at' => now(), // Otomatis mark sebagai verified (tidak perlu email verification)
         ]);
 
         // Create student record if role is siswa
@@ -111,31 +160,24 @@ class AuthController extends Controller
                 \App\Models\Student::create([
                     'user_id' => $user->id,
                     'nama_lengkap' => $user->name,
-                    'nis' => \App\Services\StudentService::generateNIS(),
+                    'nis' => $validated['nis'],
                     'tgl_lahir' => null,
                     'alamat' => null,
                     'no_hp' => null,
-                    'kelas' => null,
+                    'kelas' => $validated['kelas'],
+                    'nis_verified' => false, // Belum verifikasi NIS
                 ]);
-                Log::info('Student record created for new siswa user', ['user_id' => $user->id]);
+                Log::info('Student record created for new siswa user', [
+                    'user_id' => $user->id,
+                    'nis' => $validated['nis'],
+                    'kelas' => $validated['kelas']
+                ]);
             } catch (\Exception $e) {
                 Log::error('Error creating student record during registration', [
                     'user_id' => $user->id,
                     'error' => $e->getMessage()
                 ]);
             }
-        }
-
-        // Create verification code
-        $verificationCode = EmailVerificationCode::getOrCreateForUser($user);
-
-        // Send verification code via email
-        try {
-            $user->notify(new SendVerificationCodeEmail($verificationCode));
-            $successMessage = 'Registrasi berhasil! Kode verifikasi telah dikirim ke ' . $user->email . '. Silakan cek email Anda dalam beberapa detik.';
-        } catch (\Exception $e) {
-            Log::error('Error sending verification code: ' . $e->getMessage());
-            $successMessage = 'Registrasi berhasil! Silakan cek email Anda untuk kode verifikasi.';
         }
 
         // Log registration
@@ -149,9 +191,16 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        // Redirect ke halaman verify code
-        return redirect()->route('verification.code')
-            ->with('success', $successMessage);
+        // Redirect berdasarkan role
+        if ($user->role === 'siswa') {
+            // Siswa harus verifikasi NIS terlebih dahulu
+            return redirect()->route('verification.nis')
+                ->with('success', 'Registrasi berhasil! Silakan verifikasi NIS Anda untuk melanjutkan.');
+        } else {
+            // Guru/Wali kelas langsung bisa akses dashboard
+            return redirect()->route('guru.dashboard')
+                ->with('success', 'Registrasi berhasil! Selamat datang ' . $user->name);
+        }
     }
 
     public function logout(Request $request)
@@ -176,107 +225,75 @@ class AuthController extends Controller
     /**
      * Show verification code form
      */
-    public function showVerificationCodeForm()
+    /**
+     * Show NIS verification form for siswa
+     */
+    public function showVerifyNISForm()
     {
-        if (!Auth::check() || Auth::user()->email_verified_at) {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'siswa') {
             return redirect()->route('login');
         }
 
-        return view('auth.verify-code');
+        if ($user->nis_verified) {
+            return redirect()->route('siswa.dashboard');
+        }
+
+        $student = $user->student;
+        return view('auth.verify-nis', compact('student'));
     }
 
     /**
-     * Verify code submitted by user
+     * Verify NIS submitted by siswa
      */
-    public function verifyCode(Request $request)
+    public function verifyNIS(Request $request)
     {
         $user = Auth::user();
-        
-        if (!$user instanceof \App\Models\User) {
-            $user = User::find($user->id);
-        }
-
-        if (!$user || $user->email_verified_at) {
+        if (!$user || $user->role !== 'siswa') {
             return redirect()->route('login');
         }
 
-        // Validasi input
+        if ($user->nis_verified) {
+            return redirect()->route('siswa.dashboard');
+        }
+
         $request->validate([
-            'code' => 'required|string|size:6',
+            'nis' => 'required|string',
         ], [
-            'code.required' => 'Kode verifikasi diperlukan',
-            'code.size' => 'Kode verifikasi harus 6 digit',
+            'nis.required' => 'NIS tidak boleh kosong',
         ]);
 
-        // Find verification code
-        $verificationCode = EmailVerificationCode::where('user_id', $user->id)
-            ->where('code', $request->code)
-            ->first();
-
-        // Check if code exists and is valid
-        if (!$verificationCode) {
-            return back()->withErrors([
-                'code' => 'Kode verifikasi tidak valid'
-            ])->withInput();
+        $student = $user->student;
+        if (!$student) {
+            Log::error('Student record not found for user', ['user_id' => $user->id]);
+            return back()->withErrors(['nis' => 'Data siswa tidak ditemukan']);
         }
 
-        if (!$verificationCode->isValid()) {
-            if ($verificationCode->isExpired()) {
-                $verificationCode->delete();
-                return back()->withErrors([
-                    'code' => 'Kode verifikasi telah expired. Silakan minta kode baru.'
-                ]);
-            }
+        // Check if NIS matches
+        if ($request->nis === $student->nis) {
+            $user->nis_verified = true;
+            $user->save();
 
-            if ($verificationCode->attempts >= 5) {
-                $verificationCode->delete();
-                return back()->withErrors([
-                    'code' => 'Terlalu banyak percobaan salah. Silakan minta kode baru.'
-                ]);
-            }
-        }
+            // Update student record as well
+            $student->nis_verified = true;
+            $student->save();
 
-        // Mark email as verified
-        $user->email_verified_at = now();
-        $user->save();
-        $verificationCode->markAsVerified();
+            Log::info('NIS verified successfully', [
+                'user_id' => $user->id,
+                'nis' => $student->nis
+            ]);
 
-        Log::info('Email verified', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'verified_at' => $user->email_verified_at
-        ]);
-
-        // Refresh user instance and update auth state
-        $user->refresh();
-        Auth::setUser($user);
-        $request->session()->regenerate();
-
-        // Redirect to dashboard redirect route (no verified middleware)
-        return redirect()->route('dashboard.redirect')
-            ->with('success', 'Email berhasil diverifikasi! Selamat datang.');
-    }
-    public function resendVerificationCode(Request $request)
-    {
-        $user = Auth::user();
-        
-        if (!$user instanceof \App\Models\User) {
-            $user = User::find($user->id);
-        }
-
-        if (!$user || $user->email_verified_at) {
-            return redirect()->route('login');
-        }
-
-        // Create new code
-        $verificationCode = EmailVerificationCode::getOrCreateForUser($user);
-
-        try {
-            $user->notify(new SendVerificationCodeEmail($verificationCode));
-            return back()->with('success', 'Kode verifikasi baru telah dikirim ke email Anda.');
-        } catch (\Exception $e) {
-            Log::error('Error resending verification code: ' . $e->getMessage());
-            return back()->withErrors(['email' => 'Gagal mengirim kode verifikasi. Silakan coba lagi.']);
+            return redirect()->route('dashboard.redirect')
+                ->with('success', 'NIS berhasil diverifikasi! Selamat datang.');
+        } else {
+            Log::warning('NIS verification failed - incorrect NIS', [
+                'user_id' => $user->id,
+                'provided_nis' => $request->nis,
+                'actual_nis' => $student->nis
+            ]);
+            
+            return back()->withErrors(['nis' => 'NIS tidak sesuai. Silakan cek kembali.'])
+                ->withInput();
         }
     }
 

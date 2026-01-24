@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\CustomVerifyEmailNotification;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
@@ -18,7 +18,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'phone',
-        'class'
+        'class',
+        'nis_verified'
     ];
 
     protected $hidden = [
@@ -37,17 +38,22 @@ class User extends Authenticatable implements MustVerifyEmail
     // Role check methods
     public function isKoordinatorBK()
     {
-        return $this->role === 'koordinator_bk';
+        return $this->role === 'koordinator_bk' || $this->role === 'koordinator';
     }
 
     public function isGuruBK()
     {
-        return $this->role === 'guru_bk';
+        return $this->role === 'guru_bk' || $this->role === 'guru';
     }
 
     public function isSiswa()
     {
         return $this->role === 'siswa';
+    }
+
+    public function isWaliKelas()
+    {
+        return $this->role === 'wali_kelas';
     }
 
     /**
@@ -79,5 +85,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function catatanKonselings()
     {
         return $this->hasMany(Catatan::class, 'user_id');
+    }
+
+    public function walisiswa()
+    {
+        return $this->hasMany(Student::class, 'wali_kelas_id');
+    }
+
+    public function studentBehaviors()
+    {
+        return $this->hasMany(\App\Models\StudentBehavior::class, 'recorded_by');
+    }
+
+    public function waliKelasNotes()
+    {
+        return $this->hasMany(\App\Models\WaliKelasNote::class, 'wali_kelas_id');
     }
 }

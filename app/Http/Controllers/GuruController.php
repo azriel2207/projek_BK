@@ -558,8 +558,8 @@ public function editJadwal($id)
                 $query->where('students.kelas', $kelas);
             }
 
-            // Order by latest created_at dan paginate
-            $siswa = $query->orderBy('users.created_at', 'desc')
+            // Order by NIS dan paginate
+            $siswa = $query->orderBy('students.nis', 'asc')
                 ->paginate(20)
                 ->withQueryString();
 
@@ -1535,6 +1535,186 @@ public function editJadwal($id)
 
             return back()->withInput()
                 ->with('error', 'Gagal menyimpan jadwal: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Catat Data Siswa - Form untuk merekam perilaku/riwayat siswa
+     */
+    public function catatDataSiswaForm($studentId)
+    {
+        try {
+            $student = Student::with('user')->findOrFail($studentId);
+            
+            return view('guru.catat-data-siswa', compact('student'));
+        } catch (\Exception $e) {
+            Log::error('Error loading catat data siswa form', [
+                'error' => $e->getMessage(),
+                'student_id' => $studentId
+            ]);
+            return back()->with('error', 'Siswa tidak ditemukan');
+        }
+    }
+
+    /**
+     * Simpan data siswa (perilaku/riwayat)
+     */
+    public function simpanDataSiswa(Request $request, $studentId)
+    {
+        try {
+            $student = Student::findOrFail($studentId);
+
+            $request->validate([
+                'kategori' => 'required|in:akademik,perilaku,kesehatan,sosial,kehadiran,lainnya',
+                'deskripsi' => 'required|string|min:10',
+                'tanggal_kejadian' => 'required|date',
+                'status' => 'required|in:aktif,resolved,monitoring',
+            ]);
+
+            \App\Models\StudentBehavior::create([
+                'student_id' => $student->id,
+                'recorded_by' => Auth::id(),
+                'kategori' => $request->kategori,
+                'deskripsi' => $request->deskripsi,
+                'tanggal_kejadian' => $request->tanggal_kejadian,
+                'status' => $request->status,
+            ]);
+
+            Log::info('Student behavior recorded', [
+                'student_id' => $student->id,
+                'recorded_by' => Auth::id(),
+                'kategori' => $request->kategori
+            ]);
+
+            return redirect()->route('guru.siswa.detail', $student->user_id)
+                ->with('success', 'Data siswa berhasil dicatat');
+        } catch (\Exception $e) {
+            Log::error('Error saving student data', [
+                'error' => $e->getMessage(),
+                'student_id' => $studentId
+            ]);
+            return back()->withInput()->with('error', 'Gagal menyimpan data siswa: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Lihat riwayat/perilaku siswa
+     */
+    public function lihatRiwayatSiswa($studentId)
+    {
+        try {
+            $student = Student::with('user', 'behaviors', 'identity')->findOrFail($studentId);
+            
+            $behaviors = \App\Models\StudentBehavior::where('student_id', $student->id)
+                ->with('recordedBy')
+                ->latest()
+                ->paginate(10);
+
+            return view('guru.riwayat-siswa', compact('student', 'behaviors'));
+        } catch (\Exception $e) {
+            Log::error('Error loading student behaviors', [
+                'error' => $e->getMessage(),
+                'student_id' => $studentId
+            ]);
+            return back()->with('error', 'Gagal memuat riwayat siswa');
+        }
+    }
+
+    /**
+     * Edit data siswa (perilaku)
+     */
+    public function editRiwayatSiswa($behaviorId)
+    {
+        try {
+            $behavior = \App\Models\StudentBehavior::findOrFail($behaviorId);
+            
+            // Verifikasi guru yang mencatat
+            if ($behavior->recorded_by !== Auth::id()) {
+                return abort(403, 'Unauthorized');
+            }
+
+            return view('guru.edit-riwayat-siswa', compact('behavior'));
+        } catch (\Exception $e) {
+            Log::error('Error loading behavior edit form', [
+                'error' => $e->getMessage(),
+                'behavior_id' => $behaviorId
+            ]);
+            return back()->with('error', 'Data tidak ditemukan');
+        }
+    }
+
+    /**
+     * Update riwayat siswa
+     */
+    public function updateRiwayatSiswa(Request $request, $behaviorId)
+    {
+        try {
+            $behavior = \App\Models\StudentBehavior::findOrFail($behaviorId);
+            
+            if ($behavior->recorded_by !== Auth::id()) {
+                return abort(403, 'Unauthorized');
+            }
+
+            $request->validate([
+                'kategori' => 'required|in:akademik,perilaku,kesehatan,sosial,kehadiran,lainnya',
+                'deskripsi' => 'required|string|min:10',
+                'tanggal_kejadian' => 'required|date',
+                'status' => 'required|in:aktif,resolved,monitoring',
+            ]);
+
+            $behavior->update([
+                'kategori' => $request->kategori,
+                'deskripsi' => $request->deskripsi,
+                'tanggal_kejadian' => $request->tanggal_kejadian,
+                'status' => $request->status,
+            ]);
+
+            Log::info('Student behavior updated', [
+                'behavior_id' => $behaviorId,
+                'student_id' => $behavior->student_id,
+                'updated_by' => Auth::id()
+            ]);
+
+            return redirect()->route('guru.siswa.riwayat', $behavior->student_id)
+                ->with('success', 'Data siswa berhasil diupdate');
+        } catch (\Exception $e) {
+            Log::error('Error updating student behavior', [
+                'error' => $e->getMessage(),
+                'behavior_id' => $behaviorId
+            ]);
+            return back()->withInput()->with('error', 'Gagal mengupdate data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Hapus riwayat siswa
+     */
+    public function hapusRiwayatSiswa($behaviorId)
+    {
+        try {
+            $behavior = \App\Models\StudentBehavior::findOrFail($behaviorId);
+            
+            if ($behavior->recorded_by !== Auth::id()) {
+                return abort(403, 'Unauthorized');
+            }
+
+            $studentId = $behavior->student_id;
+            $behavior->delete();
+
+            Log::info('Student behavior deleted', [
+                'behavior_id' => $behaviorId,
+                'student_id' => $studentId,
+                'deleted_by' => Auth::id()
+            ]);
+
+            return redirect()->route('guru.siswa.riwayat', $studentId)
+                ->with('success', 'Data siswa berhasil dihapus');
+        } catch (\Exception $e) {
+            Log::error('Error deleting student behavior', [
+                'error' => $e->getMessage(),
+                'behavior_id' => $behaviorId
+            ]);
+            return back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
 

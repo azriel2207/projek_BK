@@ -94,6 +94,50 @@ class KoordinatorController extends Controller
     }
 
     /**
+     * List semua siswa
+     */
+    public function daftarSiswa(Request $request)
+    {
+        $query = Student::with('user', 'waliKelas');
+
+        // Filter berdasarkan search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('nis', 'like', "%{$search}%")
+                  ->orWhere('kelas', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter berdasarkan kelas
+        if ($request->filled('kelas')) {
+            $query->where('kelas', $request->kelas);
+        }
+
+        // Filter berdasarkan wali kelas
+        if ($request->filled('wali_kelas')) {
+            $query->where('wali_kelas_id', $request->wali_kelas);
+        }
+
+        $siswa = $query->paginate(15);
+        $daftarKelas = Student::distinct()->pluck('kelas')->sort();
+        $daftarWaliKelas = User::where('role', 'wali_kelas')->get();
+
+        return view('koordinator.daftar-siswa', compact('siswa', 'daftarKelas', 'daftarWaliKelas'));
+    }
+
+    /**
+     * Detail siswa
+     */
+    public function detailSiswa($studentId)
+    {
+        $siswa = Student::with('user', 'waliKelas', 'behaviors', 'identity')->findOrFail($studentId);
+        
+        return view('koordinator.detail-siswa', compact('siswa'));
+    }
+
+    /**
      * MANAJEMEN GURU BK
      */
     public function indexGuru(Request $request)
@@ -353,14 +397,15 @@ class KoordinatorController extends Controller
         }
     }
 
+
     /**
-     * MANAJEMEN SISWA
+     * MANAJEMEN AKUN SISWA
+     * Koordinator dapat menambah akun siswa dan mengatur data diri siswa
      */
-    public function indexSiswa()
+    public function indexSiswa(Request $request)
     {
         try {
-            // Query dari users table dengan role siswa, left join dengan students
-            $siswas = DB::table('users')
+            $query = DB::table('users')
                 ->leftJoin('students', 'users.id', '=', 'students.user_id')
                 ->where('users.role', 'siswa')
                 ->select(
@@ -370,144 +415,108 @@ class KoordinatorController extends Controller
                     'users.phone',
                     'students.id as student_id',
                     'students.nis',
-                    'students.nama_lengkap',
                     'students.kelas',
-                    'students.no_hp',
+                    'students.tgl_lahir',
+                    'students.nama_lengkap',
                     'users.created_at'
-                )
-                ->orderBy('users.created_at', 'desc')
-                ->paginate(10);
+                );
 
-            Log::info('Data siswa loaded', [
-                'total' => $siswas->total(),
-                'count' => $siswas->count(),
-                'current_page' => $siswas->currentPage()
-            ]);
+            // Filter pencarian
+            if ($search = $request->input('search')) {
+                $search = trim($search);
+                if (!empty($search)) {
+                    $query->where(function($q) use ($search) {
+                        $q->where('users.name', 'like', '%' . $search . '%')
+                          ->orWhere('users.email', 'like', '%' . $search . '%')
+                          ->orWhere('students.nis', 'like', '%' . $search . '%')
+                          ->orWhere('students.nama_lengkap', 'like', '%' . $search . '%');
+                    });
+                }
+            }
 
-            // sesuaikan nama view agar konsisten dengan route 'koordinator.siswa.index'
-            return view('koordinator.siswa.index', compact('siswas'));
+            $siswa = $query->orderBy('students.nis', 'asc')
+                ->paginate(15)
+                ->withQueryString();
+
+            return view('koordinator.siswa.index', compact('siswa'));
         } catch (\Exception $e) {
-            Log::error('Error in indexSiswa', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return back()->with('error', 'Gagal memuat data siswa: ' . $e->getMessage());
+            Log::error('Error loading siswa list', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Gagal memuat data siswa');
         }
     }
 
+    /**
+     * Form untuk tambah akun siswa baru
+     */
     public function createSiswa()
     {
         return view('koordinator.siswa.create');
     }
 
+    /**
+     * Simpan akun siswa baru
+     */
     public function storeSiswa(Request $request)
     {
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users',
-                'nis' => 'required|string|unique:students',
+                'email' => 'required|email|unique:users,email',
+                'nis' => 'required|string|unique:students,nis',
                 'password' => 'required|min:8|confirmed',
-                'alamat' => 'required|string',
-                'kelas' => 'required|string',
-                'tgl_lahir' => 'required|date',
-                'no_hp' => 'required|string',
+                'nama_lengkap' => 'nullable|string|max:255',
+                'tgl_lahir' => 'nullable|date',
+                'kelas' => 'nullable|string|max:50',
+                'alamat' => 'nullable|string',
+                'no_hp' => 'nullable|string',
             ]);
 
-            // Buat user (hanya dengan kolom yang ada di users table)
+            // Buat user
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'siswa',
-                'email_verified_at' => now(),
-                'phone' => $validated['no_hp'],
+                'nis_verified' => true, // Langsung verified karena dibuat oleh koordinator
             ]);
 
-            // Buat student record secara manual karena data tidak ada di users table
-            Log::info('Creating student record', [
+            // Buat student record
+            Student::create([
                 'user_id' => $user->id,
-                'name' => $validated['name'],
+                'nama_lengkap' => $validated['nama_lengkap'] ?? $validated['name'],
                 'nis' => $validated['nis'],
-                'kelas' => $validated['kelas'],
+                'tgl_lahir' => $validated['tgl_lahir'] ?? null,
+                'alamat' => $validated['alamat'] ?? null,
+                'no_hp' => $validated['no_hp'] ?? null,
+                'kelas' => $validated['kelas'] ?? null,
             ]);
 
-            $student = Student::create([
+            // Langsung verifikasi email
+            $user->markEmailAsVerified();
+
+            Log::info('New siswa account created by koordinator', [
                 'user_id' => $user->id,
-                'nama_lengkap' => $validated['name'],
                 'nis' => $validated['nis'],
-                'tgl_lahir' => $validated['tgl_lahir'],
-                'alamat' => $validated['alamat'],
-                'no_hp' => $validated['no_hp'],
-                'kelas' => $validated['kelas'],
-            ]);
-
-            Log::info('Student created successfully', [
-                'student_id' => $student->id,
-                'user_id' => $student->user_id,
-                'nis' => $student->nis,
-                'kelas' => $student->kelas,
+                'created_by' => Auth::id()
             ]);
 
             return redirect()->route('koordinator.siswa.index')
-                ->with('success', 'Siswa berhasil ditambahkan');
-
+                ->with('success', 'Akun siswa berhasil dibuat. Akun dapat langsung digunakan untuk login.');
         } catch (\Exception $e) {
-            Log::error('Error storing siswa', [
+            Log::error('Error creating siswa account', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id_created' => $user->id ?? null,
+                'created_by' => Auth::id()
             ]);
-            return back()->withInput()
-                ->with('error', 'Gagal menambahkan siswa: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal membuat akun siswa: ' . $e->getMessage());
         }
     }
 
-    public function showSiswa($id)
-    {
-        try {
-            // Query user dengan role siswa, left join dengan students
-            $siswa = DB::table('users')
-                ->leftJoin('students', 'users.id', '=', 'students.user_id')
-                ->where('users.id', $id)
-                ->where('users.role', 'siswa')
-                ->select(
-                    'users.*',
-                    'students.id as student_id',
-                    'students.nis',
-                    'students.nama_lengkap',
-                    'students.kelas',
-                    'students.alamat',
-                    'students.tgl_lahir',
-                    'students.no_hp'
-                )
-                ->first();
-
-            if (!$siswa) {
-                abort(404, 'Siswa tidak ditemukan');
-            }
-
-            Log::info('Siswa detail accessed', [
-                'user_id' => $id,
-                'accessed_by' => Auth::id()
-            ]);
-
-            return view('koordinator.siswa.show', compact('siswa'));
-        } catch (\Exception $e) {
-            Log::error('Error showing siswa', [
-                'error' => $e->getMessage(),
-                'user_id' => $id
-            ]);
-
-            return back()->with('error', 'Siswa tidak ditemukan');
-        }
-    }
-
+    /**
+     * Form edit siswa
+     */
     public function editSiswa($id)
     {
         try {
-            // Query user dengan role siswa, left join dengan students
             $siswa = DB::table('users')
                 ->leftJoin('students', 'users.id', '=', 'students.user_id')
                 ->where('users.id', $id)
@@ -518,8 +527,8 @@ class KoordinatorController extends Controller
                     'students.nis',
                     'students.nama_lengkap',
                     'students.kelas',
-                    'students.alamat',
                     'students.tgl_lahir',
+                    'students.alamat',
                     'students.no_hp'
                 )
                 ->first();
@@ -528,47 +537,40 @@ class KoordinatorController extends Controller
                 abort(404, 'Siswa tidak ditemukan');
             }
 
-            Log::info('Edit siswa form accessed', [
-                'user_id' => $id,
-                'accessed_by' => Auth::id()
-            ]);
-
             return view('koordinator.siswa.edit', compact('siswa'));
         } catch (\Exception $e) {
-            Log::error('Error showing edit siswa form', [
+            Log::error('Error loading edit siswa form', [
                 'error' => $e->getMessage(),
                 'user_id' => $id
             ]);
-
-            return back()->with('error', 'Siswa tidak ditemukan');
+            return back()->with('error', 'Gagal memuat data siswa');
         }
     }
 
+    /**
+     * Update data siswa (koordinator bisa update data diri)
+     */
     public function updateSiswa(Request $request, $id)
     {
         try {
-            $user = User::findOrFail($id);
-
-            if ($user->role !== 'siswa') {
-                abort(403, 'User bukan siswa');
-            }
+            $user = User::where('id', $id)->where('role', 'siswa')->firstOrFail();
 
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'nis' => 'required|string|unique:students,nis,' . ($user->student?->id ?? 'NULL'),
-                'alamat' => 'required|string',
-                'kelas' => 'required|string',
-                'tgl_lahir' => 'required|date',
-                'no_hp' => 'required|string',
+                'nis' => 'required|string',
+                'nama_lengkap' => 'nullable|string|max:255',
+                'tgl_lahir' => 'nullable|date',
+                'kelas' => 'nullable|string|max:50',
+                'alamat' => 'nullable|string',
+                'no_hp' => 'nullable|string',
                 'password' => 'nullable|min:8|confirmed',
             ]);
 
-            // Update user (hanya kolom yang ada di users table)
+            // Update user
             $updateData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'phone' => $validated['no_hp'],
             ];
 
             if ($request->filled('password')) {
@@ -578,259 +580,282 @@ class KoordinatorController extends Controller
             $user->update($updateData);
 
             // Update student record
-            $siswa = Student::where('user_id', $user->id)->first();
+            $student = Student::where('user_id', $user->id)->first();
             
-            Log::info('Student update - before', [
-                'user_id' => $user->id,
-                'siswa_exists' => $siswa ? true : false,
-                'siswa_id' => $siswa->id ?? null,
-                'validated_nis' => $validated['nis'],
-                'validated_kelas' => $validated['kelas'],
-            ]);
-            
-            if ($siswa) {
-                $updateResult = $siswa->update([
-                    'nama_lengkap' => $validated['name'],
+            if ($student) {
+                $student->update([
+                    'nama_lengkap' => $validated['nama_lengkap'] ?? $validated['name'],
                     'nis' => $validated['nis'],
-                    'tgl_lahir' => $validated['tgl_lahir'],
-                    'alamat' => $validated['alamat'],
-                    'no_hp' => $validated['no_hp'],
-                    'kelas' => $validated['kelas'],
-                ]);
-                
-                Log::info('Student updated - after', [
-                    'user_id' => $user->id,
-                    'update_result' => $updateResult,
-                    'nis_in_db' => $siswa->fresh()->nis,
-                    'kelas_in_db' => $siswa->fresh()->kelas,
+                    'tgl_lahir' => $validated['tgl_lahir'] ?? null,
+                    'alamat' => $validated['alamat'] ?? null,
+                    'no_hp' => $validated['no_hp'] ?? null,
+                    'kelas' => $validated['kelas'] ?? null,
                 ]);
             } else {
-                // Create student record if it doesn't exist
-                $createResult = Student::create([
+                Student::create([
                     'user_id' => $user->id,
-                    'nama_lengkap' => $validated['name'],
+                    'nama_lengkap' => $validated['nama_lengkap'] ?? $validated['name'],
                     'nis' => $validated['nis'],
-                    'tgl_lahir' => $validated['tgl_lahir'],
-                    'alamat' => $validated['alamat'],
-                    'no_hp' => $validated['no_hp'],
-                    'kelas' => $validated['kelas'],
-                ]);
-                
-                Log::info('Student created - new', [
-                    'user_id' => $user->id,
-                    'created_id' => $createResult->id,
-                    'nis_in_db' => $createResult->nis,
-                    'kelas_in_db' => $createResult->kelas,
+                    'tgl_lahir' => $validated['tgl_lahir'] ?? null,
+                    'alamat' => $validated['alamat'] ?? null,
+                    'no_hp' => $validated['no_hp'] ?? null,
+                    'kelas' => $validated['kelas'] ?? null,
                 ]);
             }
 
-            Log::info('Student updated', [
+            Log::info('Siswa account updated by koordinator', [
                 'user_id' => $user->id,
                 'updated_by' => Auth::id()
             ]);
 
             return redirect()->route('koordinator.siswa.index')
-                ->with('success', 'Siswa berhasil diupdate');
-
+                ->with('success', 'Data siswa berhasil diupdate');
         } catch (\Exception $e) {
-            Log::error('Error updating student', [
-                'error' => $e->getMessage()
+            Log::error('Error updating siswa account', [
+                'error' => $e->getMessage(),
+                'user_id' => $id,
+                'updated_by' => Auth::id()
             ]);
-
-            return back()->withInput()
-                ->with('error', 'Gagal mengupdate siswa: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal mengupdate siswa: ' . $e->getMessage());
         }
     }
 
-    public function destroySiswa($id)
+    /**
+     * Hapus akun siswa
+     */
+    public function deleteSiswa($id)
     {
         try {
-            $user = User::findOrFail($id);
-
-            if ($user->role !== 'siswa') {
-                abort(403, 'User bukan siswa');
-            }
-
-            // Delete associated student record
-            $siswa = Student::where('user_id', $user->id)->first();
-            if ($siswa) {
-                $siswa->delete();
-            }
-
-            // Delete user
+            $user = User::where('id', $id)->where('role', 'siswa')->firstOrFail();
+            
             $user->delete();
 
-            Log::info('Student deleted', [
-                'user_id' => $id,
+            Log::info('Siswa account deleted by koordinator', [
+                'user_id' => $user->id,
                 'deleted_by' => Auth::id()
             ]);
 
             return redirect()->route('koordinator.siswa.index')
-                ->with('success', 'Siswa berhasil dihapus');
-
+                ->with('success', 'Akun siswa berhasil dihapus');
         } catch (\Exception $e) {
-            Log::error('Error deleting student', [
-                'error' => $e->getMessage()
-            ]);
-
-            return back()->with('error', 'Gagal menghapus siswa');
-        }
-    }
-
-    /**
-     * UPGRADE SISWA KE GURU BK
-     */
-
-    /**
-     * Show form untuk upgrade siswa ke guru BK
-     */
-    public function showUpgradeForm($userId)
-    {
-        try {
-            $user = User::with('student')->findOrFail($userId);
-
-            // Validasi: hanya siswa yang bisa di-upgrade
-            if ($user->role !== 'siswa') {
-                return redirect()->route('koordinator.siswa.index')
-                    ->with('error', 'Hanya user dengan role siswa yang dapat di-upgrade');
-            }
-
-            return view('koordinator.upgrade-guru', compact('user'));
-
-        } catch (\Exception $e) {
-            Log::error('Error showing upgrade form', [
+            Log::error('Error deleting siswa account', [
                 'error' => $e->getMessage(),
-                'user_id' => $userId
+                'user_id' => $id,
+                'deleted_by' => Auth::id()
             ]);
-
-            return redirect()->route('koordinator.siswa.index')
-                ->with('error', 'User tidak ditemukan');
+            return back()->with('error', 'Gagal menghapus akun siswa: ' . $e->getMessage());
         }
     }
 
     /**
-     * Process upgrade siswa ke guru BK
+     * MANAJEMEN AKUN WALI KELAS
+     * Koordinator dapat menambah, edit, dan hapus akun wali kelas
      */
-    public function upgradeToGuru(Request $request, $userId)
+    public function indexWaliKelas(Request $request)
     {
         try {
-            $user = User::with('student')->findOrFail($userId);
+            $query = DB::table('users')
+                ->where('users.role', 'wali_kelas')
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.email',
+                    'users.phone',
+                    'users.created_at',
+                    DB::raw('COUNT(students.id) as jumlah_siswa')
+                )
+                ->leftJoin('students', 'users.id', '=', 'students.wali_kelas_id')
+                ->groupBy('users.id', 'users.name', 'users.email', 'users.phone', 'users.created_at');
 
-            // Validasi: hanya siswa yang bisa di-upgrade
-            if ($user->role !== 'siswa') {
-                return back()->with('error', 'Hanya user dengan role siswa yang dapat di-upgrade');
+            // Filter pencarian
+            if ($search = $request->input('search')) {
+                $search = trim($search);
+                if (!empty($search)) {
+                    $query->where(function($q) use ($search) {
+                        $q->where('users.name', 'like', '%' . $search . '%')
+                          ->orWhere('users.email', 'like', '%' . $search . '%');
+                    });
+                }
             }
 
-            $request->validate([
-                'nip' => 'required|string|unique:counselors,nip',
-                'specialization' => 'required|string|max:255',
-                'office_hours' => 'required|string|max:255',
+            $waliKelas = $query->orderBy('users.created_at', 'desc')
+                ->paginate(15)
+                ->withQueryString();
+
+            return view('koordinator.wali-kelas.index', compact('waliKelas'));
+        } catch (\Exception $e) {
+            Log::error('Error loading wali kelas list', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Gagal memuat data wali kelas');
+        }
+    }
+
+    /**
+     * Form untuk tambah akun wali kelas baru
+     */
+    public function createWaliKelas()
+    {
+        return view('koordinator.wali-kelas.create');
+    }
+
+    /**
+     * Simpan akun wali kelas baru
+     */
+    public function storeWaliKelas(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:8|confirmed',
+                'phone' => 'nullable|string|max:20',
             ]);
 
-            DB::transaction(function () use ($user, $request) {
-                // Update user dengan nip agar ProfileSync menggunakannya
-                $user->update([
-                    'role' => 'guru_bk',
-                    'nip' => $request->nip,
-                    'updated_at' => now()
-                ]);
+            // Buat user dengan role wali_kelas
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => 'wali_kelas',
+                'phone' => $validated['phone'] ?? null,
+                'email_verified_at' => now(),
+            ]);
 
-                // Hapus data siswa jika ada
-                if ($user->student) {
-                    $user->student->delete();
-                }
-
-                // Update counselor record (Observer sudah membuat saat role berubah)
-                $counselor = Counselor::where('user_id', $user->id)->first();
-                if ($counselor) {
-                    $counselor->update([
-                        'nip' => $request->nip,
-                        'specialization' => $request->specialization,
-                        'office_hours' => $request->office_hours,
-                    ]);
-                }
-            });
-
-            Log::info('User upgraded to guru BK', [
+            Log::info('New wali kelas account created by koordinator', [
                 'user_id' => $user->id,
-                'upgraded_by' => Auth::id()
+                'name' => $validated['name'],
+                'created_by' => Auth::id()
             ]);
 
-            return redirect()->route('koordinator.guru.index')
-                ->with('success', 'User ' . $user->name . ' berhasil di-upgrade menjadi Guru BK');
+            return redirect()->route('koordinator.wali-kelas.index')
+                ->with('success', 'Akun wali kelas berhasil dibuat. Akun dapat langsung digunakan untuk login.');
+        } catch (\Exception $e) {
+            Log::error('Error creating wali kelas account', [
+                'error' => $e->getMessage(),
+                'created_by' => Auth::id()
+            ]);
+            return back()->withInput()->with('error', 'Gagal membuat akun wali kelas: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Form edit akun wali kelas
+     */
+    public function editWaliKelas($id)
+    {
+        try {
+            $waliKelas = DB::table('users')
+                ->where('users.id', $id)
+                ->where('users.role', 'wali_kelas')
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.email',
+                    'users.phone',
+                    DB::raw('COUNT(students.id) as jumlah_siswa')
+                )
+                ->leftJoin('students', 'users.id', '=', 'students.wali_kelas_id')
+                ->groupBy('users.id', 'users.name', 'users.email', 'users.phone')
+                ->first();
+
+            if (!$waliKelas) {
+                abort(404, 'Wali kelas tidak ditemukan');
+            }
+
+            return view('koordinator.wali-kelas.edit', compact('waliKelas'));
+        } catch (\Exception $e) {
+            Log::error('Error showing edit wali kelas form', [
+                'error' => $e->getMessage(),
+                'user_id' => $id
+            ]);
+
+            return back()->with('error', 'Wali kelas tidak ditemukan');
+        }
+    }
+
+    /**
+     * Update akun wali kelas
+     */
+    public function updateWaliKelas(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            if ($user->role !== 'wali_kelas') {
+                abort(403, 'User bukan wali kelas');
+            }
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'phone' => 'nullable|string|max:20',
+                'password' => 'nullable|min:8|confirmed',
+            ]);
+
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
+
+            $user->update($updateData);
+
+            Log::info('Wali kelas account updated by koordinator', [
+                'user_id' => $user->id,
+                'updated_by' => Auth::id()
+            ]);
+
+            return redirect()->route('koordinator.wali-kelas.index')
+                ->with('success', 'Data wali kelas berhasil diupdate');
 
         } catch (\Exception $e) {
-            Log::error('Error upgrading user to guru BK', [
-                'error' => $e->getMessage(),
-                'user_id' => $userId
+            Log::error('Error updating wali kelas account', [
+                'error' => $e->getMessage()
             ]);
 
             return back()->withInput()
-                ->with('error', 'Gagal meng-upgrade user: ' . $e->getMessage());
+                ->with('error', 'Gagal mengupdate wali kelas: ' . $e->getMessage());
         }
     }
 
     /**
-     * LAPORAN - METHOD YANG DIBUTUHKAN
+     * Hapus akun wali kelas
      */
-    public function laporan()
+    public function destroyWaliKelas($id)
     {
         try {
-            // Data statistik untuk laporan
-            $stats = [
-                'total_siswa' => User::where('role', 'siswa')->count(),
-                'total_guru_bk' => User::where('role', 'guru_bk')->count(),
-                'total_konseling' => JanjiKonseling::count(),
-                'konseling_bulan_ini' => JanjiKonseling::whereMonth('created_at', now()->month)->count(),
-                'konseling_selesai' => JanjiKonseling::where('status', 'selesai')->count(),
-                'konseling_pending' => JanjiKonseling::where('status', 'menunggu')->count(),
-            ];
+            $user = User::findOrFail($id);
 
-            // Data konseling per bulan untuk chart
-            $konselingPerBulan = JanjiKonseling::select(
-                DB::raw('MONTH(created_at) as bulan'),
-                DB::raw('COUNT(*) as total')
-            )
-                ->whereYear('created_at', now()->year)
-                ->groupBy('bulan')
-                ->orderBy('bulan')
-                ->get();
+            if ($user->role !== 'wali_kelas') {
+                abort(403, 'User bukan wali kelas');
+            }
 
-            // Data konseling berdasarkan jenis bimbingan
-            $konselingByJenis = JanjiKonseling::select(
-                'jenis_bimbingan',
-                DB::raw('COUNT(*) as total')
-            )
-                ->groupBy('jenis_bimbingan')
-                ->get();
+            // Cek apakah ada siswa yang ditugaskan
+            $siswaCount = Student::where('wali_kelas_id', $user->id)->count();
+            if ($siswaCount > 0) {
+                return back()->with('error', 'Tidak dapat menghapus wali kelas yang masih memiliki siswa di kelasnya. Pindahkan siswa terlebih dahulu.');
+            }
 
-            // Data konseling berdasarkan status
-            $konselingByStatus = JanjiKonseling::select(
-                'status',
-                DB::raw('COUNT(*) as total')
-            )
-                ->groupBy('status')
-                ->get();
+            $user->delete();
 
-            Log::info('Laporan accessed', [
-                'user_id' => Auth::id()
+            Log::info('Wali kelas account deleted by koordinator', [
+                'user_id' => $id,
+                'deleted_by' => Auth::id()
             ]);
 
-            return view('koordinator.laporan', compact(
-                'stats',
-                'konselingPerBulan',
-                'konselingByJenis',
-                'konselingByStatus'
-            ));
+            return redirect()->route('koordinator.wali-kelas.index')
+                ->with('success', 'Akun wali kelas berhasil dihapus');
 
         } catch (\Exception $e) {
-            Log::error('Error in laporan', [
+            Log::error('Error deleting wali kelas account', [
                 'error' => $e->getMessage()
             ]);
 
-            return back()->with('error', 'Gagal memuat laporan: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus akun wali kelas: ' . $e->getMessage());
         }
     }
 
-   
 };

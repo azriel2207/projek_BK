@@ -38,7 +38,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Siswa</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $siswas->total() }}</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $siswa->total() }}</p>
                 </div>
                 <div class="bg-blue-100 p-4 rounded-lg">
                     <i class="fas fa-users text-blue-600 text-2xl"></i>
@@ -117,40 +117,40 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($siswas as $index => $siswa)
+                    @forelse($siswa as $index => $item)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $siswas->firstItem() + $index }}
+                            {{ $siswa->firstItem() + $index }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {{ $siswa->nis ?? 'N/A' }}
+                            {{ $item->nis ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $siswa->nama_lengkap ?? $siswa->name }}
+                            {{ $item->nama_lengkap ?? $item->name }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $siswa->kelas ?? 'N/A' }}
+                            {{ $item->kelas ?? 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ $siswa->email }}
+                            {{ $item->email }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ $siswa->phone ?? $siswa->no_hp ?? '-' }}
+                            {{ $item->phone ?? $item->no_hp ?? '-' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ \Carbon\Carbon::parse($siswa->created_at)->format('d-m-Y') }}
+                            {{ \Carbon\Carbon::parse($item->created_at)->format('d-m-Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-2">
-                                <a href="{{ route('koordinator.siswa.show', $siswa->id) }}" 
+                                <a href="{{ route('koordinator.siswa.show', $item->id) }}" 
                                    class="text-blue-600 hover:text-blue-900">
                                     Lihat
                                 </a>
-                                <a href="{{ route('koordinator.siswa.edit', $siswa->id) }}" 
+                                <a href="{{ route('koordinator.siswa.edit', $item->id) }}" 
                                    class="text-yellow-600 hover:text-yellow-900">
                                     Edit
                                 </a>
-                                <form action="{{ route('koordinator.siswa.destroy', $siswa->id) }}" 
+                                <form action="{{ route('koordinator.siswa.destroy', $item->id) }}" 
                                       method="POST" 
                                       class="inline"
                                       onsubmit="return confirm('Yakin ingin menghapus siswa ini?')">
@@ -181,9 +181,9 @@
         </div>
 
         <!-- Pagination -->
-        @if($siswas->hasPages())
+        @if($siswa->hasPages())
         <div class="bg-white px-4 py-3 border-t border-gray-200">
-            {{ $siswas->links() }}
+            {{ $siswa->links() }}
         </div>
         @endif
     </div>
@@ -194,7 +194,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span class="font-medium">Total: {{ $siswas->total() }} siswa</span>
+            <span class="font-medium">Total: {{ $siswa->total() }} siswa</span>
         </div>
     </div>
 </div>

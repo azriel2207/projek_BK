@@ -116,10 +116,6 @@
                                     <i class="fas fa-eye"></i>
                                     <span>Lihat</span>
                                 </a>
-                                <a href="{{ route('guru.siswa.edit', $item->id) }}" class="text-blue-600 hover:text-blue-900 transition duration-150 flex items-center space-x-1">
-                                    <i class="fas fa-edit"></i>
-                                    <span>Edit</span>
-                                </a>
                                 <a href="{{ route('guru.siswa.riwayat', $item->id) }}" class="text-green-600 hover:text-green-900 transition duration-150 flex items-center space-x-1">
                                     <i class="fas fa-history"></i>
                                     <span>Riwayat</span>
