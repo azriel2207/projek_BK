@@ -105,5 +105,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info('📌 AKUN WALI KELAS:');
         $this->command->info('   📧 Email: walikelas@gmail.com');
         $this->command->info('   🔑 Password: 12345678');
+        $this->command->info('');
+        
+        // Jalankan seeder untuk menambahkan data siswa
+        $this->call(AddStudentsSeeder::class);
     }
 }
