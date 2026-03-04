@@ -69,6 +69,24 @@
                 @enderror
             </div>
 
+            <!-- Kelas Yang Diampu -->
+            <div class="mb-6">
+                <label for="kelas" class="block text-sm font-medium text-gray-700 mb-2">
+                    Kelas yang diampu
+                </label>
+                <input
+                    type="text"
+                    name="kelas"
+                    id="kelas"
+                    value="{{ old('kelas') }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 @error('kelas') border-red-500 @enderror"
+                    placeholder="Contoh: X-A, XI-B"
+                >
+                @error('kelas')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Password -->
             <div class="mb-6">
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">

@@ -708,6 +708,7 @@ class KoordinatorController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|min:8|confirmed',
                 'phone' => 'nullable|string|max:20',
+                'kelas' => 'nullable|string|max:50', // kelas yang diampu
             ]);
 
             // Buat user dengan role wali_kelas
@@ -717,6 +718,7 @@ class KoordinatorController extends Controller
                 'password' => Hash::make($validated['password']),
                 'role' => 'wali_kelas',
                 'phone' => $validated['phone'] ?? null,
+                'class' => $validated['kelas'] ?? null,
                 'email_verified_at' => now(),
             ]);
 
@@ -789,12 +791,14 @@ class KoordinatorController extends Controller
                 'email' => 'required|email|unique:users,email,' . $user->id,
                 'phone' => 'nullable|string|max:20',
                 'password' => 'nullable|min:8|confirmed',
+                'kelas' => 'nullable|string|max:50',
             ]);
 
             $updateData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
+                'class' => $validated['kelas'] ?? null,
             ];
 
             if ($request->filled('password')) {

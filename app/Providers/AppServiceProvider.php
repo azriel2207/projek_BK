@@ -6,6 +6,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use App\Models\User;
+use App\Models\Counselor;
+use App\Observers\UserObserver;
+use App\Observers\CounselorObserver;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\Discord\Provider;
 
@@ -42,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event) {
             $event->extendSocialite('discord', Provider::class);
         });
+
+        // Register model observers for profile synchronization
+        User::observe(UserObserver::class);
+        Counselor::observe(CounselorObserver::class);
 
     }
 }

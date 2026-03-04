@@ -12,6 +12,10 @@
         $layout = 'layouts.siswa-layout';
         $updateRoute = route('profile.update'); // route siswa / user biasa
         $method = 'POST'; // sesuai route
+    } elseif (Auth::user()->isWaliKelas()) {
+        $layout = 'layouts.wali-kelas-layout';
+        $updateRoute = route('profile.update');
+        $method = 'POST';
     } else {
         $layout = 'layouts.koordinator-layout';
         // Kalau ada koordinator update route, ganti di sini

@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Counselor;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class SyncDataTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_user_update_syncs_to_counselor()
     {
         // Create user dengan role guru_bk

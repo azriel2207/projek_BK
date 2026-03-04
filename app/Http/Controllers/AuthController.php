@@ -157,7 +157,7 @@ class AuthController extends Controller
         // Create student record if role is siswa
         if ($user->role === 'siswa') {
             try {
-                \App\Models\Student::create([
+                $studentData = [
                     'user_id' => $user->id,
                     'nama_lengkap' => $user->name,
                     'nis' => $validated['nis'],
@@ -166,11 +166,27 @@ class AuthController extends Controller
                     'no_hp' => null,
                     'kelas' => $validated['kelas'],
                     'nis_verified' => false, // Belum verifikasi NIS
-                ]);
+                ];
+
+                // jika ada wali kelas untuk kelas tersebut, assign
+                $wali = \App\Models\User::where('role', 'wali_kelas')
+                    ->where('class', $validated['kelas'])
+                    ->first();
+                if ($wali) {
+                    $studentData['wali_kelas_id'] = $wali->id;
+                } else {
+                    Log::warning('No wali kelas found for new siswa registration', [
+                        'kelas' => $validated['kelas'],
+                        'user_id' => $user->id
+                    ]);
+                }
+
+                \App\Models\Student::create($studentData);
                 Log::info('Student record created for new siswa user', [
                     'user_id' => $user->id,
                     'nis' => $validated['nis'],
-                    'kelas' => $validated['kelas']
+                    'kelas' => $validated['kelas'],
+                    'wali_kelas_id' => $studentData['wali_kelas_id'] ?? null
                 ]);
             } catch (\Exception $e) {
                 Log::error('Error creating student record during registration', [
