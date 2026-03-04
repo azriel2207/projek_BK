@@ -23,7 +23,8 @@ class AddMissingFirstStudentSeeder extends Seeder
         }
 
         // Create user
-        $email = 'achmad.devani.rizqy.pratama.setiyawan.1@siswa.local';
+        // menggunakan alamat Gmail supaya format memenuhi (nama@gmail.com)
+        $email = 'achmad.devani.rizqy.pratama.setiyawan.1@gmail.com';
         
         // Check if email exists
         $existingUser = DB::table('users')->where('email', $email)->first();

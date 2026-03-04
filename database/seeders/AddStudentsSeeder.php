@@ -65,7 +65,8 @@ class AddStudentsSeeder extends Seeder
         foreach ($students as $index => $studentData) {
             // Generate email dari nama dengan index unik
             $emailName = strtolower(str_replace(' ', '.', $studentData['name']));
-            $email = $emailName . '.' . ($index + 1) . '@siswa.local';
+            // gunakan domain Gmail sesuai permintaan
+            $email = $emailName . '.' . ($index + 1) . '@gmail.com';
 
             // Check if user already exists
             $existingUser = DB::table('users')->where('email', $email)->first();
